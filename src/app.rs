@@ -102,7 +102,6 @@ pub fn app() -> Html {
         Callback::from(move |event: InputEvent| {
             let input: HtmlInputElement = event.target_unchecked_into();
             let text = input.value();
-            // Create a vector of owned strings
             let lines_vec: Vec<String> = text.lines().map(String::from).collect();
             lines.set(lines_vec);
         })
@@ -125,8 +124,8 @@ pub fn app() -> Html {
                 }
 
                 .notepad-container {
-                    width: calc(min(90vw, 440px)); /* Approximately 14.8cm + 2*20px padding */
-                    height: calc(min(90vh, 615px)); /* Approximately 21cm + 2*20px padding */
+                    width: calc(min(90vw, 440px));
+                    height: calc(min(90vh, 615px));
                     background-color: #ffffff;
                     border: 1px solid #ccc;
                     padding: 20px;
