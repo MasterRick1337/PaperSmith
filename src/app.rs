@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+/*use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
@@ -65,9 +65,6 @@ pub fn app() -> Html {
                 <a href="https://tauri.app" target="_blank">
                     <img src="public/tauri.svg" class="logo tauri" alt="Tauri logo"/>
                 </a>
-                <a href="https://yew.rs" target="_blank">
-                    <img src="public/yew.png" class="logo yew" alt="Yew logo"/>
-                </a>
             </div>
 
             <p>{"Click on the Tauri and Yew logos to learn more."}</p>
@@ -88,5 +85,83 @@ pub fn app() -> Html {
 
             <p><b>{ &*greet_msg }</b></p>
         </main>
+    }
+}
+*/
+
+use yew::prelude::*;
+use web_sys::HtmlInputElement;
+
+#[function_component(App)]
+pub fn app() -> Html {
+    let text_input_ref = use_node_ref();
+    let lines = use_state(Vec::new);
+
+    let on_input = {
+        let lines = lines.clone();
+        Callback::from(move |event: InputEvent| {
+            let input: HtmlInputElement = event.target_unchecked_into();
+            let text = input.value();
+            // Create a vector of owned strings
+            let lines_vec: Vec<String> = text.lines().map(String::from).collect();
+            lines.set(lines_vec);
+        })
+    };
+    
+
+
+    html! {
+        <>
+            <style>
+                {"
+                body {
+                    margin: 0;
+                    padding: 0;
+                    background-color: #ffffff;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                }
+
+                .notepad-container {
+                    width: calc(min(90vw, 440px)); /* Approximately 14.8cm + 2*20px padding */
+                    height: calc(min(90vh, 615px)); /* Approximately 21cm + 2*20px padding */
+                    background-color: #ffffff;
+                    border: 1px solid #ccc;
+                    padding: 20px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                    overflow: hidden;
+                }
+
+                .notepad-textarea {
+                    width: 100%;
+                    height: 100%;
+                    padding: 10px;
+                    font-family: Arial, sans-serif;
+                    font-size: 16px;
+                    border: none;
+                    outline: none;
+                    resize: none;
+                    color: black;
+                }
+                "}
+            </style>
+            <div class="notepad-container">
+                <textarea
+                    class="notepad-textarea"
+                    ref={text_input_ref}
+                    placeholder="Write your text here..."
+                    oninput={on_input}
+                />
+            </div>
+            <div>
+                <ul>
+                    {for lines
+                        .iter()
+                        .map(|line| html! { <li>{line}</li> })}
+                </ul>
+            </div>
+        </>
     }
 }

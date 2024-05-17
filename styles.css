@@ -1,4 +1,4 @@
-.logo.yew:hover {
+/*.logo.yew:hover {
   filter: drop-shadow(0 0 2em #20a88a);
 }
 :root {
@@ -109,4 +109,36 @@ button {
   button:active {
     background-color: #0f0f0f69;
   }
+}*/
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.notepad-container {
+  width: calc(min(90vw, 440px)); /* Approximately 14.8cm + 2*20px padding */
+  height: calc(min(90vh, 615px)); /* Approximately 21cm + 2*20px padding */
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.notepad-textarea {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  border: none;
+  outline: none;
+  resize: none;
+  color: black;
 }
