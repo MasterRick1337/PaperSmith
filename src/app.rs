@@ -91,6 +91,8 @@ pub fn app() -> Html {
 
 use yew::prelude::*;
 use web_sys::HtmlInputElement;
+use wasm_bindgen::JsCast;
+use yew::events::InputEvent;
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -100,14 +102,12 @@ pub fn app() -> Html {
     let on_input = {
         let lines = lines.clone();
         Callback::from(move |event: InputEvent| {
-            let input: HtmlInputElement = event.target_unchecked_into();
+            let input: HtmlInputElement = event.target().unwrap().dyn_into().unwrap();
             let text = input.value();
             let lines_vec: Vec<String> = text.lines().map(String::from).collect();
             lines.set(lines_vec);
         })
     };
-    
-
 
     html! {
         <>
@@ -156,11 +156,10 @@ pub fn app() -> Html {
             </div>
             <div>
                 <ul>
-                    {for lines
-                        .iter()
-                        .map(|line| html! { <li>{line}</li> })}
+                    {for lines.iter().map(|line| html! { <li>{line}</li> })}
                 </ul>
             </div>
         </>
     }
 }
+
