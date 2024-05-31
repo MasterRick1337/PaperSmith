@@ -116,36 +116,98 @@ pub fn app() -> Html {
                 body {
                     margin: 0;
                     padding: 0;
-                    background-color: #ffffff;
+                    background-color: #1e1e1e;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     height: 100vh;
+                    font-family: Arial, sans-serif;
+                    padding-top: 20px;
+                    padding-bottom: 20px;
+                }
+                
+                .top-bar {
+                    height: 50px;
+                    background-color: #333333;
+                    color: #ffffff;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    width: 100%;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    padding: 0 20px;
+                    /*box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);*/
+                    border-bottom: 1px solid #444444;
+                }
+                
+                .sidebar {
+                    width: 300px;
+                    background-color: #2d2d2d;
+                    color: #e0e0e0;
+                    overflow-y: auto;
+                    position: fixed;
+                    left: 0;
+                    top: 50px;
+                    bottom: 20px;
+                    padding: 20px;
+                    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+                }
+                
+                .bottom-bar {
+                    height: 20px;
+                    background-color: #333333;
+                    color:  #e0e0e0;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    width: 100%;
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    padding: 0 20px;
+                    /*box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);*/
+                    border-top: 1px solid #444444;
                 }
 
                 .notepad-container {
-                    width: calc(min(90vw, 440px));
-                    height: calc(min(90vh, 615px));
-                    background-color: #ffffff;
-                    border: 1px solid #ccc;
+                    margin-top: 80px;
+                    margin-bottom: 40px;
+                    margin-left: 330px;
+                    width: 420px;
+                    height: calc(100vh - 160px);
+                    width: calc((100vh - 160px) / 1.414);
+                    background-color: #2d2d2d;
+                    border: 1px solid #444444;
                     padding: 20px;
                     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
                     overflow: hidden;
                 }
-
+                
                 .notepad-textarea {
                     width: 100%;
                     height: 100%;
                     padding: 10px;
-                    font-family: Arial, sans-serif;
                     font-size: 16px;
                     border: none;
                     outline: none;
                     resize: none;
-                    color: black;
+                    background-color: #2d2d2d;
+                    color: #ffffff;
+                    overflow-y: auto;
                 }
                 "}
             </style>
+            <div class="top-bar">
+                <p>{"Placeholder"}</p>
+            </div>
+
+            <div class="sidebar">
+            </div>
+
             <div class="notepad-container">
                 <textarea
                     class="notepad-textarea"
@@ -154,6 +216,11 @@ pub fn app() -> Html {
                     oninput={on_input}
                 />
             </div>
+
+            <div class="bottom-bar">
+                <p>{"Placeholder"}</p>
+            </div>
+            
             <div>
                 <ul>
                     {for lines.iter().map(|line| html! { <li>{line}</li> })}
@@ -162,4 +229,3 @@ pub fn app() -> Html {
         </>
     }
 }
-
