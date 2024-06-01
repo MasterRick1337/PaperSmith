@@ -90,8 +90,7 @@ pub fn app() -> Html {
 */
 
 use yew::prelude::*;
-use web_sys::HtmlInputElement;
-use wasm_bindgen::JsCast;
+use web_sys::HtmlElement;
 use yew::events::InputEvent;
 
 #[function_component(App)]
@@ -101,11 +100,13 @@ pub fn app() -> Html {
 
     let on_input = {
         let lines = lines.clone();
-        Callback::from(move |event: InputEvent| {
-            let input: HtmlInputElement = event.target().unwrap().dyn_into().unwrap();
-            let text = input.value();
-            let lines_vec: Vec<String> = text.lines().map(String::from).collect();
-            lines.set(lines_vec);
+        let text_input_ref = text_input_ref.clone();
+        Callback::from(move |_: InputEvent| {
+            if let Some(input) = text_input_ref.cast::<HtmlElement>() {
+                let inner_text = input.inner_text();
+                let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
+                lines.set(new_lines);
+            }
         })
     };
 
@@ -209,22 +210,16 @@ pub fn app() -> Html {
             </div>
 
             <div class="notepad-container">
-                <textarea
+                <div
                     class="notepad-textarea"
                     ref={text_input_ref}
-                    placeholder="Write your text here..."
+                    contenteditable = "true"
                     oninput={on_input}
-                />
+                ></div>
             </div>
 
             <div class="bottom-bar">
                 <p>{"Placeholder"}</p>
-            </div>
-            
-            <div>
-                <ul>
-                    {for lines.iter().map(|line| html! { <li>{line}</li> })}
-                </ul>
             </div>
         </>
     }
