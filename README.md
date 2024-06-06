@@ -39,4 +39,4 @@ This project is in a very early stage of development and currently NOT ready for
 
 ### Installation
 
-Currently, there is no installation available. You can build it yourself by cloning the repository and running `cargo tauri build` in the root directory.
+Currently, there is no installation available. You can build it yourself by cloning the repository and running ```cargo tauri build``` in the root directory.
