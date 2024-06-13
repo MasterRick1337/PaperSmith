@@ -1,3 +1,97 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    --base: #141414;
+    --border: #000000;
+    --surface0:	#222222;
+    --surface1: #2d2d2d;
+    --overlay0:	#636363;
+    --text: #e0e0e0;
+  }
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--base);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.topbar{
+    height: 50px;
+    background-color: var(--surface0);
+    color: var(--text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.sidebar {
+    width: 300px;
+    background-color: var(--surface0);
+    color: var(--text);
+    overflow-y: auto;
+    position: fixed;
+    left: 0;
+    top: 50px;
+    bottom: 20px;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.bottombar {
+    height: 20px;
+    background-color: var(--surface0);
+    color:  var(--text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0 20px;
+    border-top: 1px solid var(--border);
+}
+
+.notepad-container {
+    margin-top: 80px;
+    margin-bottom: 40px;
+    margin-left: 330px;
+    width: 420px;
+    height: calc(100vh - 160px);
+    width: calc((100vh - 160px) / 1.414);
+    background-color: var(--surface1);
+    border: 1px solid #444444;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.notepad-textarea {
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    outline: none;
+    resize: none;
+    background-color: var(--surface1);
+    color: var(--text);
+    overflow-y: auto;
+}
