@@ -16,6 +16,12 @@ This project is in a very early stage of development and currently NOT ready for
 
 ### ToDo
 
+- MasterRick1337: Zooming on Page & Writing features
+- Toll25: Logo Design
+- DotDo1: File Saving
+- Alllpacka: MarkDown Compiler
+
+
 ### Features
 
 - [ ] A Obsidian-like file structure
