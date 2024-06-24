@@ -89,13 +89,32 @@ pub fn app() -> Html {
 }
 */
 
+use serde::Serialize;
+use serde_wasm_bindgen::to_value;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::spawn_local;
+use web_sys::{HtmlElement, HtmlInputElement};
 use yew::prelude::*;
-use web_sys::HtmlElement;
 use yew::events::InputEvent;
+use std::fs::File;
+use std::io::Write;
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
+    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
+}
+
+#[derive(Serialize)]
+struct SaveFileArgs {
+    content: String,
+    filename: String,
+}
 
 #[function_component(App)]
 pub fn app() -> Html {
     let text_input_ref = use_node_ref();
+    let filename_input_ref = use_node_ref();
     let lines = use_state(Vec::new);
 
     let on_input = {
@@ -109,6 +128,54 @@ pub fn app() -> Html {
             }
         })
     };
+
+    let save = {
+        let text_input_ref = text_input_ref.clone();
+        Callback::from(move |_| {
+            let text_input_ref = text_input_ref.clone();
+            spawn_local(async move {
+                // Get the text from the input element
+                let input_element = text_input_ref.cast::<HtmlElement>().unwrap();
+                let text = input_element.inner_text();
+
+                // Show the save file dialog
+                let result = invoke("show_save_dialog", JsValue::NULL).await.as_string();
+                if let Some(path) = result {
+                    let save_args = SaveFileArgs {
+                        content: text,
+                        filename: path.clone(),
+                    };
+
+                    let args = to_value(&save_args).unwrap();
+                    invoke("save_file", args).await;
+                }
+            });
+        })
+    };
+
+    /*let save = Callback::from(move |_: MouseEvent| {
+        let args = to_value(&()).unwrap();
+        let ahhh = invoke("show_save_dialog", args).await;
+    });*/
+
+    /*This one worked----------------------------------------------------------
+    let save = {
+        Callback::from(move |_| {
+            spawn_local(async move {
+                let args = to_value(&()).unwrap();
+                let ahhh = invoke("show_save_dialog", args).await;
+            });
+        })
+    };*/
+
+    /*let save = {
+        Callback::from(move |_| {
+            spawn_local(async move {
+                let args = to_value(&()).unwrap();
+                invoke("saveTest", args).await.as_string();
+            });
+        })
+    };*/
 
     html! {
         <>
@@ -126,7 +193,7 @@ pub fn app() -> Html {
                     padding-top: 20px;
                     padding-bottom: 20px;
                 }
-                
+
                 .top-bar {
                     height: 50px;
                     background-color: #333333;
@@ -143,7 +210,7 @@ pub fn app() -> Html {
                     /*box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);*/
                     border-bottom: 1px solid #444444;
                 }
-                
+
                 .sidebar {
                     width: 300px;
                     background-color: #2d2d2d;
@@ -156,7 +223,7 @@ pub fn app() -> Html {
                     padding: 20px;
                     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
                 }
-                
+
                 .bottom-bar {
                     height: 20px;
                     background-color: #333333;
@@ -187,7 +254,7 @@ pub fn app() -> Html {
                     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
                     overflow: hidden;
                 }
-                
+
                 .notepad-textarea {
                     width: 100%;
                     height: 100%;
@@ -204,6 +271,7 @@ pub fn app() -> Html {
             </style>
             <div class="top-bar">
                 <p>{"Placeholder"}</p>
+                <button onclick={save}>{"Save"}</button>
             </div>
 
             <div class="sidebar">
