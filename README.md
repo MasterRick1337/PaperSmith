@@ -5,7 +5,7 @@ _A free and open-source writing application for authors_
 
 ### TOC
 - [Status](#status)
-- [ToDo] ()
+- [ToDo](#todo)
 - [Features](#features)
 - [Installation](#installation)
 - [License](LICENSE)
