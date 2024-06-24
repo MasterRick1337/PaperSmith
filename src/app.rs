@@ -10,35 +10,9 @@ pub fn app() -> Html {
     let font_size = use_state(|| 16.0);
 
 
-    let on_text_input = {
-        let text_input_ref = text_input_ref.clone();
-        let lines = lines.clone();
+    let on_text_input = text_input_handler(text_input_ref.clone(), lines.clone());
+    let on_font_size_change = font_size_change_handler(font_size.clone());
 
-        Callback::from(move |_| {
-            if let Some(input) = text_input_ref.cast::<HtmlElement>() {
-                let inner_text = input.inner_text();
-                let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
-                lines.set(new_lines);
-            }
-        })
-    };
-
-    let on_font_size_change = {
-        let font_size = font_size.clone();
-
-        Callback::from(move |e: InputEvent| {
-            if let Some(input) = e.target_dyn_into::<HtmlInputElement>() {
-                let new_font_size = input.value_as_number();
-                font_size.set(new_font_size);
-
-                if let Some(document) = web_sys::window().and_then(|w| w.document()) {
-                    if let Some(style) = document.get_element_by_id("dynamic-style").and_then(|el| el.dyn_into::<HtmlElement>().ok()) {
-                        style.set_inner_html(&format!(":root {{ --font-size: {}px; }}", new_font_size));
-                    }
-                }
-            }
-        })
-    };
 
     html! {
         <>
@@ -72,3 +46,28 @@ pub fn app() -> Html {
     }
 }
 
+
+fn text_input_handler(text_input_ref: NodeRef, lines: UseStateHandle<Vec<String>>) -> Callback<InputEvent>{
+    Callback::from(move |_| {
+        if let Some(input) = text_input_ref.cast::<HtmlElement>() {
+            let inner_text = input.inner_text();
+            let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
+            lines.set(new_lines);
+        }
+    })
+}
+
+fn font_size_change_handler(font_size: UseStateHandle<f64>) -> Callback<InputEvent>{
+    Callback::from(move |e: InputEvent| {
+        if let Some(input) = e.target_dyn_into::<HtmlInputElement>() {
+            let new_font_size = input.value_as_number();
+            font_size.set(new_font_size);
+
+            if let Some(document) = web_sys::window().and_then(|w| w.document()) {
+                if let Some(style) = document.get_element_by_id("dynamic-style").and_then(|el| el.dyn_into::<HtmlElement>().ok()) {
+                    style.set_inner_html(&format!(":root {{ --font-size: {}px; }}", new_font_size));
+                }
+            }
+        }
+    })
+}
