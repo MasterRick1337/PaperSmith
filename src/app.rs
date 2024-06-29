@@ -114,7 +114,6 @@ struct SaveFileArgs {
 #[function_component(App)]
 pub fn app() -> Html {
     let text_input_ref = use_node_ref();
-    let filename_input_ref = use_node_ref();
     let lines = use_state(Vec::new);
 
     let on_input = {
@@ -134,20 +133,18 @@ pub fn app() -> Html {
         Callback::from(move |_| {
             let text_input_ref = text_input_ref.clone();
             spawn_local(async move {
-                // Get the text from the input element
-                let input_element = text_input_ref.cast::<HtmlElement>().unwrap();
-                let text = input_element.inner_text();
+                if let Some(input_element) = text_input_ref.cast::<HtmlElement>() {
+                    let text = input_element.inner_text();
+                    let result = invoke("show_save_dialog", JsValue::NULL).await.as_string();
+                    if let Some(path) = result {
+                        let save_args = SaveFileArgs {
+                            content: text,
+                            filename: path.clone(),
+                        };
 
-                // Show the save file dialog
-                let result = invoke("show_save_dialog", JsValue::NULL).await.as_string();
-                if let Some(path) = result {
-                    let save_args = SaveFileArgs {
-                        content: text,
-                        filename: path.clone(),
-                    };
-
-                    let args = to_value(&save_args).unwrap();
-                    invoke("save_file", args).await;
+                        let args = to_value(&save_args).unwrap();
+                        invoke("save_file", args).await;
+                    }
                 }
             });
         })

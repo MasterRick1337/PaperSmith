@@ -10,7 +10,7 @@ use serde::Deserialize;
 use tauri::Manager;
 use std::fs::File;
 use std::io::Write;
-use rfd::{AsyncFileDialog, FileDialog};
+use rfd::{FileDialog};
 
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -25,6 +25,7 @@ async fn show_save_dialog() -> Result<String, String> {
     let path = FileDialog::new()
         .set_title("Save File")
         .add_filter("Text", &["txt"])
+        .add_filter("MarkDown", &["md"])
         .save_file()
         .ok_or_else(|| "No file selected".to_string())?;
 
@@ -47,17 +48,36 @@ async fn show_save_dialog() {
 }*/
 
 #[tauri::command]
-fn save_file(args: SaveFileArgs) -> Result<(), String> {
-    let mut file = File::create(&args.filename)
-        .map_err(|e| format!("Failed to create file: {}", e))?;
-    file.write_all(args.content.as_bytes())
-        .map_err(|e| format!("Failed to write to file: {}", e))?;
-    Ok(())
+fn extract_div_contents(input: String) -> Vec<String> {
+    // Initialize an empty vector to store the extracted contents
+    let mut result = Vec::new();
+
+    // Define the start and end tag strings
+    let start_tag = "<div>";
+    let end_tag = "</div>";
+
+    // Split the input string by the start tag
+    let parts: Vec<&str> = input.split(start_tag).collect();
+
+    // Iterate over the parts and extract the contents between the start and end tags
+    for part in parts {
+        if let Some(end_index) = part.find(end_tag) {
+            if part.find("<br>") != None {
+
+            } else {
+                let content = &part[..end_index];
+                result.push(content.to_string());
+            }
+        }
+    }
+
+    result
 }
+
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![show_save_dialog, save_file])
+        .invoke_handler(tauri::generate_handler![show_save_dialog, extract_div_contents])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
