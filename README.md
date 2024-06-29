@@ -5,7 +5,7 @@ _A free and open-source writing application for authors_
 
 ### TOC
 - [Status](#status)
-- [ToDo] ()
+- [ToDo](#todo)
 - [Features](#features)
 - [Installation](#installation)
 - [License](LICENSE)
@@ -15,6 +15,12 @@ _A free and open-source writing application for authors_
 This project is in a very early stage of development and currently NOT ready for usage.
 
 ### ToDo
+
+- MasterRick1337: Zooming on Page & Writing features
+- Toll25: Logo Design
+- DotDo1: File Saving
+- Alllpacka: MarkDown Compiler
+
 
 ### Features
 

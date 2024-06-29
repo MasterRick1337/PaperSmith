@@ -89,12 +89,8 @@ pub fn app() -> Html {
 }
 */
 
-use serde::Serialize;
-use serde_wasm_bindgen::to_value;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::spawn_local;
-use web_sys::{HtmlElement, HtmlInputElement};
 use yew::prelude::*;
+use web_sys::{HtmlElement, HtmlInputElement};
 use yew::events::InputEvent;
 use std::fs::File;
 use std::io::Write;
@@ -110,23 +106,18 @@ struct SaveFileArgs {
     content: String,
     filename: String,
 }
+use wasm_bindgen::JsCast;
 
 #[function_component(App)]
 pub fn app() -> Html {
     let text_input_ref = use_node_ref();
     let lines = use_state(Vec::new);
+    let font_size = use_state(|| 16.0);
 
-    let on_input = {
-        let lines = lines.clone();
-        let text_input_ref = text_input_ref.clone();
-        Callback::from(move |_: InputEvent| {
-            if let Some(input) = text_input_ref.cast::<HtmlElement>() {
-                let inner_text = input.inner_text();
-                let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
-                lines.set(new_lines);
-            }
-        })
-    };
+
+    let on_text_input = text_input_handler(text_input_ref.clone(), lines.clone());
+    let on_font_size_change = font_size_change_handler(font_size.clone());
+
 
     let save = {
         let text_input_ref = text_input_ref.clone();
@@ -176,97 +167,12 @@ pub fn app() -> Html {
 
     html! {
         <>
-            <style>
-                {"
-                body {
-                    margin: 0;
-                    padding: 0;
-                    background-color: #1e1e1e;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                    font-family: Arial, sans-serif;
-                    padding-top: 20px;
-                    padding-bottom: 20px;
-                }
-
-                .top-bar {
-                    height: 50px;
-                    background-color: #333333;
-                    color: #ffffff;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    width: 100%;
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    padding: 0 20px;
-                    /*box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);*/
-                    border-bottom: 1px solid #444444;
-                }
-
-                .sidebar {
-                    width: 300px;
-                    background-color: #2d2d2d;
-                    color: #e0e0e0;
-                    overflow-y: auto;
-                    position: fixed;
-                    left: 0;
-                    top: 50px;
-                    bottom: 20px;
-                    padding: 20px;
-                    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-                }
-
-                .bottom-bar {
-                    height: 20px;
-                    background-color: #333333;
-                    color:  #e0e0e0;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    width: 100%;
-                    position: fixed;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
-                    padding: 0 20px;
-                    /*box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);*/
-                    border-top: 1px solid #444444;
-                }
-
-                .notepad-container {
-                    margin-top: 80px;
-                    margin-bottom: 40px;
-                    margin-left: 330px;
-                    width: 420px;
-                    height: calc(100vh - 160px);
-                    width: calc((100vh - 160px) / 1.414);
-                    background-color: #2d2d2d;
-                    border: 1px solid #444444;
-                    padding: 20px;
-                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                    overflow: hidden;
-                }
-
-                .notepad-textarea {
-                    width: 100%;
-                    height: 100%;
-                    padding: 10px;
-                    font-size: 16px;
-                    border: none;
-                    outline: none;
-                    resize: none;
-                    background-color: #2d2d2d;
-                    color: #ffffff;
-                    overflow-y: auto;
-                }
-                "}
-            </style>
-            <div class="top-bar">
+            <style id="dynamic-style"></style>
+            <div class="menubar">
+                <p>{"Placeholder"}</p>
+                <input type="number" value={format!("{}", *font_size)} oninput={on_font_size_change} />
+            </div>
+            <div class="toolbar">
                 <p>{"Placeholder"}</p>
                 <button onclick={save}>{"Save"}</button>
             </div>
@@ -275,17 +181,45 @@ pub fn app() -> Html {
             </div>
 
             <div class="notepad-container">
-                <div
-                    class="notepad-textarea"
-                    ref={text_input_ref}
-                    contenteditable = "true"
-                    oninput={on_input}
-                ></div>
+                <div class="notepad-wrapper">
+                    <div
+                        class="notepad-textarea"
+                        ref={text_input_ref}
+                        contenteditable = "true"
+                        oninput={on_text_input}
+                    ></div>
+                </div>
             </div>
 
-            <div class="bottom-bar">
+            <div class="bottombar">
                 <p>{"Placeholder"}</p>
             </div>
         </>
     }
+}
+
+
+fn text_input_handler(text_input_ref: NodeRef, lines: UseStateHandle<Vec<String>>) -> Callback<InputEvent>{
+    Callback::from(move |_| {
+        if let Some(input) = text_input_ref.cast::<HtmlElement>() {
+            let inner_text = input.inner_text();
+            let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
+            lines.set(new_lines);
+        }
+    })
+}
+
+fn font_size_change_handler(font_size: UseStateHandle<f64>) -> Callback<InputEvent>{
+    Callback::from(move |e: InputEvent| {
+        if let Some(input) = e.target_dyn_into::<HtmlInputElement>() {
+            let new_font_size = input.value_as_number();
+            font_size.set(new_font_size);
+
+            if let Some(document) = web_sys::window().and_then(|w| w.document()) {
+                if let Some(style) = document.get_element_by_id("dynamic-style").and_then(|el| el.dyn_into::<HtmlElement>().ok()) {
+                    style.set_inner_html(&format!(":root {{ --font-size: {}px; }}", new_font_size));
+                }
+            }
+        }
+    })
 }

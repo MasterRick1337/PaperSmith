@@ -5,7 +5,7 @@ module.exports = {
           "./src/**/*.rs",
           "./index.html",
           "./src/**/*.html",
-          "./src/**/*.css",
+          "./tailwind.css",
       ],
   },
   theme: {},
