@@ -1,5 +1,6 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use tauri::{CustomMenuItem, Menu, Submenu};
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -19,15 +20,20 @@ fn main() {
 }
 
 fn generate_menu() -> Menu {
-    let new = CustomMenuItem::new("new".to_string(), "New");
-    let open = CustomMenuItem::new("open".to_string(), "Open...");
-    let recent_submenu = Submenu::new("Recent Projects", Menu::new());
-    let save = CustomMenuItem::new("save".to_string(), "Save");
-    let save_as = CustomMenuItem::new("save_as".to_string(), "Save As...");
+    let new = CustomMenuItem::new("new".to_string(), "New").accelerator("CTRL+N");
+    let open = CustomMenuItem::new("open".to_string(), "Open...").accelerator("CTRL+O");
+    let recent_submenu = Submenu::new(
+        "Recent Projects",
+        Menu::new().add_item(CustomMenuItem::new("nothing".to_string(), "Nothing").disabled()),
+    );
+    let save = CustomMenuItem::new("save".to_string(), "Save").accelerator("CTRL+S");
+    let save_as =
+        CustomMenuItem::new("save_as".to_string(), "Save As...").accelerator("CTRL+SHIFT+S");
     let save_copy_as = CustomMenuItem::new("save_copy_as".to_string(), "Save a Copy As...");
-    let export = CustomMenuItem::new("export".to_string(), "Export");
-    let project_settings = CustomMenuItem::new("project_settings".to_string(), "Project Settings");
-    let close = CustomMenuItem::new("close".to_string(), "Close");
+    let export = CustomMenuItem::new("export".to_string(), "Export").accelerator("CTRL+E");
+    let project_settings = CustomMenuItem::new("project_settings".to_string(), "Project Settings")
+        .accelerator("ALT+CTRL+S");
+    let close = CustomMenuItem::new("close".to_string(), "Close").accelerator("ALT+CTRL+X");
 
     let project_submenu = Submenu::new(
         "Project",
@@ -43,15 +49,18 @@ fn generate_menu() -> Menu {
             .add_item(close),
     );
 
-    let undo = CustomMenuItem::new("undo".to_string(), "Undo");
-    let redo = CustomMenuItem::new("redo".to_string(), "Redo");
-    let copy = CustomMenuItem::new("copy".to_string(), "Copy");
-    let cut = CustomMenuItem::new("cut".to_string(), "Cut");
-    let paste = CustomMenuItem::new("paste".to_string(), "Paste");
-    let select_all = CustomMenuItem::new("select_all".to_string(), "Select All");
-    let find = CustomMenuItem::new("find".to_string(), "Find");
-    let find_replace = CustomMenuItem::new("find_replace".to_string(), "Find and Replace");
-    let jump_wordcount = CustomMenuItem::new("jump_wordcount".to_string(), "Jump to Word Count");
+    let undo = CustomMenuItem::new("undo".to_string(), "Undo").accelerator("CTRL+Z");
+    let redo = CustomMenuItem::new("redo".to_string(), "Redo").accelerator("CTRL+Y");
+    let copy = CustomMenuItem::new("copy".to_string(), "Copy").accelerator("CTRL+C");
+    let cut = CustomMenuItem::new("cut".to_string(), "Cut").accelerator("CTRL+X");
+    let paste = CustomMenuItem::new("paste".to_string(), "Paste").accelerator("CTRL+V");
+    let select_all =
+        CustomMenuItem::new("select_all".to_string(), "Select All").accelerator("CTRL+A");
+    let find = CustomMenuItem::new("find".to_string(), "Find").accelerator("CTRL+F");
+    let find_replace =
+        CustomMenuItem::new("find_replace".to_string(), "Find and Replace").accelerator("CTRL+H");
+    let jump_wordcount = CustomMenuItem::new("jump_wordcount".to_string(), "Jump to Word Count")
+        .accelerator("CTRL+J");
 
     let edit_submenu = Submenu::new(
         "Edit",
@@ -67,18 +76,25 @@ fn generate_menu() -> Menu {
             .add_item(jump_wordcount),
     );
 
-    let italic = CustomMenuItem::new("italic".to_string(), "Italic");
-    let bold = CustomMenuItem::new("bold".to_string(), "Bold");
-    let heading1 = CustomMenuItem::new("heading1".to_string(), "Heading 1");
-    let heading2 = CustomMenuItem::new("heading2".to_string(), "Heading 2");
-    let heading3 = CustomMenuItem::new("heading3".to_string(), "Heading 3");
-    let hyperlink = CustomMenuItem::new("hyperlink".to_string(), "Hyperlink");
-    let quote = CustomMenuItem::new("quote".to_string(), "Quote");
-    let list = CustomMenuItem::new("list".to_string(), "List");
-    let list_numbered = CustomMenuItem::new("list_numbered".to_string(), "Numbered List");
+    let italic = CustomMenuItem::new("italic".to_string(), "Italic").accelerator("CTRL+I");
+    let bold = CustomMenuItem::new("bold".to_string(), "Bold").accelerator("CTRL+B");
+    let heading1 = CustomMenuItem::new("heading1".to_string(), "Heading 1").accelerator("CTRL+1");
+    let heading2 = CustomMenuItem::new("heading2".to_string(), "Heading 2").accelerator("CTRL+2");
+    let heading3 = CustomMenuItem::new("heading3".to_string(), "Heading 3").accelerator("CTRL+3");
+    let hyperlink = CustomMenuItem::new("hyperlink".to_string(), "Hyperlink").accelerator("CTRL+K");
+    let quote = CustomMenuItem::new("quote".to_string(), "Quote").accelerator("CTRL+Q");
+    let list = CustomMenuItem::new("list".to_string(), "List").accelerator("CTRL+L");
+    let list_numbered = CustomMenuItem::new("list_numbered".to_string(), "Numbered List")
+        .accelerator("CTRL+SHIFT+L");
     let separator = CustomMenuItem::new("separator".to_string(), "Separator");
-    let inline_code = CustomMenuItem::new("inline_code".to_string(), "Inline Code");
-    let code_block = CustomMenuItem::new("code_block".to_string(), "Code Block");
+    let inline_code =
+        CustomMenuItem::new("inline_code".to_string(), "Inline Code").accelerator("CTRL+C");
+    let code_block =
+        CustomMenuItem::new("code_block".to_string(), "Code Block").accelerator("CTRL+SHIFT+C");
+    let increase_size =
+        CustomMenuItem::new("increase_size".to_string(), "Increase Size").accelerator("ALT+CTRL+I");
+    let decrease_size =
+        CustomMenuItem::new("decrease_size".to_string(), "Decrease Size").accelerator("ALT+CTRL+D");
 
     let format_submenu = Submenu::new(
         "Format",
@@ -94,12 +110,15 @@ fn generate_menu() -> Menu {
             .add_item(list_numbered)
             .add_item(separator)
             .add_item(inline_code)
-            .add_item(code_block),
+            .add_item(code_block)
+            .add_item(increase_size)
+            .add_item(decrease_size),
     );
 
-    let editor_settings = CustomMenuItem::new("editor_settings".to_string(), "Editor Settings");
-    let help = CustomMenuItem::new("help".to_string(), "Help");
-    let exit = CustomMenuItem::new("exit".to_string(), "Exit");
+    let editor_settings = CustomMenuItem::new("editor_settings".to_string(), "Editor Settings")
+        .accelerator("ALT+SHIFT+S");
+    let help = CustomMenuItem::new("help".to_string(), "Help").accelerator("F11");
+    let exit = CustomMenuItem::new("exit".to_string(), "Exit").accelerator("ALT+F4");
 
     let misc_submenu = Submenu::new(
         "Misc",
