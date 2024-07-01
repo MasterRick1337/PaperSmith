@@ -55,7 +55,7 @@ body {
     align-items: center;
     width: 100%;
     position: fixed;
-    top: 25px;
+    top: 0px;
     left: 0;
     right: 0;
     padding: 0 20px;
@@ -90,7 +90,7 @@ body {
     overflow-y: auto;
     position: fixed;
     left: 0;
-    top: 70px;
+    top: 45px;
     bottom: 20px;
     padding: 20px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
@@ -219,7 +219,7 @@ body {
 
 
 .notepad-outer-container {
-    margin-top: 70px;
+    margin-top: 45px;
     margin-left: 330px;
     padding: 10px;
     height: calc(100vh - 100px);

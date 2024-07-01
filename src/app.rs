@@ -1,7 +1,7 @@
-use yew::prelude::*;
+use wasm_bindgen::JsCast;
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::events::InputEvent;
-use wasm_bindgen::JsCast;
+use yew::prelude::*;
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -10,13 +10,11 @@ pub fn app() -> Html {
     let font_size = use_state(|| 16.0);
     let zoom_level = use_state(|| 100.0);
 
-
     let on_text_input = text_input_handler(text_input_ref.clone(), lines.clone());
     let on_font_size_change = font_size_change_handler(font_size.clone());
     let on_zoom_change = zoom_change_handler(zoom_level.clone());
     let on_zoom_increase = zoom_increase_handler(zoom_level.clone());
     let on_zoom_decrease = zoom_decrease_handler(zoom_level.clone());
-    
 
     html! {
         <>
@@ -26,14 +24,11 @@ pub fn app() -> Html {
                     <input type="number" value={format!("{}", *font_size)} oninput={on_font_size_change} />
                 </div>
             </div>
-            <div class="toolbar">
-                <p>{"Placeholder"}</p>
-            </div>
 
             <div class="sidebar">
             </div>
 
-            
+
             <div class="notepad-outer-container">
                 <div class="notepad-container" style={format!("transform: scale({});", *zoom_level / 100.0)}>
                     <a class="anchor"></a>
@@ -47,7 +42,7 @@ pub fn app() -> Html {
                     </div>
                 </div>
             </div>
-            
+
             <div class="bottombar">
                 <div class="bottombar-right" id="zoom">
                     <button class="zoom-button" title="Zoom Out" onclick={on_zoom_decrease}>{"-"}</button>
@@ -60,8 +55,10 @@ pub fn app() -> Html {
     }
 }
 
-
-fn text_input_handler(text_input_ref: NodeRef, lines: UseStateHandle<Vec<String>>) -> Callback<InputEvent>{
+fn text_input_handler(
+    text_input_ref: NodeRef,
+    lines: UseStateHandle<Vec<String>>,
+) -> Callback<InputEvent> {
     Callback::from(move |_| {
         if let Some(input) = text_input_ref.cast::<HtmlElement>() {
             let inner_text = input.inner_text();
@@ -71,22 +68,23 @@ fn text_input_handler(text_input_ref: NodeRef, lines: UseStateHandle<Vec<String>
     })
 }
 
-fn font_size_change_handler(font_size: UseStateHandle<f64>) -> Callback<InputEvent>{
+fn font_size_change_handler(font_size: UseStateHandle<f64>) -> Callback<InputEvent> {
     Callback::from(move |e: InputEvent| {
         if let Some(input) = e.target_dyn_into::<HtmlInputElement>() {
             let new_font_size = input.value_as_number();
             font_size.set(new_font_size);
 
             if let Some(document) = web_sys::window().and_then(|w| w.document()) {
-                if let Some(style) = document.get_element_by_id("dynamic-style").and_then(|el| el.dyn_into::<HtmlElement>().ok()) {
+                if let Some(style) = document
+                    .get_element_by_id("dynamic-style")
+                    .and_then(|el| el.dyn_into::<HtmlElement>().ok())
+                {
                     style.set_inner_html(&format!(":root {{ --font-size: {}px; }}", new_font_size));
                 }
             }
         }
     })
 }
-
-
 
 fn zoom_change_handler(zoom_level: UseStateHandle<f64>) -> Callback<InputEvent> {
     Callback::from(move |e: InputEvent| {
