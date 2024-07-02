@@ -2,6 +2,10 @@ use wasm_bindgen::JsCast;
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::events::InputEvent;
 use yew::prelude::*;
+#[path = "sidebar.rs"]
+mod sidebar;
+
+use sidebar::SideBar;
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -26,6 +30,7 @@ pub fn app() -> Html {
             </div>
 
             <div class="sidebar">
+                <SideBar/>
             </div>
 
 

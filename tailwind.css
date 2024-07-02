@@ -149,7 +149,7 @@ body {
     height: 2px;
     background: var(--overlay0);
     outline: none;
-    opacity: 0.9; 
+    opacity: 0.9;
     transition: opacity 0.2s ease;
     border-radius: 2px;
 }
@@ -215,7 +215,37 @@ body {
     background-color: var(--overlay0);
 }
 
+.chevron {
+    /*margin-inline-start: calc(-1* var(--size-4-5));*/
+    position: absolute;
+    width: 1.125rem;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
 
+.chevron:before {
+    content: "\200B";
+}
+
+.chapter-title {
+    align-items: baseline;
+    display: flex;
+    position: relative;
+}
+
+.chapter-title::before {
+    content: "\200B";
+}
+
+svg.svg-icon {
+    color: #ccc;
+    stroke-width: 4px;
+    width: 10px;
+    height: 10px;
+    transition: transform 100ms ease-in-out;
+}
 
 
 .notepad-outer-container {
@@ -237,7 +267,8 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     position: relative;
     margin: 0 auto;
-    transform-origin: top; /* TODO: Make Zoom work with transform-origin: center*/
+    transform-origin: top;
+    /* TODO: Make Zoom work with transform-origin: center*/
 }
 
 .notepad-wrapper {
