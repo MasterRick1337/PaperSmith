@@ -1,8 +1,30 @@
+use serde::Serialize;
+use serde_wasm_bindgen::to_value;
+use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::JsValue;
+use wasm_bindgen_futures::spawn_local;
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::events::InputEvent;
 use yew_icons::{Icon, IconId};
 use yew::prelude::*;
+#[path = "sidebar.rs"]
+mod sidebar;
+
+use sidebar::SideBar;
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
+    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
+}
+
+#[derive(Serialize)]
+struct SaveFileArgs {
+    content: String,
+    filename: String,
+}
+
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -16,6 +38,28 @@ pub fn app() -> Html {
     let on_zoom_change = zoom_change_handler(zoom_level.clone());
     let on_zoom_increase = zoom_increase_handler(zoom_level.clone());
     let on_zoom_decrease = zoom_decrease_handler(zoom_level.clone());
+
+    let save = {
+        let text_input_ref = text_input_ref.clone();
+        Callback::from(move |_| {
+            let text_input_ref = text_input_ref.clone();
+            spawn_local(async move {
+                if let Some(input_element) = text_input_ref.cast::<HtmlElement>() {
+                    let text = input_element.inner_text();
+                    let result = invoke("show_save_dialog", JsValue::NULL).await.as_string();
+                    if let Some(path) = result {
+                        let save_args = SaveFileArgs {
+                            content: text,
+                            filename: path.clone(),
+                        };
+
+                        let args = to_value(&save_args).unwrap();
+                        invoke("save_file", args).await;
+                    }
+                }
+            });
+        })
+    };
 
 
     let on_font_increase = {
@@ -62,9 +106,12 @@ pub fn app() -> Html {
                 <Icon icon_id={IconId::LucideListChecks} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
 
                 //<Icon icon_id={IconId::LucideSpellCheck}/>
+
+                <button onclick={save}>{"Save"}</button>
             </div>
 
             <div class="sidebar">
+                <SideBar/>
             </div>
 
             <div class="notepad-outer-container">
@@ -82,6 +129,10 @@ pub fn app() -> Html {
             </div>
 
             <div class="bottombar">
+                <div class="bottombar-left">
+                    <SessionTime/>
+                </div>
+
                 <div class="bottombar-right" id="zoom">
                     <Icon icon_id={IconId::LucideMinus} class="zoom-button" title="Zoom Out" onclick={on_zoom_decrease}/>
                     <input type="range" min="0" max="200" class="zoom-slider" id="zoom-slider" title="Zoom" value={format!("{}", *zoom_level)} oninput={on_zoom_change} />
@@ -90,6 +141,39 @@ pub fn app() -> Html {
                 </div>
             </div>
         </>
+    }
+}
+
+/*let save = Callback::from(move |_: MouseEvent| {
+    let args = to_value(&()).unwrap();
+    let ahhh = invoke("show_save_dialog", args).await;
+});*/
+
+/*This one worked----------------------------------------------------------
+let save = {
+    Callback::from(move |_| {
+        spawn_local(async move {
+            let args = to_value(&()).unwrap();
+            let ahhh = invoke("show_save_dialog", args).await;
+        });
+    })
+};*/
+
+/*let save = {
+    Callback::from(move |_| {
+        spawn_local(async move {
+            let args = to_value(&()).unwrap();
+            invoke("saveTest", args).await.as_string();
+        });
+    })
+};*/
+
+#[function_component]
+fn SessionTime() -> Html {
+    let time_string = use_state(|| "Time Placeholder".to_string());
+
+    html! {
+        <p>{ <std::string::String as Clone>::clone(&*time_string)}</p>
     }
 }
 
@@ -114,11 +198,19 @@ fn font_size_change_handler(font_size: UseStateHandle<f64>) -> Callback<InputEve
             font_size.set(new_font_size);
 
             if let Some(document) = web_sys::window().and_then(|w| w.document()) {
-                if let Some(style) = document
+                if let Some(_style) = document
                     .get_element_by_id("dynamic-style")
                     .and_then(|el| el.dyn_into::<HtmlElement>().ok())
                 {
-                    style.set_inner_html(&format!(":root {{ --font-size: {}px; }}", new_font_size));
+                    if let Some(style) = document
+                        .get_element_by_id("dynamic-style")
+                        .and_then(|el| el.dyn_into::<HtmlElement>().ok())
+                    {
+                        style.set_inner_html(&format!(
+                            ":root {{ --font-size: {}px; }}",
+                            new_font_size
+                        ));
+                    }
                 }
             }
         }

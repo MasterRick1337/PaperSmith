@@ -16,6 +16,8 @@ console_error_panic_hook = "0.1.7"
 # TODO: Find Spell-Check icon (It's not LucideSpellCheck for some reason)
 yew_icons = {version = "0.8", features = ["LucidePlus", "LucideMinus", "LucideBold", "LucideItalic", "LucideUnderline", "LucideAlignCenter", "LucideAlignJustify", "LucideAlignLeft", "LucideAlignRight", "LucideHighlighter", "LucideUndo", "LucideRedo", "LucideBaseline", "LucideList", "LucideListChecks"]}
 
+log = "0.4.21"
+gloo-timers = "0.3.0"
 
 
 [workspace]

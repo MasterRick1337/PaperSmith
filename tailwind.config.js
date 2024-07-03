@@ -5,7 +5,13 @@ module.exports = {
           "./src/**/*.html",
           "./tailwind.css",
       ],
-  theme: {},
+  theme: {
+    extend: {
+      transitionProperty: {
+        'max-height': 'max-height'
+      }
+    }
+  },
   variants: {},
   plugins: [],
 };
