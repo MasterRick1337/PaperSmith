@@ -14,6 +14,8 @@ serde = { version = "1", features = ["derive"] }
 serde-wasm-bindgen = "0.6"
 console_error_panic_hook = "0.1.7"
 log = "0.4.21"
+gloo-timers = "0.3.0"
+
 
 [workspace]
 members = ["src-tauri"]

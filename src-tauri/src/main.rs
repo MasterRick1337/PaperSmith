@@ -1,24 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
-//#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-#![cfg_attr(
-all(not(debug_assertions), target_os = "windows"),
-windows_subsystem = "windows"
-)]
-
-use serde::Deserialize;
-use tauri::Manager;
-use std::fs::File;
-use std::io::Write;
-use rfd::{FileDialog};
-
-
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[derive(Deserialize)]
-struct SaveFileArgs {
-    content: String,
-    filename: String,
-}
+use rfd::FileDialog;
 
 #[tauri::command]
 async fn show_save_dialog() -> Result<String, String> {
@@ -28,8 +11,6 @@ async fn show_save_dialog() -> Result<String, String> {
         .add_filter("MarkDown", &["md"])
         .save_file()
         .ok_or_else(|| "No file selected".to_string())?;
-
-
 
     Ok(path.to_str().unwrap_or_default().to_string())
 }
@@ -63,21 +44,21 @@ fn extract_div_contents(input: String) -> Vec<String> {
     for part in parts {
         if let Some(end_index) = part.find(end_tag) {
             if part.find("<br>") != None {
-
             } else {
                 let content = &part[..end_index];
                 result.push(content.to_string());
             }
         }
     }
-
     result
 }
 
-
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![show_save_dialog, extract_div_contents])
+        .invoke_handler(tauri::generate_handler![
+            show_save_dialog,
+            extract_div_contents
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
