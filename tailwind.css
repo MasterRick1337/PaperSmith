@@ -27,6 +27,8 @@ body {
     padding-bottom: 20px;
 }
 
+
+
 .toolbar {
     height: 25px;
     background-color: var(--surface0);
@@ -42,6 +44,8 @@ body {
     border-bottom: 1px solid var(--border);
 }
 
+
+
 .menubar {
     height: 45px;
     background-color: var(--surface0);
@@ -51,12 +55,33 @@ body {
     align-items: center;
     width: 100%;
     position: fixed;
-    top: 25px;
+    top: 0px;
     left: 0;
     right: 0;
     padding: 0 20px;
     border-bottom: 1px solid var(--border);
 }
+
+.menubar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.menubar-center {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.menubar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+
 
 .sidebar {
     width: 300px;
@@ -65,11 +90,13 @@ body {
     overflow-y: auto;
     position: fixed;
     left: 0;
-    top: 70px;
+    top: 45px;
     bottom: 20px;
     padding: 20px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
 }
+
+
 
 .bottombar {
     height: 30px;
@@ -87,18 +114,161 @@ body {
     border-top: 1px solid var(--border);
 }
 
-.notepad-container {
-    margin-top: 80px;
-    margin-bottom: 40px;
-    margin-right: 30px;
+.bottombar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.bottombar-center {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.bottombar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+
+
+#zoom {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    position: relative;
+}
+
+.zoom-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100px;
+    height: 2px;
+    background: var(--overlay0);
+    outline: none;
+    opacity: 0.9;
+    transition: opacity 0.2s ease;
+    border-radius: 2px;
+}
+
+.zoom-slider:hover {
+    opacity: 1;
+}
+
+/* TODO: Test which Slider for Linux */
+.zoom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 7px;
+    height: 12px;
+    background: var(--overlay0);
+    cursor: default;
+    /*box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);*/
+}
+
+.zoom-slider::-moz-range-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 7px;
+    height: 12px;
+    background: var(--overlay0);
+    cursor: default;
+    /*box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);*/
+}
+
+#zoom-value {
+    color: var(--text);
+    font-size: 12px;
+}
+
+.zoom-text {
+    background: none;
+    margin-left: 5px;
+    cursor: default;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+}
+
+.zoom-button {
+    background: none;
+    padding: 5px;
+    cursor: default;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.zoom-button:hover {
+    background-color: var(--overlay0);
+}
+
+.chevron {
+    /*margin-inline-start: calc(-1* var(--size-4-5));*/
+    position: absolute;
+    width: 1.125rem;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+.chevron:before {
+    content: "\200B";
+}
+
+.chapter-title {
+    align-items: baseline;
+    display: flex;
+    position: relative;
+}
+
+.chapter-title::before {
+    content: "\200B";
+}
+
+svg.svg-icon {
+    color: #ccc;
+    stroke-width: 4px;
+    width: 10px;
+    height: 10px;
+    transition: transform 100ms ease-in-out;
+}
+
+
+.notepad-outer-container {
+    margin-top: 45px;
     margin-left: 330px;
-    height: calc(100vh - 160px);
-    width: calc((100vh - 160px) / 1.414);
+    padding: 10px;
+    height: calc(100vh - 100px);
+    width: calc(100vw - 360px);
+    overflow: auto;
+    background-color: var(--base);
+}
+
+.notepad-container {
+    width: 210mm;
+    height: 297mm;
     background-color: var(--surface1);
     border: 1px solid #444444;
     padding: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    position: relative;
+    margin: 0 auto;
+    transform-origin: top;
+    /* TODO: Make Zoom work with transform-origin: center*/
 }
 
 .notepad-wrapper {
@@ -122,8 +292,17 @@ body {
     overflow-y: auto;
 }
 
+.anchor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    padding: 10px;
+}
 
 
+
+/* TODO: Test which Scrollbar for Linux */
 * {
     scrollbar-width: thin;
     scrollbar-color: var(--overlay0) var(--surface0);
