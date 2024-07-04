@@ -7,7 +7,8 @@ use wasm_bindgen_futures::spawn_local;
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::events::InputEvent;
 use yew::prelude::*;
-#[path = "sidebar.rs"]
+
+#[path = "sidebar/sidebar.rs"]
 mod sidebar;
 
 use sidebar::SideBar;
