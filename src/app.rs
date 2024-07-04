@@ -6,6 +6,7 @@ use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::events::InputEvent;
+use yew_icons::{Icon, IconId};
 use yew::prelude::*;
 
 #[path = "sidebar/sidebar.rs"]
@@ -25,6 +26,7 @@ struct SaveFileArgs {
     filename: String,
 }
 
+
 #[function_component(App)]
 pub fn app() -> Html {
     let text_input_ref = use_node_ref();
@@ -37,6 +39,7 @@ pub fn app() -> Html {
     let on_zoom_change = zoom_change_handler(zoom_level.clone());
     let on_zoom_increase = zoom_increase_handler(zoom_level.clone());
     let on_zoom_decrease = zoom_decrease_handler(zoom_level.clone());
+
     let save = {
         let text_input_ref = text_input_ref.clone();
         Callback::from(move |_| {
@@ -59,21 +62,58 @@ pub fn app() -> Html {
         })
     };
 
+
+    let on_font_increase = {
+        let font_size = font_size.clone();
+        Callback::from(move |_| {
+            font_size.set(*font_size + 1.0);
+        })
+    };
+
+    let on_font_decrease = {
+        let font_size = font_size.clone();
+        Callback::from(move |_| {
+            font_size.set(*font_size - 1.0);
+        })
+    };
+
     html! {
         <>
             <style id="dynamic-style"></style>
             <div class="menubar">
-                <div class="menubar-left" id="font-size">
-                    <input type="number" value={format!("{}", *font_size)} oninput={on_font_size_change} />
+                <Icon icon_id={IconId::LucideUndo} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+                <Icon icon_id={IconId::LucideRedo} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+                <div class="separator"></div>
+
+                <div class="font-size-changer">
+                    <Icon icon_id={IconId::LucideMinus} width={"2em".to_owned()} height={"2em".to_owned()} class="font-size-button" title="Decrease font size" onclick={on_font_decrease}/>
+                    <input type="number" value={format!("{}", *font_size)} class="font-size-input" oninput={on_font_size_change} />
+                    <Icon icon_id={IconId::LucidePlus} width={"2em".to_owned()} height={"2em".to_owned()} class = "font-size-button" title="Increase font size" onclick={on_font_increase}/>
                 </div>
+
+                //<Icon icon_id={IconId::}/>
+                <div class="separator"></div>
+                <Icon icon_id={IconId::LucideBold} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+                <Icon icon_id={IconId::LucideItalic} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+                <Icon icon_id={IconId::LucideUnderline} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+                <Icon icon_id={IconId::LucideBaseline} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+                <Icon icon_id={IconId::LucideHighlighter} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+                <div class="separator"></div>
+                <Icon icon_id={IconId::LucideAlignCenter} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+                <Icon icon_id={IconId::LucideAlignJustify} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+                <Icon icon_id={IconId::LucideAlignLeft} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+                <Icon icon_id={IconId::LucideAlignRight} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+                <Icon icon_id={IconId::LucideList} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+                <Icon icon_id={IconId::LucideListChecks} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+
+                //<Icon icon_id={IconId::LucideSpellCheck}/>
+
                 <button onclick={save}>{"Save"}</button>
-                <p>{"Placeholder"}</p>
             </div>
 
             <div class="sidebar">
                 <SideBar/>
             </div>
-
 
             <div class="notepad-outer-container">
                 <div class="notepad-container" style={format!("transform: scale({});", *zoom_level / 100.0)}>
@@ -90,17 +130,21 @@ pub fn app() -> Html {
             </div>
 
             <div class="bottombar">
+                <div class="bottombar-left">
+                    <SessionTime/>
+                </div>
+
                 <div class="bottombar-right" id="zoom">
-                    <button class="zoom-button" title="Zoom Out" onclick={on_zoom_decrease}>{"-"}</button>
+                    <Icon icon_id={IconId::LucideMinus} class="zoom-button" title="Zoom Out" onclick={on_zoom_decrease}/>
                     <input type="range" min="0" max="200" class="zoom-slider" id="zoom-slider" title="Zoom" value={format!("{}", *zoom_level)} oninput={on_zoom_change} />
-                    <button class = "zoom-button" title="Zoom In" onclick={on_zoom_increase}>{"+"}</button>
+                    <Icon icon_id={IconId::LucidePlus} class = "zoom-button" title="Zoom In" onclick={on_zoom_increase}/>
                     <span class="zoom-text" id="zoom-value">{format!("{}%", *zoom_level)}</span>
                 </div>
-                <SessionTime/>
             </div>
         </>
     }
 }
+
 /*let save = Callback::from(move |_: MouseEvent| {
     let args = to_value(&()).unwrap();
     let ahhh = invoke("show_save_dialog", args).await;
@@ -134,10 +178,9 @@ fn SessionTime() -> Html {
     }
 }
 
-fn text_input_handler(
-    text_input_ref: NodeRef,
-    lines: UseStateHandle<Vec<String>>,
-) -> Callback<InputEvent> {
+
+
+fn text_input_handler(text_input_ref: NodeRef, lines: UseStateHandle<Vec<String>>,) -> Callback<InputEvent> {
     Callback::from(move |_| {
         if let Some(input) = text_input_ref.cast::<HtmlElement>() {
             let inner_text = input.inner_text();
@@ -146,6 +189,8 @@ fn text_input_handler(
         }
     })
 }
+
+
 
 fn font_size_change_handler(font_size: UseStateHandle<f64>) -> Callback<InputEvent> {
     Callback::from(move |e: InputEvent| {
@@ -172,6 +217,8 @@ fn font_size_change_handler(font_size: UseStateHandle<f64>) -> Callback<InputEve
         }
     })
 }
+
+
 
 fn zoom_change_handler(zoom_level: UseStateHandle<f64>) -> Callback<InputEvent> {
     Callback::from(move |e: InputEvent| {

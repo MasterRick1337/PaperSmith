@@ -51,7 +51,7 @@ body {
     background-color: var(--surface0);
     color: var(--text);
     display: flex;
-    justify-content: space-between;
+    justify-content: left;
     align-items: center;
     width: 100%;
     position: fixed;
@@ -62,24 +62,24 @@ body {
     border-bottom: 1px solid var(--border);
 }
 
-.menubar-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.menubar-icon {
+    margin-left: 10px;
+    cursor: pointer;
+    font-size: 10px;
 }
 
-.menubar-center {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.menubar-icon:first-child {
+    margin-left: 0;
 }
 
-.menubar-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-left: auto;
+.separator {
+    width: 1px;
+    height: 20px;
+    background-color: var(--surface1);
+    margin: 0 10px;
+    margin-right: 0;
 }
+
 
 
 
@@ -215,6 +215,7 @@ body {
     background-color: var(--overlay0);
 }
 
+
 .chevron {
     /*margin-inline-start: calc(-1* var(--size-4-5));*/
     position: absolute;
@@ -248,6 +249,7 @@ svg.svg-icon {
 }
 
 
+
 .notepad-outer-container {
     margin-top: 45px;
     margin-left: 330px;
@@ -267,8 +269,7 @@ svg.svg-icon {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     position: relative;
     margin: 0 auto;
-    transform-origin: top;
-    /* TODO: Make Zoom work with transform-origin: center*/
+    transform-origin: top; /* TODO: Make Zoom work with transform-origin: center*/
 }
 
 .notepad-wrapper {
@@ -338,4 +339,117 @@ svg.svg-icon {
 *::-moz-scrollbar-thumb {
     background-color: var(--overlay0);
     border-radius: 10px;
+}
+
+
+
+#zoom {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    position: relative;
+}
+
+.zoom-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100px;
+    height: 2px;
+    background: var(--overlay0);
+    outline: none;
+    opacity: 0.9; 
+    transition: opacity 0.2s ease;
+    border-radius: 2px;
+}
+
+.zoom-slider:hover {
+    opacity: 1;
+}
+
+/* TODO: Test which Slider for Linux */
+.zoom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 7px;
+    height: 12px;
+    background: var(--overlay0);
+    cursor: default;
+}
+
+.zoom-slider::-moz-range-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 7px;
+    height: 12px;
+    background: var(--overlay0);
+    cursor: default;
+}
+
+#zoom-value {
+    color: var(--text);
+    font-size: 12px;
+}
+
+.zoom-text {
+    background: none;
+    user-select: none;
+    margin-left: 5px;
+    cursor: default;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+}
+
+.zoom-button {
+    background: none;
+    padding: 5px;
+    cursor: default;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.zoom-button:hover {
+    background-color: var(--overlay0);
+}
+
+
+
+.font-size-changer {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.font-size-button {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.font-size-button:hover {
+    background-color: var(--overlay0);
+}
+
+.font-size-input {
+    width: 50px;
+    text-align: center;
+    border: var(--overlay0) solid 1px;
+    border-radius: 5px;
+    background-color: var(--surface1);
+    height: 30px;
+    margin: 0 5px;
+    outline: none;
+}
+
+.font-size-changer input[type="number"]::-webkit-outer-spin-button,
+.font-size-changer input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
 }
