@@ -241,7 +241,6 @@ body {
 }
 
 svg.svg-icon {
-    color: #ccc;
     stroke-width: 4px;
     width: 10px;
     height: 10px;
@@ -452,4 +451,30 @@ svg.svg-icon {
 .font-size-changer input[type="number"]::-webkit-outer-spin-button,
 .font-size-changer input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
+}
+
+
+.sidebar-dropdown-icon-container {
+    margin-left: auto;
+    margin-top: auto;
+    margin-bottom: auto;
+    order: 2;
+    align-items: center;
+}
+
+.chapter-title:hover .hide-parent-hover {
+    display: flex;
+}
+
+.hide-parent-hover {
+    display: none;
+}
+
+.sidebar-dropdown-icon {
+    margin-top: auto;
+    margin-bottom: auto;
+    border: solid 1px;
+    border-radius: 0.375rem;
+    padding: 1px;
+    cursor: pointer;
 }

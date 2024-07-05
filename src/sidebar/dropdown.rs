@@ -1,6 +1,7 @@
 use gloo_timers::callback::Timeout;
 use web_sys::HtmlElement;
 use yew::prelude::*;
+use yew_icons::{Icon, IconId};
 #[path = "chevron.rs"]
 mod chevron;
 
@@ -11,6 +12,14 @@ pub struct DropdownProps {
     pub title: String,
     pub open: bool,
     pub children: Html,
+    pub dropdown_type: DropdownType,
+}
+
+#[derive(PartialEq, Copy, Clone)]
+pub enum DropdownType {
+    Chapter,
+    Notes,
+    Extras,
 }
 
 #[function_component(Dropdown)]
@@ -18,6 +27,7 @@ pub fn dropdown(
     DropdownProps {
         title,
         open,
+        dropdown_type,
         children,
     }: &DropdownProps,
 ) -> Html {
@@ -39,7 +49,6 @@ pub fn dropdown(
                     .expect("div_ref not attached to div element");
 
                 transition_string.set(format!("max-height: {}px", content.scroll_height()));
-                gloo_console::log!(format!("{}", content.scroll_height()));
 
                 let _timeout = Timeout::new(1, {
                     let transition_string = transition_string.clone();
@@ -79,11 +88,10 @@ pub fn dropdown(
 
     html! {
         <div class="chapter">
-            <div class="chapter-title rounded-md my-[1px] hover:bg-blue-500" onclick={onclick}>
+            <div class="chapter-title rounded-md my-[1px] hover:bg-mauve hover:text-mantle" onclick={onclick}>
                 <Chevron rotated={*chevron_rotated} hidden={false}/>
-                <div class="inline-block pl-5">{title}</div>
-                <div class="chapter-edit-button"></div>
-                <div class="chapter-delete-button"></div>
+                <div class="inline-block pl-5 text-ellipsis whitespace-nowrap overflow-hidden">{title}</div>
+                {get_buttons(*dropdown_type)}
             </div>
             <div
                 class="chapter-contents pl-2 ml-2 border-l-2 border-[#ccc] text-[#AAA] overflow-hidden"
@@ -93,5 +101,40 @@ pub fn dropdown(
                 {children.clone()}
             </div>
         </div>
+    }
+}
+
+fn get_buttons(dropdown_type: DropdownType) -> Html {
+    match dropdown_type {
+        DropdownType::Chapter => {
+            html! (
+                <div class="sidebar-dropdown-icon-container hide-parent-hover">
+                    <div class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text">
+                        <Icon icon_id={IconId::LucideEdit3} width={"16px"} height={"16px"}/>
+                    </div>
+                    <div class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text mx-1">
+                        <Icon icon_id={IconId::LucideTrash2} width={"16px"} height={"16px"}/>
+                    </div>
+                </div>
+            )
+        }
+        DropdownType::Notes => {
+            html! (
+                <div class="sidebar-dropdown-icon-container hide-parent-hover">
+                    <div class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text mx-1">
+                        <Icon icon_id={IconId::LucidePlus} width={"16px"} height={"16px"}/>
+                    </div>
+                </div>
+            )
+        }
+        DropdownType::Extras => {
+            html! (
+                <div class="sidebar-dropdown-icon-container hide-parent-hover">
+                    <div class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text mx-1">
+                        <Icon icon_id={IconId::LucidePlus} width={"16px"} height={"16px"}/>
+                    </div>
+                </div>
+            )
+        }
     }
 }
