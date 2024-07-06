@@ -4,6 +4,10 @@
 use rfd::FileDialog;
 use tauri::{CustomMenuItem, Menu, Submenu};
 
+mod loader;
+
+use loader::{parse_project, Project};
+
 #[tauri::command]
 async fn show_save_dialog() -> Result<String, String> {
     let path = FileDialog::new()
@@ -14,6 +18,12 @@ async fn show_save_dialog() -> Result<String, String> {
         .ok_or_else(|| "No file selected".to_string())?;
 
     Ok(path.to_str().unwrap_or_default().to_string())
+}
+
+#[tauri::command]
+fn get_project() -> Project {
+    let project_path = FileDialog::new().pick_folder().unwrap();
+    parse_project(project_path)
 }
 
 /*this one worked--------------------------------------------------------------
@@ -60,7 +70,8 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             show_save_dialog,
-            extract_div_contents
+            extract_div_contents,
+            get_project
         ])
         .menu(generate_menu())
         .run(tauri::generate_context!())
