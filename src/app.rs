@@ -1,6 +1,5 @@
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
-use shared::PaperSmithError;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
@@ -9,6 +8,9 @@ use web_sys::{HtmlElement, HtmlInputElement};
 use yew::events::InputEvent;
 use yew::prelude::*;
 use yew_icons::{Icon, IconId};
+
+//TODO Toast System
+//TODO File Opening
 
 #[path = "sidebar/sidebar.rs"]
 mod sidebar;
@@ -20,13 +22,7 @@ use shared::Project;
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
-    async fn invoke_with_args(cmd: &str, args: JsValue) -> JsValue;
-}
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
-    async fn invoke(cmd: &str) -> JsValue;
+    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
 }
 
 #[derive(Serialize)]
@@ -62,9 +58,7 @@ pub fn app() -> Html {
                 if let Some(input_element) = text_input_ref.cast::<HtmlElement>() {
                     let text = input_element.inner_text();
                     let result: Option<String> =
-                        invoke_with_args("show_save_dialog", JsValue::NULL)
-                            .await
-                            .as_string();
+                        invoke("show_save_dialog", JsValue::NULL).await.as_string();
                     if let Some(path) = result {
                         let save_args = SaveFileArgs {
                             content: text,
@@ -72,7 +66,7 @@ pub fn app() -> Html {
                         };
 
                         let args = to_value(&save_args).unwrap();
-                        invoke_with_args("save_file", args).await;
+                        invoke("save_file", args).await;
                     }
                 }
             });
@@ -115,12 +109,13 @@ pub fn app() -> Html {
             let project = project.clone();
             {
                 spawn_local(async move {
-                    let project_jsvalue = invoke("get_project").await;
-                    let project_temp: Result<Project, PaperSmithError> =
+                    let project_jsvalue = invoke("get_project", JsValue::null()).await;
+                    let project_or_none: Option<Project> =
                         serde_wasm_bindgen::from_value(project_jsvalue.clone()).unwrap();
-                    match project_temp {
-                        Ok(project1) => project.set(Some(project1.clone())),
-                        Err(error) => print!("{}", error),
+                    if project_or_none.is_some() {
+                        project.set(project_or_none.clone());
+                    } else {
+                        gloo_console::log!("bruh")
                     }
                 });
             }
@@ -175,7 +170,7 @@ pub fn app() -> Html {
                             class="notepad-textarea"
                             ref={text_input_ref}
                             contenteditable = "true"
-                            oninput={on_text_input}
+                            //oninput={on_text_input}
                         ></div>
                     </div>
                 </div>

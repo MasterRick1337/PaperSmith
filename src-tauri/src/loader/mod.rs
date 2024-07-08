@@ -1,14 +1,14 @@
 use std::fs;
 use std::path::PathBuf;
 
-use shared::{Chapter, PaperSmithError, Project};
+use shared::{Chapter, Project};
 
-pub fn parse_project(path: PathBuf) -> Result<Project, PaperSmithError> {
-    let file_path = path.join(".papersmith.json");
+pub fn parse_project(path: PathBuf) -> Option<Project> {
+    let mut file_path = path.clone();
+    file_path.push(".papersmith.json");
 
-    // Check if the file exists
-    if file_path.exists() && file_path.is_file() {
-        return Err(PaperSmithError::new_only_code(2));
+    if !(file_path.exists() && file_path.is_file()) {
+        return None;
     }
     let mut chapters_path = path.clone();
     chapters_path.push("Chapters");
@@ -75,5 +75,5 @@ pub fn parse_project(path: PathBuf) -> Result<Project, PaperSmithError> {
         })
     }
 
-    Ok(Project { path, chapters })
+    Some(Project { path, chapters })
 }
