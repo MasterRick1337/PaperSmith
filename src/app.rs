@@ -1,3 +1,4 @@
+use std::fmt::format;
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -7,6 +8,11 @@ use wasm_bindgen_futures::spawn_local;
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::events::InputEvent;
 use yew::prelude::*;
+use chrono::prelude::*;
+use chrono::TimeDelta;
+use yew_hooks::prelude::*;
+
+
 #[path = "sidebar.rs"]
 mod sidebar;
 
@@ -126,10 +132,32 @@ let save = {
 
 #[function_component]
 fn SessionTime() -> Html {
-    let time_string = use_state(|| "Time Placeholder".to_string());
+    let start_time = use_state(|| Local::now());
+    let session_time = use_state(|| TimeDelta::new(0, 0).unwrap());
+
+    use_interval(
+        {
+            let session_time = session_time.clone();
+            move || {
+                let current_time = Local::now();
+                gloo_console::log!("Current Time: {}", current_time.to_string());
+                session_time.set(current_time - *start_time);
+            }
+        },
+        1000,
+    );
+
+    let total_seconds = session_time.num_seconds();
+    let hours = total_seconds / 3600;
+    let minutes = (total_seconds % 3600) / 60;
+    let seconds = total_seconds % 60;
+
+    let formatted_time = format!("{:02}:{:02}:{:02}", hours, minutes, seconds);
+    
 
     html! {
-        <p>{ <std::string::String as Clone>::clone(&*time_string)}</p>
+
+        <p>{formatted_time}</p>
     }
 }
 
