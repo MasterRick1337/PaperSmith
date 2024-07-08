@@ -1,23 +1,32 @@
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
+use shared::PaperSmithError;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::events::InputEvent;
-use yew_icons::{Icon, IconId};
 use yew::prelude::*;
+use yew_icons::{Icon, IconId};
 
 #[path = "sidebar/sidebar.rs"]
 mod sidebar;
 
 use sidebar::SideBar;
 
+use shared::Project;
+
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
-    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
+    async fn invoke_with_args(cmd: &str, args: JsValue) -> JsValue;
+}
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
+    async fn invoke(cmd: &str) -> JsValue;
 }
 
 #[derive(Serialize)]
@@ -26,13 +35,18 @@ struct SaveFileArgs {
     filename: String,
 }
 
-
 #[function_component(App)]
 pub fn app() -> Html {
     let text_input_ref = use_node_ref();
     let lines = use_state(Vec::new);
     let font_size = use_state(|| 16.0);
     let zoom_level = use_state(|| 100.0);
+    let project: UseStateHandle<Option<Project>> = use_state(|| None);
+    let sidebar = use_state(|| {
+        html! {
+            <>{"No Project Loaded"}</>
+        }
+    });
 
     let on_text_input = text_input_handler(text_input_ref.clone(), lines.clone());
     let on_font_size_change = font_size_change_handler(font_size.clone());
@@ -47,7 +61,10 @@ pub fn app() -> Html {
             spawn_local(async move {
                 if let Some(input_element) = text_input_ref.cast::<HtmlElement>() {
                     let text = input_element.inner_text();
-                    let result = invoke("show_save_dialog", JsValue::NULL).await.as_string();
+                    let result: Option<String> =
+                        invoke_with_args("show_save_dialog", JsValue::NULL)
+                            .await
+                            .as_string();
                     if let Some(path) = result {
                         let save_args = SaveFileArgs {
                             content: text,
@@ -55,13 +72,12 @@ pub fn app() -> Html {
                         };
 
                         let args = to_value(&save_args).unwrap();
-                        invoke("save_file", args).await;
+                        invoke_with_args("save_file", args).await;
                     }
                 }
             });
         })
     };
-
 
     let on_font_increase = {
         let font_size = font_size.clone();
@@ -74,6 +90,40 @@ pub fn app() -> Html {
         let font_size = font_size.clone();
         Callback::from(move |_| {
             font_size.set(*font_size - 1.0);
+        })
+    };
+
+    {
+        let sidebar = sidebar.clone();
+        let project = project.clone();
+        use_effect_with(project.clone(), move |_| {
+            if (*project.clone()).is_none() {
+                sidebar.set(html! {
+                    {"No Project Loaded"}
+                });
+            } else {
+                sidebar.set(html! {
+                    <SideBar project={<std::option::Option<shared::Project> as Clone>::clone(&(project)).unwrap()}/>
+                });
+            }
+        })
+    };
+
+    let on_load = {
+        let project = project.clone();
+        Callback::from(move |_: MouseEvent| {
+            let project = project.clone();
+            {
+                spawn_local(async move {
+                    let project_jsvalue = invoke("get_project").await;
+                    let project_temp: Result<Project, PaperSmithError> =
+                        serde_wasm_bindgen::from_value(project_jsvalue.clone()).unwrap();
+                    match project_temp {
+                        Ok(project1) => project.set(Some(project1.clone())),
+                        Err(error) => print!("{}", error),
+                    }
+                });
+            }
         })
     };
 
@@ -109,10 +159,12 @@ pub fn app() -> Html {
                 //<Icon icon_id={IconId::LucideSpellCheck}/>
 
                 <button onclick={save}>{"Save"}</button>
+                <button onclick={on_load}>{"Load"}</button>
+
             </div>
 
             <div class="sidebar">
-                <SideBar/>
+                {(*sidebar).clone()}
             </div>
 
             <div class="notepad-outer-container">
@@ -178,9 +230,10 @@ fn SessionTime() -> Html {
     }
 }
 
-
-
-fn text_input_handler(text_input_ref: NodeRef, lines: UseStateHandle<Vec<String>>,) -> Callback<InputEvent> {
+fn text_input_handler(
+    text_input_ref: NodeRef,
+    lines: UseStateHandle<Vec<String>>,
+) -> Callback<InputEvent> {
     Callback::from(move |_| {
         if let Some(input) = text_input_ref.cast::<HtmlElement>() {
             let inner_text = input.inner_text();
@@ -189,8 +242,6 @@ fn text_input_handler(text_input_ref: NodeRef, lines: UseStateHandle<Vec<String>
         }
     })
 }
-
-
 
 fn font_size_change_handler(font_size: UseStateHandle<f64>) -> Callback<InputEvent> {
     Callback::from(move |e: InputEvent| {
@@ -217,8 +268,6 @@ fn font_size_change_handler(font_size: UseStateHandle<f64>) -> Callback<InputEve
         }
     })
 }
-
-
 
 fn zoom_change_handler(zoom_level: UseStateHandle<f64>) -> Callback<InputEvent> {
     Callback::from(move |e: InputEvent| {

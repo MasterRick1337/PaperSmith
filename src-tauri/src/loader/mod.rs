@@ -1,20 +1,15 @@
-use rfd::FileDialog;
-use std::fmt;
 use std::fs;
 use std::path::PathBuf;
 
-pub struct Project {
-    path: PathBuf,
-    chapters: Vec<Chapter>,
-}
+use shared::{Chapter, PaperSmithError, Project};
 
-pub struct Chapter {
-    path: PathBuf,
-    notes: Vec<PathBuf>,
-    extras: Vec<PathBuf>,
-}
+pub fn parse_project(path: PathBuf) -> Result<Project, PaperSmithError> {
+    let file_path = path.join(".papersmith.json");
 
-pub fn parse_project(path: PathBuf) -> Project {
+    // Check if the file exists
+    if file_path.exists() && file_path.is_file() {
+        return Err(PaperSmithError::new_only_code(2));
+    }
     let mut chapters_path = path.clone();
     chapters_path.push("Chapters");
     if !chapters_path.exists() {
@@ -34,7 +29,7 @@ pub fn parse_project(path: PathBuf) -> Project {
         if !notes_path.exists() {
             fs::create_dir_all(&notes_path).unwrap();
         }
-        let mut notes: Vec<PathBuf> = vec![];
+        let mut notes: Vec<String> = vec![];
 
         for note in notes_path
             .read_dir()
@@ -43,7 +38,7 @@ pub fn parse_project(path: PathBuf) -> Project {
         {
             let note = note.unwrap().path();
             if note.extension().unwrap() == "md" {
-                notes.push(note)
+                notes.push(note.file_name().unwrap().to_string_lossy().into_owned())
             }
         }
 
@@ -52,7 +47,7 @@ pub fn parse_project(path: PathBuf) -> Project {
         if !extras_path.exists() {
             fs::create_dir_all(&extras_path).unwrap();
         }
-        let mut extras: Vec<PathBuf> = vec![];
+        let mut extras: Vec<String> = vec![];
 
         for extra_file in extras_path
             .read_dir()
@@ -60,15 +55,25 @@ pub fn parse_project(path: PathBuf) -> Project {
             .filter(|x| x.as_ref().unwrap().file_type().unwrap().is_file())
         {
             let extra_file = extra_file.unwrap().path();
-            extras.push(extra_file);
+            extras.push(
+                extra_file
+                    .file_name()
+                    .unwrap()
+                    .to_string_lossy()
+                    .into_owned(),
+            );
         }
 
         chapters.push(Chapter {
-            path: chapter_path,
+            name: chapter_path
+                .file_name()
+                .unwrap()
+                .to_string_lossy()
+                .into_owned(),
             notes,
             extras,
         })
     }
 
-    Project { path, chapters }
+    Ok(Project { path, chapters })
 }

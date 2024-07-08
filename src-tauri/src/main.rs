@@ -6,7 +6,9 @@ use tauri::{CustomMenuItem, Menu, Submenu};
 
 mod loader;
 
-use loader::{parse_project, Project};
+use loader::parse_project;
+
+use shared::Project;
 
 #[tauri::command]
 async fn show_save_dialog() -> Result<String, String> {
@@ -21,7 +23,7 @@ async fn show_save_dialog() -> Result<String, String> {
 }
 
 #[tauri::command]
-fn get_project() -> Project {
+fn get_project() -> Result<Project, shared::PaperSmithError> {
     let project_path = FileDialog::new().pick_folder().unwrap();
     parse_project(project_path)
 }
@@ -71,7 +73,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             show_save_dialog,
             extract_div_contents,
-            get_project
+            get_project,
         ])
         .menu(generate_menu())
         .run(tauri::generate_context!())
