@@ -1,4 +1,5 @@
-use std::fmt::format;
+use chrono::prelude::*;
+use chrono::TimeDelta;
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -8,12 +9,7 @@ use wasm_bindgen_futures::spawn_local;
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::events::InputEvent;
 use yew::prelude::*;
-use chrono::prelude::*;
-use chrono::TimeDelta;
 use yew_hooks::prelude::*;
-
-
-#[path = "sidebar.rs"]
 use yew_icons::{Icon, IconId};
 
 //TODO Toast System
@@ -225,7 +221,7 @@ let save = {
 
 #[function_component]
 fn SessionTime() -> Html {
-    let start_time = use_state(|| Local::now());
+    let start_time = use_state(Local::now);
     let session_time = use_state(|| TimeDelta::new(0, 0).unwrap());
 
     use_interval(
@@ -246,7 +242,6 @@ fn SessionTime() -> Html {
     let seconds = total_seconds % 60;
 
     let formatted_time = format!("{:02}:{:02}:{:02}", hours, minutes, seconds);
-
 
     html! {
 
