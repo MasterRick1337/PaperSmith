@@ -17,16 +17,18 @@ This project is in a very early stage of development and currently NOT ready for
 ### ToDo
 
 - MasterRick1337: Zooming on Page & Writing features
-- Toll25: Logo Design
+- Toll25: Logo Design & Everything else
 - DotDo1: File Saving
 - Alllpacka: MarkDown Compiler
 
 
 ### Features
 
-- [ ] A Obsidian-like file structure
+- [X] A Obsidian-like file structure
 - [ ] Create, rename and delete files & folders
-- [ ] Load & Save Files
+- [ ] Save Files
+- [X] Load Project
+- [ ] Open Files
 - [ ] MarkDown-like support
 - [ ] Word-like styling features
 - [ ] Spellcheck (maybe)
@@ -42,11 +44,16 @@ This project is in a very early stage of development and currently NOT ready for
 - [ ] Search and Replace
 - [ ] Autosave
 - [ ] Settings
+- [ ] Backups
+- [ ] Toast System
+- [ ] Right Click Menus
+- [ ] Automatic Page split
+
 
 ### Installation
 
 Currently, there is no installation available. You can build it yourself by cloning the repository and running 
-```
+```bash
 cargo tauri build
 ``` 
 in the root directory.

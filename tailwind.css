@@ -158,7 +158,6 @@ body {
     opacity: 1;
 }
 
-/* TODO: Test which Slider for Linux */
 .zoom-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
@@ -260,8 +259,8 @@ svg.svg-icon {
 }
 
 .notepad-container {
-    width: 210mm;
-    height: 297mm;
+    width: 20rem;
+    height: 30rem;
     background-color: var(--surface1);
     border: 1px solid #444444;
     padding: 20px;
@@ -302,7 +301,6 @@ svg.svg-icon {
 
 
 
-/* TODO: Test which Scrollbar for Linux */
 * {
     scrollbar-width: thin;
     scrollbar-color: var(--overlay0) var(--surface0);
@@ -365,7 +363,6 @@ svg.svg-icon {
     opacity: 1;
 }
 
-/* TODO: Test which Slider for Linux */
 .zoom-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
