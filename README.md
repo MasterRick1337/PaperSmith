@@ -48,6 +48,7 @@ This project is in a very early stage of development and currently NOT ready for
 - [ ] Toast System
 - [ ] Right Click Menus
 - [ ] Automatic Page split
+- [ ] Theme Switcher
 
 
 ### Installation
