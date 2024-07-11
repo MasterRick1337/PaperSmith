@@ -48,7 +48,11 @@ pub fn app() -> Html {
     });
 
     let on_text_input = text_input_handler(text_input_ref.clone(), lines.clone());
+    
     let on_font_size_change = font_size_change_handler(font_size.clone());
+    let on_font_size_increase = font_size_increase_handler(font_size.clone());
+    let on_font_size_decrease = font_size_decrease_handler(font_size.clone());
+
     let on_zoom_change = zoom_change_handler(zoom_level.clone());
     let on_zoom_increase = zoom_increase_handler(zoom_level.clone());
     let on_zoom_decrease = zoom_decrease_handler(zoom_level.clone());
@@ -73,20 +77,6 @@ pub fn app() -> Html {
                     }
                 }
             });
-        })
-    };
-
-    let on_font_increase = {
-        let font_size = font_size.clone();
-        Callback::from(move |_| {
-            font_size.set(*font_size + 1.0);
-        })
-    };
-
-    let on_font_decrease = {
-        let font_size = font_size.clone();
-        Callback::from(move |_| {
-            font_size.set(*font_size - 1.0);
         })
     };
 
@@ -134,9 +124,9 @@ pub fn app() -> Html {
                 <div class="separator"></div>
 
                 <div class="font-size-changer">
-                    <Icon icon_id={IconId::LucideMinus} width={"2em".to_owned()} height={"2em".to_owned()} class="font-size-button" title="Decrease font size" onclick={on_font_decrease}/>
+                    <Icon icon_id={IconId::LucideMinus} width={"2em".to_owned()} height={"2em".to_owned()} class="font-size-button" title="Decrease font size" onclick={on_font_size_decrease}/>
                     <input type="number" value={format!("{}", *font_size)} class="font-size-input" oninput={on_font_size_change} />
-                    <Icon icon_id={IconId::LucidePlus} width={"2em".to_owned()} height={"2em".to_owned()} class = "font-size-button" title="Increase font size" onclick={on_font_increase}/>
+                    <Icon icon_id={IconId::LucidePlus} width={"2em".to_owned()} height={"2em".to_owned()} class = "font-size-button" title="Increase font size" onclick={on_font_size_increase}/>
                 </div>
 
                 //<Icon icon_id={IconId::}/>
@@ -173,7 +163,7 @@ pub fn app() -> Html {
                             class="notepad-textarea"
                             ref={text_input_ref}
                             contenteditable = "true"
-                            //oninput={on_text_input}
+                            oninput={on_text_input}
                         ></div>
                     </div>
                 </div>
@@ -249,6 +239,8 @@ fn SessionTime() -> Html {
     }
 }
 
+
+
 fn text_input_handler(
     text_input_ref: NodeRef,
     lines: UseStateHandle<Vec<String>>,
@@ -261,6 +253,9 @@ fn text_input_handler(
         }
     })
 }
+
+
+
 
 fn font_size_change_handler(font_size: UseStateHandle<f64>) -> Callback<InputEvent> {
     Callback::from(move |e: InputEvent| {
@@ -287,6 +282,46 @@ fn font_size_change_handler(font_size: UseStateHandle<f64>) -> Callback<InputEve
         }
     })
 }
+
+fn font_size_increase_handler(font_size: UseStateHandle<f64>) -> Callback<MouseEvent> {
+    Callback::from(move |_| {
+        let current_font_size = *font_size;
+        font_size.set(current_font_size + 1.0);
+
+        if let Some(document) = web_sys::window().and_then(|w| w.document()) {
+            if let Some(style) = document
+                .get_element_by_id("dynamic-style")
+                .and_then(|el| el.dyn_into::<HtmlElement>().ok())
+            {
+                style.set_inner_html(&format!(
+                    ":root {{ --font-size: {}px; }}",
+                    current_font_size + 1.0
+                ));
+            }
+        }
+    })
+}
+
+fn font_size_decrease_handler(font_size: UseStateHandle<f64>) -> Callback<MouseEvent> {
+    Callback::from(move |_| {
+        let current_font_size = *font_size;
+        font_size.set(current_font_size - 1.0);
+
+        if let Some(document) = web_sys::window().and_then(|w| w.document()) {
+            if let Some(style) = document
+                .get_element_by_id("dynamic-style")
+                .and_then(|el| el.dyn_into::<HtmlElement>().ok())
+            {
+                style.set_inner_html(&format!(
+                    ":root {{ --font-size: {}px; }}",
+                    current_font_size - 1.0
+                ));
+            }
+        }
+    })
+}
+
+
 
 fn zoom_change_handler(zoom_level: UseStateHandle<f64>) -> Callback<InputEvent> {
     Callback::from(move |e: InputEvent| {

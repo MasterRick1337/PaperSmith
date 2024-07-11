@@ -16,7 +16,7 @@ This project is in a very early stage of development and currently NOT ready for
 
 ### ToDo
 
-- MasterRick1337: Zooming on Page & Writing features
+- MasterRick1337: Writing features
 - Toll25: Logo Design & Everything else
 - DotDo1: File Saving
 - Alllpacka: MarkDown Compiler
@@ -31,7 +31,7 @@ This project is in a very early stage of development and currently NOT ready for
 - [ ] Open Files
 - [ ] MarkDown-like support
 - [ ] Word-like styling features
-- [ ] Spellcheck (maybe)
+- [ ] Spellcheck
 - [ ] Creation of chapters
 - [ ] Notes for chapters
 - [ ] Descriptions for chapters
