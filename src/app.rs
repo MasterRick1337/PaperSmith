@@ -3,23 +3,32 @@ use chrono::TimeDelta;
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
-use web_sys::{HtmlElement, HtmlInputElement};
+use web_sys::HtmlElement;
 use yew::events::InputEvent;
 use yew::prelude::*;
 use yew_hooks::prelude::*;
 use yew_icons::{Icon, IconId};
+
+
+
+#[path = "font_size_handlers.rs"]
+mod font_size_handlers;
+use font_size_handlers::FontSizeControls;
+
+#[path = "zoom_level_handlers.rs"]
+mod zoom_level_handlers;
+use zoom_level_handlers::ZoomControls;
+
+
 
 //TODO Toast System
 //TODO File Opening
 
 #[path = "sidebar/sidebar.rs"]
 mod sidebar;
-
 use sidebar::SideBar;
-
 use shared::Project;
 
 #[wasm_bindgen]
@@ -48,14 +57,8 @@ pub fn app() -> Html {
     });
 
     let on_text_input = text_input_handler(text_input_ref.clone(), lines.clone());
-    
-    let on_font_size_change = font_size_change_handler(font_size.clone());
-    let on_font_size_increase = font_size_increase_handler(font_size.clone());
-    let on_font_size_decrease = font_size_decrease_handler(font_size.clone());
 
-    let on_zoom_change = zoom_change_handler(zoom_level.clone());
-    let on_zoom_increase = zoom_increase_handler(zoom_level.clone());
-    let on_zoom_decrease = zoom_decrease_handler(zoom_level.clone());
+    
 
     let save = {
         let text_input_ref = text_input_ref.clone();
@@ -123,11 +126,7 @@ pub fn app() -> Html {
                 <Icon icon_id={IconId::LucideRedo} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 <div class="separator"></div>
 
-                <div class="font-size-changer">
-                    <Icon icon_id={IconId::LucideMinus} width={"2em".to_owned()} height={"2em".to_owned()} class="font-size-button" title="Decrease font size" onclick={on_font_size_decrease}/>
-                    <input type="number" value={format!("{}", *font_size)} class="font-size-input" oninput={on_font_size_change} />
-                    <Icon icon_id={IconId::LucidePlus} width={"2em".to_owned()} height={"2em".to_owned()} class = "font-size-button" title="Increase font size" onclick={on_font_size_increase}/>
-                </div>
+                <FontSizeControls font_size={font_size.clone()} />
 
                 //<Icon icon_id={IconId::}/>
                 <div class="separator"></div>
@@ -174,11 +173,8 @@ pub fn app() -> Html {
                     <SessionTime/>
                 </div>
 
-                <div class="bottombar-right" id="zoom">
-                    <Icon icon_id={IconId::LucideMinus} class="zoom-button" title="Zoom Out" onclick={on_zoom_decrease}/>
-                    <input type="range" min="0" max="200" class="zoom-slider" id="zoom-slider" title="Zoom" value={format!("{}", *zoom_level)} oninput={on_zoom_change} />
-                    <Icon icon_id={IconId::LucidePlus} class = "zoom-button" title="Zoom In" onclick={on_zoom_increase}/>
-                    <span class="zoom-text" id="zoom-value">{format!("{}%", *zoom_level)}</span>
+                <div class="bottombar-right">
+                    <ZoomControls zoom_level={zoom_level.clone()} />
                 </div>
             </div>
         </>
@@ -251,107 +247,5 @@ fn text_input_handler(
             let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
             lines.set(new_lines);
         }
-    })
-}
-
-
-
-
-fn font_size_change_handler(font_size: UseStateHandle<f64>) -> Callback<InputEvent> {
-    Callback::from(move |e: InputEvent| {
-        if let Some(input) = e.target_dyn_into::<HtmlInputElement>() {
-            let new_font_size = input.value_as_number();
-            font_size.set(new_font_size);
-
-            if let Some(document) = web_sys::window().and_then(|w| w.document()) {
-                if let Some(_style) = document
-                    .get_element_by_id("dynamic-style")
-                    .and_then(|el| el.dyn_into::<HtmlElement>().ok())
-                {
-                    if let Some(style) = document
-                        .get_element_by_id("dynamic-style")
-                        .and_then(|el| el.dyn_into::<HtmlElement>().ok())
-                    {
-                        style.set_inner_html(&format!(
-                            ":root {{ --font-size: {}px; }}",
-                            new_font_size
-                        ));
-                    }
-                }
-            }
-        }
-    })
-}
-
-fn font_size_increase_handler(font_size: UseStateHandle<f64>) -> Callback<MouseEvent> {
-    Callback::from(move |_| {
-        let current_font_size = *font_size;
-        font_size.set(current_font_size + 1.0);
-
-        if let Some(document) = web_sys::window().and_then(|w| w.document()) {
-            if let Some(style) = document
-                .get_element_by_id("dynamic-style")
-                .and_then(|el| el.dyn_into::<HtmlElement>().ok())
-            {
-                style.set_inner_html(&format!(
-                    ":root {{ --font-size: {}px; }}",
-                    current_font_size + 1.0
-                ));
-            }
-        }
-    })
-}
-
-fn font_size_decrease_handler(font_size: UseStateHandle<f64>) -> Callback<MouseEvent> {
-    Callback::from(move |_| {
-        let current_font_size = *font_size;
-        font_size.set(current_font_size - 1.0);
-
-        if let Some(document) = web_sys::window().and_then(|w| w.document()) {
-            if let Some(style) = document
-                .get_element_by_id("dynamic-style")
-                .and_then(|el| el.dyn_into::<HtmlElement>().ok())
-            {
-                style.set_inner_html(&format!(
-                    ":root {{ --font-size: {}px; }}",
-                    current_font_size - 1.0
-                ));
-            }
-        }
-    })
-}
-
-
-
-fn zoom_change_handler(zoom_level: UseStateHandle<f64>) -> Callback<InputEvent> {
-    Callback::from(move |e: InputEvent| {
-        if let Some(input) = e.target_dyn_into::<HtmlInputElement>() {
-            let new_zoom_level = input.value_as_number();
-            zoom_level.set(new_zoom_level);
-        }
-    })
-}
-
-fn zoom_increase_handler(zoom_level: UseStateHandle<f64>) -> Callback<MouseEvent> {
-    Callback::from(move |_| {
-        let current_zoom = *zoom_level;
-        let new_zoom_level = if current_zoom % 10.0 == 0.0 {
-            (current_zoom + 10.0).min(200.0)
-        } else {
-            ((current_zoom / 10.0).ceil() * 10.0).min(200.0)
-        };
-        zoom_level.set(new_zoom_level);
-    })
-}
-
-fn zoom_decrease_handler(zoom_level: UseStateHandle<f64>) -> Callback<MouseEvent> {
-    Callback::from(move |_| {
-        let current_zoom = *zoom_level;
-        let new_zoom_level = if current_zoom % 10.0 == 0.0 {
-            (current_zoom - 10.0).max(0.0)
-        } else {
-            ((current_zoom / 10.0).floor() * 10.0).max(0.0)
-        };
-        zoom_level.set(new_zoom_level);
     })
 }
