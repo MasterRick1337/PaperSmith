@@ -23,7 +23,7 @@ async fn show_save_dialog() -> Result<String, String> {
 }
 
 #[tauri::command]
-fn get_project() -> Result<Project, shared::PaperSmithError> {
+fn get_project() -> Option<Project> {
     let project_path = FileDialog::new().pick_folder().unwrap();
     parse_project(project_path)
 }

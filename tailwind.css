@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 :root {
-    --base: #141414;
-    --border: #000000;
-    --surface0: #222222;
-    --surface1: #2d2d2d;
-    --overlay0: #636363;
-    --text: #e0e0e0;
+    --base: #1E1E2A;        
+    --border: #2C2C38; 
+    --surface0: #23232D;    
+    --surface1: #2A2A37;    
+    --overlay0: #454552;    
+    --text: #D1D5DB;        
     --font-size: 16px;
     --line-height: 1.5;
     --aspect-ratio: 1.0;
@@ -62,6 +62,7 @@ body {
     border-bottom: 1px solid var(--border);
 }
 
+/* TODO: Fix issue where icons get smaller when resizing window*/
 .menubar-icon {
     margin-left: 10px;
     cursor: pointer;
@@ -158,7 +159,6 @@ body {
     opacity: 1;
 }
 
-/* TODO: Test which Slider for Linux */
 .zoom-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
@@ -166,8 +166,6 @@ body {
     height: 12px;
     background: var(--overlay0);
     cursor: default;
-    /*box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--border);*/
 }
 
 .zoom-slider::-moz-range-thumb {
@@ -177,8 +175,6 @@ body {
     height: 12px;
     background: var(--overlay0);
     cursor: default;
-    /*box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--border);*/
 }
 
 #zoom-value {
@@ -194,6 +190,7 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    user-select: none;
     width: 25px;
     height: 25px;
 }
@@ -214,6 +211,7 @@ body {
 .zoom-button:hover {
     background-color: var(--overlay0);
 }
+
 
 
 .chevron {
@@ -261,11 +259,12 @@ svg.svg-icon {
 
 .notepad-container {
     width: 210mm;
-    height: 297mm;
-    background-color: var(--surface1);
-    border: 1px solid #444444;
+    height: 100%;
+    background-color: var(--base);
+    border: none;
+    outline: none;
+    box-shadow: none;
     padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     position: relative;
     margin: 0 auto;
     transform-origin: top; /* TODO: Make Zoom work with transform-origin: center*/
@@ -274,7 +273,7 @@ svg.svg-icon {
 .notepad-wrapper {
     width: 100%;
     height: 100%;
-    overflow-y: auto;
+    overflow: hidden;
     white-space: pre-wrap;
 }
 
@@ -286,7 +285,7 @@ svg.svg-icon {
     border: none;
     outline: none;
     resize: none;
-    background-color: var(--surface1);
+    background-color: var(--base);
     color: var(--text);
     font-size: var(--font-size);
     overflow-y: auto;
@@ -302,7 +301,6 @@ svg.svg-icon {
 
 
 
-/* TODO: Test which Scrollbar for Linux */
 * {
     scrollbar-width: thin;
     scrollbar-color: var(--overlay0) var(--surface0);
@@ -342,85 +340,6 @@ svg.svg-icon {
 
 
 
-#zoom {
-    display: flex;
-    align-items: center;
-    gap: 1px;
-    position: relative;
-}
-
-.zoom-slider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100px;
-    height: 2px;
-    background: var(--overlay0);
-    outline: none;
-    opacity: 0.9; 
-    transition: opacity 0.2s ease;
-    border-radius: 2px;
-}
-
-.zoom-slider:hover {
-    opacity: 1;
-}
-
-/* TODO: Test which Slider for Linux */
-.zoom-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 7px;
-    height: 12px;
-    background: var(--overlay0);
-    cursor: default;
-}
-
-.zoom-slider::-moz-range-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 7px;
-    height: 12px;
-    background: var(--overlay0);
-    cursor: default;
-}
-
-#zoom-value {
-    color: var(--text);
-    font-size: 12px;
-}
-
-.zoom-text {
-    background: none;
-    user-select: none;
-    margin-left: 5px;
-    cursor: default;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 25px;
-    height: 25px;
-}
-
-.zoom-button {
-    background: none;
-    padding: 5px;
-    cursor: default;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 25px;
-    height: 25px;
-    transition: background-color 0.3s, border-color 0.3s;
-}
-
-.zoom-button:hover {
-    background-color: var(--overlay0);
-}
-
-
-
 .font-size-changer {
     display: flex;
     align-items: center;
@@ -452,6 +371,7 @@ svg.svg-icon {
 .font-size-changer input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
 }
+
 
 
 .sidebar-dropdown-icon-container {
