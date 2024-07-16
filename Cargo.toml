@@ -19,6 +19,8 @@ yew_icons = {version = "0.8", features = ["LucidePlus","LucideTrash2","LucideEdi
 gloo-timers = "0.3.0"
 yew-hooks = "0.3.2"
 gloo-console = "0.3.0"
+chrono = "0.4.38"
+text_io = "0.1.12"
 
 
 [workspace]
