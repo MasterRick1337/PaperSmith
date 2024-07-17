@@ -6,7 +6,6 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{HtmlElement, HtmlInputElement, Node};
-use web_sys::HtmlElement;
 use yew::events::InputEvent;
 use yew::prelude::*;
 use yew_hooks::prelude::*;
@@ -179,9 +178,13 @@ pub fn app() -> Html {
                         if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
                             let text = pages_element.inner_text();
                             let count = text.len();
-                            let char_count_no_spaces =
+                            let count_no_spaces =
                                 text.chars().filter(|c| !c.is_whitespace()).count();
+                            gloo_console::log!("Text: {}", text.to_string());
+                            gloo_console::log!("Character count: {}", count);
+                            gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
                             char_count.set(count);
+                            char_count_no_spaces.set(count_no_spaces);
                         }
                     }
                 },
