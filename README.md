@@ -17,8 +17,8 @@ This project is in a very early stage of development and currently NOT ready for
 ### ToDo
 
 - MasterRick1337: Writing features
-- Toll25: Logo Design & Everything else
-- DotDo1: File Saving
+- Toll25: File System
+- DotDo1: Words Per Minute
 - Alllpacka: MarkDown Compiler
 
 

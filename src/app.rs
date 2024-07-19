@@ -43,8 +43,10 @@ struct SaveFileArgs {
     filename: String,
 }
 
+
 #[function_component(App)]
 pub fn app() -> Html {
+    let pages_ref: NodeRef = use_node_ref();
     let text_input_ref = use_node_ref();
     let lines = use_state(Vec::new);
     let font_size = use_state(|| 16.0);
@@ -121,6 +123,81 @@ pub fn app() -> Html {
         })
     };
 
+    #[derive(Properties, PartialEq)]
+    pub struct WordCountProps {
+        pub pages_ref: NodeRef,
+    }
+
+    #[function_component]
+    fn WordCount(WordCountProps { pages_ref }: &WordCountProps) -> Html {
+        let word_count = use_state(|| 0);
+        {
+            let pages_ref = pages_ref.clone();
+            let word_count = word_count.clone();
+            use_interval(
+                {
+                    let pages_ref = pages_ref.clone();
+                    let word_count = word_count.clone();
+                    move || {
+                        if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
+                            let text = pages_element.inner_text();
+                            let count = text.split_whitespace().count();
+                            word_count.set(count);
+                        }
+                    }
+                },
+                1500,
+            )
+        }
+
+        html! {
+        <div>{format!("{} Words", *word_count)}</div>
+    }
+    }
+
+    #[derive(Properties, PartialEq)]
+    pub struct CharCountProps {
+        pub pages_ref: NodeRef,
+    }
+
+    #[function_component]
+    fn CharCount(CharCountProps { pages_ref }: &CharCountProps) -> Html {
+        let char_count = use_state(|| 0);
+        let char_count_no_spaces = use_state(|| 0);
+        {
+            let pages_ref = pages_ref.clone();
+            let char_count = char_count.clone();
+            let char_count_no_spaces = char_count_no_spaces.clone();
+            use_interval(
+                {
+                    let pages_ref = pages_ref.clone();
+                    let char_count = char_count.clone();
+                    let char_count_no_spaces = char_count_no_spaces.clone();
+                    move || {
+                        if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
+                            let text = pages_element.inner_text();
+                            let count = text.len();
+                            let count_no_spaces =
+                                text.chars().filter(|c| !c.is_whitespace()).count();
+                            gloo_console::log!("Text: {}", text.to_string());
+                            gloo_console::log!("Character count: {}", count);
+                            gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
+                            char_count.set(count);
+                            char_count_no_spaces.set(count_no_spaces);
+                        }
+                    }
+                },
+                1500,
+            )
+        }
+        html! {
+        <div>
+            <p>{format!("Characters: {}, {} without spaces", *char_count, *char_count_no_spaces)}</p>
+            </div>
+
+    }
+    }
+
     html! {
         <>
             <style id="dynamic-style"></style>
@@ -157,7 +234,7 @@ pub fn app() -> Html {
                 {(*sidebar).clone()}
             </div>
 
-            <div class="notepad-outer-container">
+            <div class="notepad-outer-container" ref={pages_ref.clone()}>
                 <div class="notepad-container" style={format!("transform: scale({});", *zoom_level / 100.0)}>
                     <a class="anchor"></a>
                     <div class="notepad-wrapper">
@@ -174,6 +251,8 @@ pub fn app() -> Html {
             <div class="bottombar">
                 <div class="bottombar-left">
                     <SessionTime/>
+                    <WordCount pages_ref={pages_ref.clone()}/>
+                    <CharCount pages_ref={pages_ref.clone()}/>
                     <p>{ format!("WPM: {:.2}", *wpm) }</p>
                 </div>
 
@@ -219,7 +298,6 @@ fn SessionTime() -> Html {
             let session_time = session_time.clone();
             move || {
                 let current_time = Local::now();
-                gloo_console::log!("Current Time: {}", current_time.to_string());
                 session_time.set(current_time - *start_time);
             }
         },
