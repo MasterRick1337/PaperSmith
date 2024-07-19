@@ -56,8 +56,11 @@ pub fn app() -> Html {
         }
     });
 
-    let on_text_input = text_input_handler(text_input_ref.clone(), lines.clone());
+    let start_time = use_state(|| None);
+    let word_count = use_state(|| 0);
+    let wpm = use_state(|| 0.0);
 
+    let on_text_input = text_input_handler(text_input_ref.clone(), lines.clone(), start_time.clone(), word_count.clone(), wpm.clone());
     
 
     let save = {
@@ -171,6 +174,7 @@ pub fn app() -> Html {
             <div class="bottombar">
                 <div class="bottombar-left">
                     <SessionTime/>
+                    <p>{ format!("WPM: {:.2}", *wpm) }</p>
                 </div>
 
                 <div class="bottombar-right">
@@ -237,15 +241,41 @@ fn SessionTime() -> Html {
 
 
 
+fn calculate_wpm(word_count: usize, start_time: Option<DateTime<Local>>) -> f64 {
+    if let Some(start) = start_time {
+        let elapsed = Local::now() - start;
+        let elapsed_seconds = elapsed.num_seconds() as f64;
+        if elapsed_seconds > 0.0 {
+            return (word_count as f64 / elapsed_seconds) * 60.0;
+        }
+    }
+    0.0
+}
+
+
+
 fn text_input_handler(
     text_input_ref: NodeRef,
     lines: UseStateHandle<Vec<String>>,
+    start_time: UseStateHandle<Option<DateTime<Local>>>,
+    word_count: UseStateHandle<usize>,
+    wpm: UseStateHandle<f64>,     
 ) -> Callback<InputEvent> {
     Callback::from(move |_| {
         if let Some(input) = text_input_ref.cast::<HtmlElement>() {
             let inner_text = input.inner_text();
             let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
             lines.set(new_lines);
+
+            let words = inner_text.split_whitespace().count();
+            word_count.set(words);
+
+            if start_time.is_none() {
+                start_time.set(Some(Local::now()));
+            }
+
+            let calculated_wpm = calculate_wpm(*word_count, *start_time);
+            wpm.set(calculated_wpm);
         }
     })
 }
