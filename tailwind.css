@@ -3,21 +3,41 @@
 @tailwind utilities;
 
 :root {
-    --base: #1E1E2A;        
-    --border: #2C2C38; 
-    --surface0: #23232D;    
-    --surface1: #2A2A37;    
-    --overlay0: #454552;    
-    --text: #D1D5DB;        
+    --base: 30, 30, 42;
+    --border: 44, 44, 56;
+    --surface0: 35, 35, 45;
+    --surface1: 42, 42, 55;
+    --overlay0: 69, 69, 82;
+    --text: 209, 213, 219;
     --font-size: 16px;
     --line-height: 1.5;
     --aspect-ratio: 1.0;
 }
 
+/* Scrollbar Chrome/Safari */
+::-webkit-scrollbar {
+    width: 8px; /* Width of the scrollbar */
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(var(--surface0), 1); /* Background of the scrollbar track */
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(var(--overlay0), 1); /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Rounded corners of the scrollbar thumb */
+}
+
+/* Scrollbar Firefox */
+* {
+    scrollbar-width: thin; /* Width of the scrollbar */
+    scrollbar-color: rgba(var(--overlay0), 1) rgba(var(--surface0), 1); /* Color of the scrollbar thumb and track */
+}
+
 body {
     margin: 0;
     padding: 0;
-    background-color: var(--base);
+    background-color: rgba(var(--base), 1);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -31,8 +51,8 @@ body {
 
 .toolbar {
     height: 25px;
-    background-color: var(--surface0);
-    color: var(--text);
+    background-color: rgba(var(--surface0), 1);
+    color: rgba(var(--text), 1);
     display: flex;
     align-items: center;
     width: 100%;
@@ -41,15 +61,15 @@ body {
     left: 0;
     right: 0;
     padding: 0 10px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid rgba(var(--border), 1);
 }
 
 
 
 .menubar {
     height: 45px;
-    background-color: var(--surface0);
-    color: var(--text);
+    background-color: rgba(var(--surface0), 1);
+    color: rgba(var(--text), 1);
     display: flex;
     justify-content: left;
     align-items: center;
@@ -59,7 +79,7 @@ body {
     left: 0;
     right: 0;
     padding: 0 20px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid rgba(var(--border), 1);
 }
 
 /* TODO: Fix issue where icons get smaller when resizing window*/
@@ -76,7 +96,7 @@ body {
 .separator {
     width: 1px;
     height: 20px;
-    background-color: var(--surface1);
+    background-color: rgba(var(--surface1), 1);
     margin: 0 10px;
     margin-right: 0;
 }
@@ -86,8 +106,8 @@ body {
 
 .sidebar {
     width: 300px;
-    background-color: var(--surface0);
-    color: var(--text);
+    background-color: rgba(var(--surface0), 1);
+    color: rgba(var(--text), 1);
     overflow-y: auto;
     position: fixed;
     left: 0;
@@ -101,8 +121,8 @@ body {
 
 .bottombar {
     height: 30px;
-    background-color: var(--surface0);
-    color: var(--text);
+    background-color: rgba(var(--surface0), 1);
+    color: rgba(var(--text), 1);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -112,7 +132,7 @@ body {
     left: 0;
     right: 0;
     padding: 0 20px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid rgba(var(--border), 1);
 }
 
 .bottombar-left {
@@ -148,7 +168,7 @@ body {
     appearance: none;
     width: 100px;
     height: 2px;
-    background: var(--overlay0);
+    background: rgba(var(--overlay0), 1);
     outline: none;
     opacity: 0.9;
     transition: opacity 0.2s ease;
@@ -164,7 +184,7 @@ body {
     appearance: none;
     width: 7px;
     height: 12px;
-    background: var(--overlay0);
+    background: rgba(var(--overlay0), 1);
     cursor: default;
 }
 
@@ -173,12 +193,12 @@ body {
     appearance: none;
     width: 7px;
     height: 12px;
-    background: var(--overlay0);
+    background: rgba(var(--overlay0), 1);
     cursor: default;
 }
 
 #zoom-value {
-    color: var(--text);
+    color: rgba(var(--text), 1);
     font-size: 12px;
 }
 
@@ -209,7 +229,7 @@ body {
 }
 
 .zoom-button:hover {
-    background-color: var(--overlay0);
+    background-color: rgba(var(--overlay0), 1);
 }
 
 
@@ -254,13 +274,13 @@ svg.svg-icon {
     height: calc(100vh - 100px);
     width: calc(100vw - 360px);
     overflow: auto;
-    background-color: var(--base);
+    background-color: rgba(var(--base), 1);
 }
 
 .notepad-container {
     width: 210mm;
     height: 100%;
-    background-color: var(--base);
+    background-color: rgba(var(--base), 1);
     border: none;
     outline: none;
     box-shadow: none;
@@ -285,8 +305,8 @@ svg.svg-icon {
     border: none;
     outline: none;
     resize: none;
-    background-color: var(--base);
-    color: var(--text);
+    background-color: rgba(var(--base), 1);
+    color: rgba(var(--text), 1);
     font-size: var(--font-size);
     overflow-y: auto;
 }
@@ -298,47 +318,6 @@ svg.svg-icon {
     z-index: 1000;
     padding: 10px;
 }
-
-
-
-* {
-    scrollbar-width: thin;
-    scrollbar-color: var(--overlay0) var(--surface0);
-}
-
-/* Scrollbar Chrome/Safari */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--surface0);
-}
-
-::-webkit-scrollbar-thumb {
-    background-color: var(--overlay0);
-    border-radius: 10px;
-}
-
-/* Scrollbar Firefox */
-* {
-    scrollbar-width: thin;
-}
-
-*::-moz-scrollbar {
-    width: 8px;
-}
-
-*::-moz-scrollbar-track {
-    background: var(--surface0);
-}
-
-*::-moz-scrollbar-thumb {
-    background-color: var(--overlay0);
-    border-radius: 10px;
-}
-
-
 
 .font-size-changer {
     display: flex;
@@ -353,15 +332,15 @@ svg.svg-icon {
 }
 
 .font-size-button:hover {
-    background-color: var(--overlay0);
+    background-color: rgba(var(--overlay0), 1);
 }
 
 .font-size-input {
     width: 50px;
     text-align: center;
-    border: var(--overlay0) solid 1px;
+    border: rgba(var(--overlay0), 1) solid 1px;
     border-radius: 5px;
-    background-color: var(--surface1);
+    background-color: rgba(var(--surface1), 1);
     height: 30px;
     margin: 0 5px;
     outline: none;
