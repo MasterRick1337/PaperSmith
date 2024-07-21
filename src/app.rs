@@ -10,7 +10,7 @@ use yew::events::InputEvent;
 use yew::prelude::*;
 use yew_hooks::prelude::*;
 use yew_icons::{Icon, IconId};
-
+use yew::events::MouseEvent;
 
 
 #[path = "font_size_handlers.rs"]
@@ -21,7 +21,9 @@ use font_size_handlers::FontSizeControls;
 mod zoom_level_handlers;
 use zoom_level_handlers::ZoomControls;
 
-
+#[path = "text_alignment_handlers.rs"]
+mod text_alignment_handlers;
+use text_alignment_handlers::TextAlignmentControls;
 
 //TODO Toast System
 //TODO File Opening
@@ -30,6 +32,8 @@ use zoom_level_handlers::ZoomControls;
 mod sidebar;
 use sidebar::SideBar;
 use shared::Project;
+
+
 
 #[wasm_bindgen]
 extern "C" {
@@ -51,6 +55,7 @@ pub fn app() -> Html {
     let lines = use_state(Vec::new);
     let font_size = use_state(|| 16.0);
     let zoom_level = use_state(|| 100.0);
+    let text_alignment = use_state(|| "left".to_string());
     let project: UseStateHandle<Option<Project>> = use_state(|| None);
     let sidebar = use_state(|| {
         html! {
@@ -64,7 +69,6 @@ pub fn app() -> Html {
 
     let on_text_input = text_input_handler(text_input_ref.clone(), lines.clone(), start_time.clone(), word_count.clone(), wpm.clone());
     
-
     let save = {
         let text_input_ref = text_input_ref.clone();
         Callback::from(move |_| {
@@ -198,6 +202,8 @@ pub fn app() -> Html {
     }
     }
 
+
+
     html! {
         <>
             <style id="dynamic-style"></style>
@@ -206,7 +212,7 @@ pub fn app() -> Html {
                 <Icon icon_id={IconId::LucideRedo} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 <div class="separator"></div>
 
-                <FontSizeControls font_size={font_size.clone()} />
+                <FontSizeControls font_size={font_size.clone()}/>
 
                 //<Icon icon_id={IconId::}/>
                 <div class="separator"></div>
@@ -216,10 +222,10 @@ pub fn app() -> Html {
                 <Icon icon_id={IconId::LucideBaseline} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 <Icon icon_id={IconId::LucideHighlighter} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 <div class="separator"></div>
-                <Icon icon_id={IconId::LucideAlignCenter} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
-                <Icon icon_id={IconId::LucideAlignJustify} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
-                <Icon icon_id={IconId::LucideAlignLeft} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
-                <Icon icon_id={IconId::LucideAlignRight} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+
+                <TextAlignmentControls text_alignment={text_alignment.clone()}/>
+
+                <div class="separator"></div>
                 <Icon icon_id={IconId::LucideList} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 <Icon icon_id={IconId::LucideListChecks} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
 
@@ -241,6 +247,7 @@ pub fn app() -> Html {
                         <div
                             class="notepad-textarea"
                             ref={text_input_ref}
+                            style={format!("text-align: {};", *text_alignment)}
                             contenteditable = "true"
                             oninput={on_text_input}
                         ></div>

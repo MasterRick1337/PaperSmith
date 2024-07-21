@@ -5,7 +5,7 @@ use yew::prelude::*;
 use yew_icons::{Icon, IconId};
 
 
-
+// TODO: Add that it only applies to selected text or text that is abut to be written
 pub fn font_size_change_handler(font_size: UseStateHandle<f64>) -> Callback<InputEvent> {
     Callback::from(move |e: InputEvent| {
         if let Some(input) = e.target_dyn_into::<HtmlInputElement>() {
@@ -88,7 +88,7 @@ pub fn font_size_controls(FontSizeProps { font_size }: &FontSizeProps) -> Html {
     html! {
         <div class="font-size-changer">
             <Icon icon_id={IconId::LucideMinus} width={"2em".to_owned()} height={"2em".to_owned()} class="font-size-button" title="Decrease font size" onclick={on_font_size_decrease}/>
-            <input type="number" value={format!("{}", **font_size)} class="font-size-input" oninput={on_font_size_change} />
+            <input type="number" value={format!("{}", **font_size)} class="font-size-input" title="Font Size" oninput={on_font_size_change} />
             <Icon icon_id={IconId::LucidePlus} width={"2em".to_owned()} height={"2em".to_owned()} class = "font-size-button" title="Increase font size" onclick={on_font_size_increase}/>
         </div>
     }

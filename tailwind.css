@@ -14,26 +14,6 @@
     --aspect-ratio: 1.0;
 }
 
-/* Scrollbar Chrome/Safari */
-::-webkit-scrollbar {
-    width: 8px; /* Width of the scrollbar */
-}
-
-::-webkit-scrollbar-track {
-    background: rgba(var(--surface0), 1); /* Background of the scrollbar track */
-}
-
-::-webkit-scrollbar-thumb {
-    background-color: rgba(var(--overlay0), 1); /* Color of the scrollbar thumb */
-    border-radius: 10px; /* Rounded corners of the scrollbar thumb */
-}
-
-/* Scrollbar Firefox */
-* {
-    scrollbar-width: thin; /* Width of the scrollbar */
-    scrollbar-color: rgba(var(--overlay0), 1) rgba(var(--surface0), 1); /* Color of the scrollbar thumb and track */
-}
-
 body {
     margin: 0;
     padding: 0;
@@ -101,6 +81,12 @@ body {
     margin-right: 0;
 }
 
+.text-alignment-changer {
+    display: flex;
+    margin-left: 10px;
+    cursor: pointer;
+    font-size: 10px;
+}
 
 
 
@@ -318,6 +304,28 @@ svg.svg-icon {
     z-index: 1000;
     padding: 10px;
 }
+
+
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(var(--surface0), 1);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(var(--overlay0), 1);
+    border-radius: 10px;
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--overlay0), 1) rgba(var(--surface0), 1);
+}
+
+
 
 .font-size-changer {
     display: flex;
