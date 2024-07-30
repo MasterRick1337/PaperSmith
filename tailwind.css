@@ -295,6 +295,7 @@ svg.svg-icon {
     color: rgba(var(--text), 1);
     font-size: var(--font-size);
     overflow-y: auto;
+    text-align: left;
 }
 
 .anchor {

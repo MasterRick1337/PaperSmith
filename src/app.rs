@@ -246,6 +246,7 @@ pub fn app() -> Html {
                     <div class="notepad-wrapper">
                         <div
                             class="notepad-textarea"
+                            id="notepad-textarea"
                             ref={text_input_ref}
                             style={format!("text-align: {};", *text_alignment)}
                             contenteditable = "true"
