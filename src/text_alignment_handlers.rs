@@ -1,96 +1,116 @@
+
+use web_sys::{window, Range};
 use yew::prelude::*;
+use yew_hooks::use_interval;
 use yew_icons::{Icon, IconId};
-use web_sys::window;
-use yew::events::MouseEvent;
 
-
-
-fn apply_alignment(alignment: &str) {
+fn apply_alignment_on_range(range: &Range, alignment: &str) {
     let window = window().expect("should have a Window");
     let document = window.document().expect("should have a Document");
 
-    if let Some(selection) = document.get_selection().expect("should have a Selection") {
-        if let Some(range) = selection.get_range_at(0).ok() {
-            let common_ancestor = range.common_ancestor_container().unwrap();
-            let notepad = document.get_element_by_id("notepad-textarea").unwrap();
+    let notepad = document.get_element_by_id("notepad-textarea").unwrap();
+    let container = document.create_element("div").unwrap();
+    container
+        .set_attribute("style", &format!("text-align: {alignment};"))
+        .unwrap();
+    gloo_console::log!("range", range);
 
-            web_sys::console::log_1(&format!("Common Ancestor: {:?}", common_ancestor).into());
-            web_sys::console::log_1(&format!("Notepad HTML: {:?}", notepad.inner_html()).into());
+    let content = range.extract_contents().unwrap();
 
-            let mut is_within = false;
-            let mut node = common_ancestor.clone();
-            while let Some(parent) = node.parent_node() {
-                web_sys::console::log_1(&format!("Checking parent: {:?}", parent).into());
-                if parent.is_same_node(Some(&notepad)) {
-                    is_within = true;
-                    break;
-                }
-                node = parent;
-            }
+    gloo_console::log!("range", &content);
 
-            web_sys::console::log_1(&format!("Is within notepad: {}", is_within).into());
+    container.append_child(&content).unwrap();
+    range.insert_node(&container).unwrap();
 
-            if is_within {
-                let container = document.create_element("div").unwrap();
-                container.set_attribute("style", &format!("text-align: {};", alignment)).unwrap();
-
-                let content = range.extract_contents().unwrap();
-                container.append_child(&content).unwrap();
-                range.insert_node(&container).unwrap();
-
-                notepad.append_child(&container).unwrap();
-
-                selection.remove_all_ranges().unwrap();
-            } else {
-                web_sys::console::log_1(&"Range is not within notepad".into());
-            }
-        } else {
-            web_sys::console::log_1(&"Range not found".into());
-        }
-    } else {
-        web_sys::console::log_1(&"Selection not found".into());
-    }
+    notepad.append_child(&container).unwrap();
 }
-
-
-
-// TODO: Add that it only applies to selected text or text that is abut to be written
-pub fn align_left() -> Callback<MouseEvent> {
-    Callback::from(move |_| apply_alignment("left"))
-}
-
-pub fn align_center() -> Callback<MouseEvent> {
-    Callback::from(move |_| apply_alignment("center"))
-}
-
-pub fn align_right() -> Callback<MouseEvent> {
-    Callback::from(move |_| apply_alignment("right"))
-}
-
-pub fn align_justify() -> Callback<MouseEvent> {
-    Callback::from(move |_| apply_alignment("justify"))
-}
-
-
 
 #[derive(Properties, PartialEq)]
 pub struct TextAlignmentProps {
     pub text_alignment: UseStateHandle<String>,
 }
 
+#[derive(Properties, PartialEq)]
+pub struct AlignmentButtonProps {
+    pub range: UseStateHandle<Option<Range>>,
+    pub icon: IconId,
+    pub title: String,
+    pub align: String,
+}
+
+#[function_component(AlignmentButton)]
+pub fn alignment_button(align_props: &AlignmentButtonProps) -> Html {
+    let align = align_props.align.clone();
+    let range_state = align_props.range.clone();
+
+    let onclick = Callback::from(move |_| {
+        let range = range_state.clone();
+        if let Some(range) = range.as_ref() {
+            apply_alignment_on_range(range, &align);
+        }
+    });
+
+    html! {
+        <Icon 
+            icon_id={align_props.icon} 
+            width={"2em".to_owned()} 
+            height={"2em".to_owned()} 
+            class="menubar-icon" 
+            title={align_props.title.clone()} 
+            onclick={onclick}
+        />
+    }
+}
+
 #[function_component(TextAlignmentControls)]
 pub fn font_size_controls(TextAlignmentProps { text_alignment: _ }: &TextAlignmentProps) -> Html {
-    let on_align_left = align_left();
-    let on_align_center = align_center();
-    let on_align_right = align_right();
-    let on_align_justify = align_justify();
+
+    let range_state = use_state(|| None);
+    let inner_range_state = range_state.clone();
+    use_interval(
+        move || {
+            let window = window().expect("should have a Window");
+            let document = window.document().expect("should have a Document");
+
+            if let Some(selection) = document.get_selection().expect("should have a Selection") {
+                if let Some(range) = selection.get_range_at(0).ok() {
+                    let common_ancestor = range.common_ancestor_container().unwrap();
+                    let notepad = document.get_element_by_id("notepad-textarea").unwrap();
+
+                    // web_sys::console::log_1(&format!("Common Ancestor: {:?}", common_ancestor).into());
+                    // web_sys::console::log_1(
+                    //     &format!("Notepad HTML: {:?}", notepad.inner_html()).into(),
+                    // );
+
+                    let mut is_within = false;
+                    let mut node = common_ancestor.clone();
+                    while let Some(parent) = node.parent_node() {
+                        // web_sys::console::log_1(&format!("Checking parent: {:?}", parent).into());
+                        if parent.is_same_node(Some(&notepad)) {
+                            is_within = true;
+                            break;
+                        }
+                        node = parent;
+                    }
+
+                    // web_sys::console::log_1(&format!("Is within notepad: {}", is_within).into());
+                    if is_within {
+                        if let Some(range) = selection.get_range_at(0).ok() {
+                            inner_range_state.set(Some(range));
+                        }
+                    }
+                }
+            }
+        },
+        10,
+    );
 
     html! {
         <div class="text-alignment-changer">
-            <Icon icon_id={IconId::LucideAlignCenter} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon" title="Align Center" onclick={on_align_center}/>
-            <Icon icon_id={IconId::LucideAlignJustify} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon" title="Align Justify" onclick={on_align_justify}/>
-            <Icon icon_id={IconId::LucideAlignLeft} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon" title="Align Left" onclick={on_align_left}/>
-            <Icon icon_id={IconId::LucideAlignRight} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon" title="Align Right" onclick={on_align_right}/>
+            <AlignmentButton range={range_state.clone()} icon={IconId::LucideAlignCenter} title="Align Center" align="center" />
+            <AlignmentButton range={range_state.clone()} icon={IconId::LucideAlignJustify} title="Align Justify" align="justify" />
+            <AlignmentButton range={range_state.clone()} icon={IconId::LucideAlignLeft} title="Align Left" align="left" />
+            <AlignmentButton range={range_state.clone()} icon={IconId::LucideAlignRight} title="Align Right" align="right" />
         </div>
     }
 }
