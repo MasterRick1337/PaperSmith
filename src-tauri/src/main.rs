@@ -42,7 +42,7 @@ async fn show_save_dialog() {
 }*/
 
 #[tauri::command]
-fn extract_div_contents(input: String) -> Vec<String> {
+fn extract_div_contents(input: &str) -> Vec<String> {
     // Initialize an empty vector to store the extracted contents
     let mut result = Vec::new();
 
