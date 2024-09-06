@@ -29,7 +29,7 @@ This project is in a very early stage of development and currently NOT ready for
 - [ ] MarkDown-like support
 - [ ] Word-like styling features
 - [ ] Spellcheck
-- [X] A Obsidian-like file structure
+- [X] Built-in File Explorer
 - [ ] Create, rename and delete files & folders
 - [ ] Save & Open Files
 - [X] Load Project
