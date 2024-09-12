@@ -7,9 +7,9 @@ use yew_icons::{Icon, IconId};
 mod dropdown;
 
 use dropdown::Dropdown;
-use dropdown::DropdownType;
+use dropdown::Type;
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, PartialEq, Eq)]
 pub struct SideBarProps {
     pub project: Project,
 }
@@ -25,12 +25,13 @@ pub fn sidebar(SideBarProps { project }: &SideBarProps) -> Html {
     html! {
         <>
             <div id="file-explorer">
-
                 <div class="chapter-title text-ellipsis whitespace-nowrap overflow-hidden">
-                    {project.path.file_name().unwrap().to_string_lossy().into_owned()}
+                    { project.path.file_name().unwrap().to_string_lossy().into_owned() }
                     <div class="sidebar-dropdown-icon-container hide-parent-hover">
-                        <div class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text mx-1">
-                            <Icon icon_id={IconId::LucideEdit3} width={"16px"} height={"16px"}/>
+                        <div
+                            class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text mx-1"
+                        >
+                            <Icon icon_id={IconId::LucideEdit3} width="16px" height="16px" />
                         </div>
                     </div>
                 </div>
@@ -39,7 +40,6 @@ pub fn sidebar(SideBarProps { project }: &SideBarProps) -> Html {
                 </div>
             </div>
         </>
-
     }
 }
 
@@ -53,24 +53,28 @@ fn chapter(ChapterProps { chapter }: &ChapterProps) -> Html {
     let note_elements: Vec<Html> = chapter
         .notes
         .iter()
-        .map(|note| html! { <Entry name={note.clone()}/> })
+        .map(|note| html! { <Entry name={note.clone()} /> })
         .collect();
 
     let extra_elements: Vec<Html> = chapter
         .extras
         .iter()
-        .map(|extra_file| html! {<Entry name={extra_file.clone()}/>})
+        .map(|extra_file| html! { <Entry name={extra_file.clone()} /> })
         .collect();
 
     html! {
-        <Dropdown title={chapter.name.clone()} open=false dropdown_type={DropdownType::Chapter}>
-            <Dropdown title="Notes" open=false dropdown_type={DropdownType::Notes}>{ for note_elements }</Dropdown>
-            <Dropdown title="Extras" open=false dropdown_type={DropdownType::Extras}>{ for extra_elements }</Dropdown>
+        <Dropdown title={chapter.name.clone()} open=false dropdown_type={Type::Chapter}>
+            <Dropdown title="Notes" open=false dropdown_type={Type::Notes}>
+                { for note_elements }
+            </Dropdown>
+            <Dropdown title="Extras" open=false dropdown_type={Type::Extras}>
+                { for extra_elements }
+            </Dropdown>
         </Dropdown>
     }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, PartialEq, Eq)]
 pub struct EntryProps {
     pub name: String,
 }
@@ -79,7 +83,7 @@ pub struct EntryProps {
 fn entry(EntryProps { name }: &EntryProps) -> Html {
     html! {
         <div class="chapter-title rounded-md hover:bg-sapphire pl-2 hover:text-mantle">
-            {name}
+            { name }
         </div>
     }
 }

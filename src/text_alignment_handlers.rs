@@ -1,4 +1,3 @@
-
 use web_sys::{window, Range};
 use yew::prelude::*;
 use yew_hooks::use_interval;
@@ -55,12 +54,12 @@ pub fn alignment_button(align_props: &AlignmentButtonProps) -> Html {
     });
 
     html! {
-        <Icon 
-            icon_id={align_props.icon} 
-            width={"2em".to_owned()} 
-            height={"2em".to_owned()} 
-            class="menubar-icon" 
-            title={align_props.title.clone()} 
+        <Icon
+            icon_id={align_props.icon}
+            width={"2em".to_owned()}
+            height={"2em".to_owned()}
+            class="menubar-icon"
+            title={align_props.title.clone()}
             onclick={onclick}
         />
     }
@@ -68,7 +67,6 @@ pub fn alignment_button(align_props: &AlignmentButtonProps) -> Html {
 
 #[function_component(TextAlignmentControls)]
 pub fn font_size_controls(TextAlignmentProps { text_alignment: _ }: &TextAlignmentProps) -> Html {
-
     let range_state = use_state(|| None);
     let inner_range_state = range_state.clone();
     use_interval(
@@ -77,7 +75,7 @@ pub fn font_size_controls(TextAlignmentProps { text_alignment: _ }: &TextAlignme
             let document = window.document().expect("should have a Document");
 
             if let Some(selection) = document.get_selection().expect("should have a Selection") {
-                if let Some(range) = selection.get_range_at(0).ok() {
+                if let Ok(range) = selection.get_range_at(0) {
                     let common_ancestor = range.common_ancestor_container().unwrap();
                     let notepad = document.get_element_by_id("notepad-textarea").unwrap();
 
@@ -87,7 +85,7 @@ pub fn font_size_controls(TextAlignmentProps { text_alignment: _ }: &TextAlignme
                     // );
 
                     let mut is_within = false;
-                    let mut node = common_ancestor.clone();
+                    let mut node = common_ancestor;
                     while let Some(parent) = node.parent_node() {
                         // web_sys::console::log_1(&format!("Checking parent: {:?}", parent).into());
                         if parent.is_same_node(Some(&notepad)) {
@@ -99,7 +97,7 @@ pub fn font_size_controls(TextAlignmentProps { text_alignment: _ }: &TextAlignme
 
                     // web_sys::console::log_1(&format!("Is within notepad: {}", is_within).into());
                     if is_within {
-                        if let Some(range) = selection.get_range_at(0).ok() {
+                        if let Ok(range) = selection.get_range_at(0) {
                             inner_range_state.set(Some(range));
                         }
                     }
@@ -111,10 +109,30 @@ pub fn font_size_controls(TextAlignmentProps { text_alignment: _ }: &TextAlignme
 
     html! {
         <div class="text-alignment-changer">
-            <AlignmentButton range={range_state.clone()} icon={IconId::LucideAlignCenter} title="Align Center" align="center" />
-            <AlignmentButton range={range_state.clone()} icon={IconId::LucideAlignJustify} title="Align Justify" align="justify" />
-            <AlignmentButton range={range_state.clone()} icon={IconId::LucideAlignLeft} title="Align Left" align="left" />
-            <AlignmentButton range={range_state.clone()} icon={IconId::LucideAlignRight} title="Align Right" align="right" />
+            <AlignmentButton
+                range={range_state.clone()}
+                icon={IconId::LucideAlignCenter}
+                title="Align Center"
+                align="center"
+            />
+            <AlignmentButton
+                range={range_state.clone()}
+                icon={IconId::LucideAlignJustify}
+                title="Align Justify"
+                align="justify"
+            />
+            <AlignmentButton
+                range={range_state.clone()}
+                icon={IconId::LucideAlignLeft}
+                title="Align Left"
+                align="left"
+            />
+            <AlignmentButton
+                range={range_state.clone()}
+                icon={IconId::LucideAlignRight}
+                title="Align Right"
+                align="right"
+            />
         </div>
     }
 }
