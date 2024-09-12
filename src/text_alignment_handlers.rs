@@ -3,11 +3,15 @@ use yew::prelude::*;
 use yew_hooks::use_interval;
 use yew_icons::{Icon, IconId};
 
+/*
+TODO: Revise cursor handeling when applying text alignment?
+TODO: Text alignment not working properly when selecting two or more lines  
+*/
+
 fn apply_alignment_on_range(range: &Range, alignment: &str) {
     let window = window().expect("should have a Window");
     let document = window.document().expect("should have a Document");
 
-    let notepad = document.get_element_by_id("notepad-textarea").unwrap();
     let container = document.create_element("div").unwrap();
     container
         .set_attribute("style", &format!("text-align: {alignment};"))
@@ -18,7 +22,7 @@ fn apply_alignment_on_range(range: &Range, alignment: &str) {
     let content = range.extract_contents().unwrap();
 
     if content.text_content().is_none() || content.text_content().unwrap().trim().is_empty() {
-        let placeholder = document.create_text_node("Placeholder Text");
+        let placeholder = document.create_text_node("\u{00A0}");
         container.append_child(&placeholder).unwrap();
     } else {
         container.append_child(&content).unwrap();
@@ -26,6 +30,11 @@ fn apply_alignment_on_range(range: &Range, alignment: &str) {
 
     range.delete_contents().unwrap();
     range.insert_node(&container).unwrap();
+
+    let selection = window.get_selection().unwrap().unwrap();
+    selection.remove_all_ranges().unwrap();
+    selection.add_range(range).unwrap();
+    range.collapse();
 }
 
 #[derive(Properties, PartialEq)]
