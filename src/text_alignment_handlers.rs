@@ -13,16 +13,20 @@ fn apply_alignment_on_range(range: &Range, alignment: &str) {
     container
         .set_attribute("style", &format!("text-align: {alignment};"))
         .unwrap();
+    
     gloo_console::log!("range", range);
 
     let content = range.extract_contents().unwrap();
 
-    gloo_console::log!("range", &content);
+    if content.text_content().is_none() || content.text_content().unwrap().trim().is_empty() {
+        let placeholder = document.create_text_node("Placeholder Text");
+        container.append_child(&placeholder).unwrap();
+    } else {
+        container.append_child(&content).unwrap();
+    }
 
-    container.append_child(&content).unwrap();
+    range.delete_contents().unwrap();
     range.insert_node(&container).unwrap();
-
-    notepad.append_child(&container).unwrap();
 }
 
 #[derive(Properties, PartialEq)]
