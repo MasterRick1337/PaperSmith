@@ -5,6 +5,7 @@ use yew_icons::{Icon, IconId};
 
 /*
 TODO: Revise cursor handeling when applying text alignment?
+TODO: Sometimes it adds a empty line when changing alignment. Sometimes it doesnt. I dont know why. Need to fix it.  
 TODO: Text alignment not working properly when selecting two or more lines  
 */
 

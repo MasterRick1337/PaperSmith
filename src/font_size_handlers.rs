@@ -5,18 +5,22 @@ use yew::prelude::*;
 use yew_icons::{Icon, IconId};
 
 
-// TODO: Add that it only applies to selected text or text that is abut to be written
 pub fn font_size_change_handler(font_size: UseStateHandle<f64>) -> Callback<InputEvent> {
     Callback::from(move |e: InputEvent| {
+        // Check if event target is an HtmlInputElement
         if let Some(input) = e.target_dyn_into::<HtmlInputElement>() {
+            // Get value from input field
             let new_font_size = input.value_as_number();
             font_size.set(new_font_size);
 
+            // Get the window and document object
             if let Some(document) = web_sys::window().and_then(|w| w.document()) {
+                // Get the HTML element
                 if let Some(_style) = document
                     .get_element_by_id("dynamic-style")
                     .and_then(|el| el.dyn_into::<HtmlElement>().ok())
                 {
+                    // Update the CSS variable for font size
                     if let Some(style) = document
                         .get_element_by_id("dynamic-style")
                         .and_then(|el| el.dyn_into::<HtmlElement>().ok())
@@ -34,9 +38,11 @@ pub fn font_size_change_handler(font_size: UseStateHandle<f64>) -> Callback<Inpu
 
 pub fn font_size_increase_handler(font_size: UseStateHandle<f64>) -> Callback<MouseEvent> {
     Callback::from(move |_| {
+        // Get the current font size and increase it by 1
         let current_font_size = *font_size;
         font_size.set(current_font_size + 1.0);
 
+        // Update the CSS variable for the new font size
         if let Some(document) = web_sys::window().and_then(|w| w.document()) {
             if let Some(style) = document
                 .get_element_by_id("dynamic-style")
@@ -53,9 +59,11 @@ pub fn font_size_increase_handler(font_size: UseStateHandle<f64>) -> Callback<Mo
 
 pub fn font_size_decrease_handler(font_size: UseStateHandle<f64>) -> Callback<MouseEvent> {
     Callback::from(move |_| {
+        // Get the current font size and decrease it by 1
         let current_font_size = *font_size;
         font_size.set(current_font_size - 1.0);
 
+        // Update the CSS variable for the new font size
         if let Some(document) = web_sys::window().and_then(|w| w.document()) {
             if let Some(style) = document
                 .get_element_by_id("dynamic-style")
@@ -70,25 +78,27 @@ pub fn font_size_decrease_handler(font_size: UseStateHandle<f64>) -> Callback<Mo
     })
 }
 
-
-
 #[derive(Properties, PartialEq)]
 pub struct FontSizeProps {
     pub font_size: UseStateHandle<f64>,
 }
 
-
-
+// Component to render the font size controls
 #[function_component(FontSizeControls)]
 pub fn font_size_controls(FontSizeProps { font_size }: &FontSizeProps) -> Html {
+    // Handlers for changing, increasing, and decreasing the font size
     let on_font_size_change = font_size_change_handler(font_size.clone());
     let on_font_size_increase = font_size_increase_handler(font_size.clone());
     let on_font_size_decrease = font_size_decrease_handler(font_size.clone());
 
+    // Render the controls with two buttons and an input field for font size
     html! {
         <div class="font-size-changer">
+            // Button to decrease the font size
             <Icon icon_id={IconId::LucideMinus} width={"2em".to_owned()} height={"2em".to_owned()} class="font-size-button" title="Decrease font size" onclick={on_font_size_decrease}/>
+            // Input field to directly set the font size
             <input type="number" value={format!("{}", **font_size)} class="font-size-input" title="Font Size" oninput={on_font_size_change} />
+            // Button to increase the font size
             <Icon icon_id={IconId::LucidePlus} width={"2em".to_owned()} height={"2em".to_owned()} class = "font-size-button" title="Increase font size" onclick={on_font_size_increase}/>
         </div>
     }

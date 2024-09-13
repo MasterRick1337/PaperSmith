@@ -208,6 +208,9 @@ pub fn app() -> Html {
         <>
             <style id="dynamic-style"></style>
             <div class="menubar">
+                <Icon icon_id={IconId::LucideSave} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+                <div class="separator"></div>
+
                 <Icon icon_id={IconId::LucideUndo} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 <Icon icon_id={IconId::LucideRedo} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 <div class="separator"></div>
@@ -231,8 +234,8 @@ pub fn app() -> Html {
 
                 //<Icon icon_id={IconId::LucideSpellCheck}/>
 
-                <button onclick={save}>{"Save"}</button>
-                <button onclick={on_load}>{"Load"}</button>
+                <button style="visibility:hidden" onclick={save}>{"Save"} </button>
+                <button style="visibility:hidden" onclick={on_load}>{"Load"}</button>
 
             </div>
 
