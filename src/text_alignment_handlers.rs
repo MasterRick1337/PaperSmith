@@ -2,41 +2,57 @@ use web_sys::{window, Range};
 use yew::prelude::*;
 use yew_hooks::use_interval;
 use yew_icons::{Icon, IconId};
+use wasm_bindgen::JsCast;
 
 /*
+TODO: First line is no div!
 TODO: Revise cursor handeling when applying text alignment?
-TODO: Sometimes it adds a empty line when changing alignment. Sometimes it doesnt. I dont know why. Need to fix it.  
 TODO: Text alignment not working properly when selecting two or more lines  
+TODO: Fixing that when you press alignment change multiple times without selecting something or beeing in an empty line, it does noting.
 */
 
 fn apply_alignment_on_range(range: &Range, alignment: &str) {
     let window = window().expect("should have a Window");
     let document = window.document().expect("should have a Document");
 
-    let container = document.create_element("div").unwrap();
-    container
+    let container = range.start_container().unwrap();
+
+    // Navigate to parent div if necessary
+    let container = if container.node_type() != web_sys::Node::ELEMENT_NODE || container.node_name().to_lowercase() != "div" {
+        container.parent_node().unwrap()
+    } else {
+        container
+    };
+
+    let container: web_sys::HtmlElement = container.unchecked_into();
+
+    let new_container = document.create_element("div").unwrap();
+    new_container
         .set_attribute("style", &format!("text-align: {alignment};"))
         .unwrap();
-    
-    gloo_console::log!("range", range);
 
-    let content = range.extract_contents().unwrap();
+    // Put inner content of old div into new div
+    let content = container.inner_html();
 
-    if content.text_content().is_none() || content.text_content().unwrap().trim().is_empty() {
+    if content.trim().is_empty() {
         let placeholder = document.create_text_node("\u{00A0}");
-        container.append_child(&placeholder).unwrap();
+        new_container.append_child(&placeholder).unwrap();
     } else {
-        container.append_child(&content).unwrap();
+        new_container.set_inner_html(&content);
     }
 
+    // Replace old container with new one
+    container.replace_with_with_node_1(&new_container).unwrap();
+
     range.delete_contents().unwrap();
-    range.insert_node(&container).unwrap();
+    range.insert_node(&new_container).unwrap();
 
     let selection = window.get_selection().unwrap().unwrap();
     selection.remove_all_ranges().unwrap();
     selection.add_range(range).unwrap();
     range.collapse();
 }
+
 
 #[derive(Properties, PartialEq)]
 pub struct TextAlignmentProps {
