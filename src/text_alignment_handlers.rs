@@ -1,60 +1,84 @@
-use web_sys::{window, Range};
+use web_sys::{window, range};
 use yew::prelude::*;
 use yew_hooks::use_interval;
-use yew_icons::{Icon, IconId};
+use yew_icons::{icon, iconid};
+use wasm_bindgen::jscast;
 
-fn apply_alignment_on_range(range: &Range, alignment: &str) {
-    let window = window().expect("should have a Window");
-    let document = window.document().expect("should have a Document");
+/*
+todo: first line is no div!
+todo: revise cursor handeling when applying text alignment?
+todo: text alignment not working properly when selecting two or more lines  
+todo: fixing that when you press alignment change multiple times without selecting something or beeing in an empty line, it does noting.
+*/
+fn apply_alignment_on_range(range: &range, alignment: &str) {
+    let window = window().expect("should have a window");
+    let document = window.document().expect("should have a document");
+    let container = range.start_container().unwrap();
 
-    let notepad = document.get_element_by_id("notepad-textarea").unwrap();
-    let container = document.create_element("div").unwrap();
-    container
-        .set_attribute("style", &format!("text-align: {alignment};"))
-        .unwrap();
-    
-    gloo_console::log!("range", range);
-
-    let content = range.extract_contents().unwrap();
-
-    if content.text_content().is_none() || content.text_content().unwrap().trim().is_empty() {
-        let placeholder = document.create_text_node("Placeholder Text");
-        container.append_child(&placeholder).unwrap();
+    // navigate to parent div if necessary
+    let container = if container.node_type() != web_sys::node::element_node || container.node_name().to_lowercase() != "div" {
+        container.parent_node().unwrap()
     } else {
-        container.append_child(&content).unwrap();
+        container
+    };
+
+    let container: web_sys::htmlelement = container.unchecked_into();
+
+    let new_container = document.create_element("div").unwrap();
+    new_container.set_attribute("style", &format!("text-align: {alignment};")).unwrap();
+
+    // put inner content of old div into new div
+    let content = container.inner_html();
+
+    if content.trim().is_empty() {
+        let placeholder = document.create_text_node("\u{00a0}");
+        new_container.append_child(&placeholder).unwrap();
+    } else {
+        new_container.set_inner_html(&content);
     }
 
+    // replace old container with new one
+    container.replace_with_with_node_1(&new_container).unwrap();
+
     range.delete_contents().unwrap();
+
+    range.insert_node(&new_container).unwrap();
+
+    let selection = window.get_selection().unwrap().unwrap();
+    selection.remove_all_ranges().unwrap();
+    selection.add_range(range).unwrap();
+    range.collapse();
     range.insert_node(&container).unwrap();
 }
 
-#[derive(Properties, PartialEq)]
-pub struct TextAlignmentProps {
-    pub text_alignment: UseStateHandle<String>,
+
+#[derive(properties, partialeq)]
+pub struct textalignmentprops {
+    pub text_alignment: usestatehandle<string>,
 }
 
-#[derive(Properties, PartialEq)]
-pub struct AlignmentButtonProps {
-    pub range: UseStateHandle<Option<Range>>,
-    pub icon: IconId,
-    pub title: String,
-    pub align: String,
+#[derive(properties, partialeq)]
+pub struct alignmentbuttonprops {
+    pub range: usestatehandle<option<range>>,
+    pub icon: iconid,
+    pub title: string,
+    pub align: string,
 }
 
-#[function_component(AlignmentButton)]
-pub fn alignment_button(align_props: &AlignmentButtonProps) -> Html {
+#[function_component(alignmentbutton)]
+pub fn alignment_button(align_props: &alignmentbuttonprops) -> html {
     let align = align_props.align.clone();
     let range_state = align_props.range.clone();
 
-    let onclick = Callback::from(move |_| {
+    let onclick = callback::from(move |_| {
         let range = range_state.clone();
-        if let Some(range) = range.as_ref() {
+        if let some(range) = range.as_ref() {
             apply_alignment_on_range(range, &align);
         }
     });
 
     html! {
-        <Icon
+        <icon
             icon_id={align_props.icon}
             width={"2em".to_owned()}
             height={"2em".to_owned()}
@@ -65,40 +89,40 @@ pub fn alignment_button(align_props: &AlignmentButtonProps) -> Html {
     }
 }
 
-#[function_component(TextAlignmentControls)]
-pub fn font_size_controls(TextAlignmentProps { text_alignment: _ }: &TextAlignmentProps) -> Html {
-    let range_state = use_state(|| None);
+#[function_component(textalignmentcontrols)]
+pub fn font_size_controls(textalignmentprops { text_alignment: _ }: &textalignmentprops) -> html {
+    let range_state = use_state(|| none);
     let inner_range_state = range_state.clone();
     use_interval(
         move || {
-            let window = window().expect("should have a Window");
-            let document = window.document().expect("should have a Document");
+            let window = window().expect("should have a window");
+            let document = window.document().expect("should have a document");
 
-            if let Some(selection) = document.get_selection().expect("should have a Selection") {
-                if let Ok(range) = selection.get_range_at(0) {
+            if let some(selection) = document.get_selection().expect("should have a selection") {
+                if let ok(range) = selection.get_range_at(0) {
                     let common_ancestor = range.common_ancestor_container().unwrap();
                     let notepad = document.get_element_by_id("notepad-textarea").unwrap();
 
-                    // web_sys::console::log_1(&format!("Common Ancestor: {:?}", common_ancestor).into());
+                    // web_sys::console::log_1(&format!("common ancestor: {:?}", common_ancestor).into());
                     // web_sys::console::log_1(
-                    //     &format!("Notepad HTML: {:?}", notepad.inner_html()).into(),
+                    //     &format!("notepad html: {:?}", notepad.inner_html()).into(),
                     // );
 
                     let mut is_within = false;
                     let mut node = common_ancestor;
-                    while let Some(parent) = node.parent_node() {
-                        // web_sys::console::log_1(&format!("Checking parent: {:?}", parent).into());
-                        if parent.is_same_node(Some(&notepad)) {
+                    while let some(parent) = node.parent_node() {
+                        // web_sys::console::log_1(&format!("checking parent: {:?}", parent).into());
+                        if parent.is_same_node(some(&notepad)) {
                             is_within = true;
                             break;
                         }
                         node = parent;
                     }
 
-                    // web_sys::console::log_1(&format!("Is within notepad: {}", is_within).into());
+                    // web_sys::console::log_1(&format!("is within notepad: {}", is_within).into());
                     if is_within {
-                        if let Ok(range) = selection.get_range_at(0) {
-                            inner_range_state.set(Some(range));
+                        if let ok(range) = selection.get_range_at(0) {
+                            inner_range_state.set(some(range));
                         }
                     }
                 }
@@ -109,30 +133,31 @@ pub fn font_size_controls(TextAlignmentProps { text_alignment: _ }: &TextAlignme
 
     html! {
         <div class="text-alignment-changer">
-            <AlignmentButton
+            <alignmentbutton
                 range={range_state.clone()}
-                icon={IconId::LucideAlignCenter}
-                title="Align Center"
+                icon={iconid::lucidealigncenter}
+                title="align center"
                 align="center"
             />
-            <AlignmentButton
+            <alignmentbutton
                 range={range_state.clone()}
-                icon={IconId::LucideAlignJustify}
-                title="Align Justify"
+                icon={iconid::lucidealignjustify}
+                title="align justify"
                 align="justify"
             />
-            <AlignmentButton
+            <alignmentbutton
                 range={range_state.clone()}
-                icon={IconId::LucideAlignLeft}
-                title="Align Left"
+                icon={iconid::lucidealignleft}
+                title="align left"
                 align="left"
             />
-            <AlignmentButton
+            <alignmentbutton
                 range={range_state.clone()}
-                icon={IconId::LucideAlignRight}
-                title="Align Right"
+                icon={iconid::lucidealignright}
+                title="align right"
                 align="right"
             />
         </div>
     }
 }
+
