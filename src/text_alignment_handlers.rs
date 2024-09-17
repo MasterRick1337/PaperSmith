@@ -13,7 +13,6 @@ TODO: Fixing that when you press alignment change multiple times without selecti
 
 fn apply_alignment_on_range(range: &Range, alignment: &str) {
     let window = window().expect("should have a Window");
-    let document = window.document().expect("should have a Document");
 
     let container = range.start_container().unwrap();
 
@@ -26,27 +25,10 @@ fn apply_alignment_on_range(range: &Range, alignment: &str) {
 
     let container: web_sys::HtmlElement = container.unchecked_into();
 
-    let new_container = document.create_element("div").unwrap();
-    new_container
+    container
         .set_attribute("style", &format!("text-align: {alignment};"))
         .unwrap();
-
-    // Put inner content of old div into new div
-    let content = container.inner_html();
-
-    if content.trim().is_empty() {
-        let placeholder = document.create_text_node("\u{00A0}");
-        new_container.append_child(&placeholder).unwrap();
-    } else {
-        new_container.set_inner_html(&content);
-    }
-
-    // Replace old container with new one
-    container.replace_with_with_node_1(&new_container).unwrap();
-
-    range.delete_contents().unwrap();
-    range.insert_node(&new_container).unwrap();
-
+    
     let selection = window.get_selection().unwrap().unwrap();
     selection.remove_all_ranges().unwrap();
     selection.add_range(range).unwrap();
