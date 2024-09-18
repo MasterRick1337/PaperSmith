@@ -8,7 +8,6 @@ use wasm_bindgen::JsCast;
 TODO: First line is no div!
 TODO: Revise cursor handeling when applying text alignment?
 TODO: Text alignment not working properly when selecting two or more lines  
-TODO: Fixing that when you press alignment change multiple times without selecting something or beeing in an empty line, it does noting.
 */
 
 fn apply_alignment_on_range(range: &Range, alignment: &str) {
