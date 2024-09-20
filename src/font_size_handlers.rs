@@ -94,12 +94,32 @@ pub fn font_size_controls(FontSizeProps { font_size }: &FontSizeProps) -> Html {
     // Render the controls with two buttons and an input field for font size
     html! {
         <div class="font-size-changer">
-            // Button to decrease the font size
-            <Icon icon_id={IconId::LucideMinus} width={"2em".to_owned()} height={"2em".to_owned()} class="font-size-button" title="Decrease font size" onclick={on_font_size_decrease}/>
-            // Input field to directly set the font size
-            <input type="number" value={format!("{}", **font_size)} class="font-size-input" title="Font Size" oninput={on_font_size_change} />
-            // Button to increase the font size
-            <Icon icon_id={IconId::LucidePlus} width={"2em".to_owned()} height={"2em".to_owned()} class = "font-size-button" title="Increase font size" onclick={on_font_size_increase}/>
+            // Button to decrease font size
+            <Icon
+                icon_id={IconId::LucideMinus}
+                width={"32px".to_owned()}
+                height={"32px".to_owned()}
+                class="font-size-button"
+                title="Decrease font size"
+                onclick={on_font_size_decrease}
+            />
+            // Input field to set font size
+            <input
+                type="number"
+                value={format!("{}", **font_size)}
+                class="font-size-input"
+                title="Font Size"
+                oninput={on_font_size_change}
+            />
+            // Button to increase font size
+            <Icon
+                icon_id={IconId::LucidePlus}
+                width={"32px".to_owned()}
+                height={"32px".to_owned()}
+                class="font-size-button"
+                title="Increase font size"
+                onclick={on_font_size_increase}
+            />
         </div>
     }
 }

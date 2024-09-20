@@ -88,6 +88,13 @@ body {
     font-size: 10px;
 }
 
+.text-styling-changer {
+    display: flex;
+    margin-left: 10px;
+    cursor:pointer;
+    font-size: 10px;
+}
+
 
 
 .sidebar {
