@@ -61,6 +61,7 @@ pub fn app() -> Html {
     let zoom_level = use_state(|| 100.0);
     let text_alignment = use_state(|| "left".to_string());
     let project: UseStateHandle<Option<Project>> = use_state(|| None);
+    let text_styling = use_state(|| "".to_string());
     let sidebar = use_state(|| {
         html! {
             <>{"No Project Loaded"}</>

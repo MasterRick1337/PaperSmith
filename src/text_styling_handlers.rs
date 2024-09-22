@@ -3,43 +3,36 @@ use yew::prelude::*;
 use yew_hooks::use_interval;
 use yew_icons::{Icon, IconId};
 use wasm_bindgen::JsCast;
-use wasm_bindgen::JsValue;
 
 pub fn apply_styling_on_range(range: &Range, style: &str) {
-    let document = window().expect("should have a Document").document().expect("should have a Document");
+    let window = window().expect("should have a Window");
 
-    let mut selected_text = range.to_string();
-    if style == "bold" {
-        selected_text = format!("**{}**", selected_text);
-    } else if style == "italic" {
-        selected_text = format!("*{}*", selected_text);
-    } else if style == "underline" {
-        selected_text = format!("_{}_", selected_text);
-    }
+    let container = range.start_container().unwrap();
 
-    // Replace the selected text with the formatted text
-    let range_start = range.start_container().unwrap();
-    let range_end = range.end_container().unwrap();
-
-    let container = if range_start.node_type() != web_sys::Node::ELEMENT_NODE || range_start.node_name().to_lowercase() != "div" {
-        range_start.parent_node().unwrap()
+    // Navigate to parent div if necessary
+    let container = if container.node_type() != web_sys::Node::ELEMENT_NODE || container.node_name().to_lowercase() != "div" {
+        container.parent_node().unwrap()
     } else {
-        range_start
+        container
     };
 
     let container: web_sys::HtmlElement = container.unchecked_into();
-    let new_html = container.inner_html().replace(&range.to_string(), &selected_text);
 
-    container.set_inner_html(&new_html);
-    
-    let selection = document.get_selection().expect("should have a Selection");
+    match style {
+        "bold" => container.set_attribute("style", "font-weight: bold;").unwrap(),
+        "italic" => container.set_attribute("style", "font-style: italic;").unwrap(),
+        "underline" => container.set_attribute("style", "text-decoration: underline;").unwrap(),
+        _ => (),
+    }
+
+    let selection = window.get_selection().unwrap().unwrap();
     selection.remove_all_ranges().unwrap();
     selection.add_range(range).unwrap();
     range.collapse();
 }
 
 #[derive(Properties, PartialEq)]
-pub struct StyleAlignmentProps {
+pub struct TextStylingProps {
     pub text_styling: UseStateHandle<String>,
 }
 
@@ -57,7 +50,7 @@ pub fn styling_button(style_props: &StylingButtonProps) -> Html {
     let range_state = style_props.range.clone();
 
     let onclick = Callback::from(move |_| {
-        let range = range_state.clone();
+        let range = (*range_state).clone();
         if let Some(range) = range.as_ref() {
             apply_styling_on_range(range, &style);
         }
@@ -68,7 +61,7 @@ pub fn styling_button(style_props: &StylingButtonProps) -> Html {
             icon_id={style_props.icon}
             width={"2em".to_owned()}
             height={"2em".to_owned()}
-            class="menubar_icon"
+            class="menubar-icon"
             title={style_props.title.clone()}
             onclick={onclick}
         />
@@ -76,8 +69,9 @@ pub fn styling_button(style_props: &StylingButtonProps) -> Html {
 }
 
 #[function_component(TextStylingControls)]
-pub fn text_styling_controls() -> Html {
+pub fn text_styling_controls(TextStylingProps { text_styling: _}: &TextStylingProps) -> Html {
     let range_state = use_state(|| None);
+    let inner_range_state = range_state.clone();
     use_interval(
         move || {
             let window = window().expect("should have a Window");
@@ -100,7 +94,7 @@ pub fn text_styling_controls() -> Html {
 
                     if is_within {
                         if let Ok(range) = selection.get_range_at(0) {
-                            range_state.set(Some(range));
+                            inner_range_state.set(Some(range));
                         }
                     }
                 }
