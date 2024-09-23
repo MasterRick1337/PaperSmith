@@ -240,7 +240,7 @@ pub fn app() -> Html {
                 //<Icon icon_id={IconId::LucideSpellCheck}/>
 
                 <button style="visibility:hidden" onclick={save}>{"Save"} </button>
-                <button style="visibility:hidden" onclick={on_load}>{"Load"}</button>
+                <button onclick={on_load}>{"Load"}</button>
 
             </div>
 
