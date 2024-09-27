@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - action-testing
+      - release-testing
 
 jobs:
   publish-tauri:
@@ -66,5 +67,5 @@ jobs:
       - uses: djnicholson/release-action@v2.11
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          asset-name: 'papersmith-protable'
+          asset-name: 'papersmith-portable'
           file: 'target/release/paper-smith'
