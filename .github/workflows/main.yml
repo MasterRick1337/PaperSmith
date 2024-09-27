@@ -56,3 +56,9 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+      - uses: djnicholson/release-action@v2.11
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          asset-name: 'papersmith-protable'
+          file: 'target/release/paper-smith'
