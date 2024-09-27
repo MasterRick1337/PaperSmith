@@ -1,5 +1,4 @@
 use chrono::prelude::*;
-use chrono::TimeDelta;
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -8,7 +7,6 @@ use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 use yew::events::InputEvent;
 use yew::prelude::*;
-use yew_hooks::prelude::*;
 use yew_icons::{Icon, IconId};
 
 
@@ -21,14 +19,28 @@ use font_size_handlers::FontSizeControls;
 mod zoom_level_handlers;
 use zoom_level_handlers::ZoomControls;
 
+#[path = "statistics/wpm.rs"]
+mod wpm;
+use wpm::calculate_wpm;
 
+#[path = "statistics/session_time.rs"]
+mod session_time;
+use session_time::SessionTime;
+
+#[path = "statistics/word_count.rs"]
+mod word_count;
+use word_count::WordCount;
+
+#[path = "statistics/char_count.rs"]
+mod char_count;
+use char_count::CharCount;
 
 //TODO Toast System
 //TODO File Opening
 
 #[path = "sidebar/sidebar.rs"]
-mod sidebar;
-use sidebar::SideBar;
+mod word_Count;
+use word_Count::SideBar;
 use shared::Project;
 
 #[wasm_bindgen]
@@ -123,81 +135,6 @@ pub fn app() -> Html {
         })
     };
 
-    #[derive(Properties, PartialEq)]
-    pub struct WordCountProps {
-        pub pages_ref: NodeRef,
-    }
-
-    #[function_component]
-    fn WordCount(WordCountProps { pages_ref }: &WordCountProps) -> Html {
-        let word_count = use_state(|| 0);
-        {
-            let pages_ref = pages_ref.clone();
-            let word_count = word_count.clone();
-            use_interval(
-                {
-                    let pages_ref = pages_ref.clone();
-                    let word_count = word_count.clone();
-                    move || {
-                        if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
-                            let text = pages_element.inner_text();
-                            let count = text.split_whitespace().count();
-                            word_count.set(count);
-                        }
-                    }
-                },
-                1500,
-            )
-        }
-
-        html! {
-        <div>{format!("{} Words", *word_count)}</div>
-    }
-    }
-
-    #[derive(Properties, PartialEq)]
-    pub struct CharCountProps {
-        pub pages_ref: NodeRef,
-    }
-
-    #[function_component]
-    fn CharCount(CharCountProps { pages_ref }: &CharCountProps) -> Html {
-        let char_count = use_state(|| 0);
-        let char_count_no_spaces = use_state(|| 0);
-        {
-            let pages_ref = pages_ref.clone();
-            let char_count = char_count.clone();
-            let char_count_no_spaces = char_count_no_spaces.clone();
-            use_interval(
-                {
-                    let pages_ref = pages_ref.clone();
-                    let char_count = char_count.clone();
-                    let char_count_no_spaces = char_count_no_spaces.clone();
-                    move || {
-                        if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
-                            let text = pages_element.inner_text();
-                            let count = text.len();
-                            let count_no_spaces =
-                                text.chars().filter(|c| !c.is_whitespace()).count();
-                            gloo_console::log!("Text: {}", text.to_string());
-                            gloo_console::log!("Character count: {}", count);
-                            gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
-                            char_count.set(count);
-                            char_count_no_spaces.set(count_no_spaces);
-                        }
-                    }
-                },
-                1500,
-            )
-        }
-        html! {
-        <div>
-            <p>{format!("Characters: {}, {} without spaces", *char_count, *char_count_no_spaces)}</p>
-            </div>
-
-    }
-    }
-
     html! {
         <>
             <style id="dynamic-style"></style>
@@ -287,49 +224,6 @@ let save = {
         });
     })
 };*/
-
-#[function_component]
-fn SessionTime() -> Html {
-    let start_time = use_state(Local::now);
-    let session_time = use_state(|| TimeDelta::new(0, 0).unwrap());
-
-    use_interval(
-        {
-            let session_time = session_time.clone();
-            move || {
-                let current_time = Local::now();
-                session_time.set(current_time - *start_time);
-            }
-        },
-        1000,
-    );
-
-    let total_seconds = session_time.num_seconds();
-    let hours = total_seconds / 3600;
-    let minutes = (total_seconds % 3600) / 60;
-    let seconds = total_seconds % 60;
-
-    let formatted_time = format!("{:02}:{:02}:{:02}", hours, minutes, seconds);
-
-    html! {
-
-        <p>{formatted_time}</p>
-    }
-}
-
-
-
-fn calculate_wpm(word_count: usize, start_time: Option<DateTime<Local>>) -> f64 {
-    if let Some(start) = start_time {
-        let elapsed = Local::now() - start;
-        let elapsed_seconds = elapsed.num_seconds() as f64;
-        if elapsed_seconds > 0.0 {
-            return (word_count as f64 / elapsed_seconds) * 60.0;
-        }
-    }
-    0.0
-}
-
 
 
 fn text_input_handler(
