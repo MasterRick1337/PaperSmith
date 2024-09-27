@@ -24,32 +24,30 @@ This project is in a very early stage of development and currently NOT ready for
 
 ### Features
 
-- [X] A Obsidian-like file structure
-- [ ] Create, rename and delete files & folders
-- [ ] Save Files
-- [X] Load Project
-- [ ] Open Files
+- [X] Pageless format
+- [ ] Page breaks
 - [ ] MarkDown-like support
 - [ ] Word-like styling features
 - [ ] Spellcheck
+- [X] Built-in File Explorer
+- [ ] Create, rename and delete files & folders
+- [ ] Save & Open Files
+- [X] Load Project
 - [ ] Creation of chapters
 - [ ] Notes for chapters
-- [ ] Descriptions for chapters
 - [ ] Opening chapters besides each other
 - [ ] Session statistics
+- [ ] Comparison between sessions (maybe)
 - [ ] Words per minute count
 - [ ] Character count
-- [ ] Comparison between sessions (maybe)
-- [ ] Export to PDF
+- [ ] Export to PDF, RTF, OTF, EPUB, ...
 - [ ] Search and Replace
 - [ ] Autosave
-- [ ] Settings
 - [ ] Backups
+- [ ] Settings
 - [ ] Toast System
 - [ ] Right Click Menus
-- [ ] Automatic Page split
 - [ ] Theme Switcher
-
 
 ### Installation
 

@@ -44,7 +44,7 @@ pub struct ZoomProps {
     pub zoom_level: UseStateHandle<f64>,
 }
 
-
+// TODO: Fix issue where, when zoomed, sidebar overlaps textarea
 
 #[function_component(ZoomControls)]
 pub fn zoom_controls(ZoomProps { zoom_level }: &ZoomProps) -> Html {
