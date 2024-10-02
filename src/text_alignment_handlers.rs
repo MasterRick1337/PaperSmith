@@ -73,7 +73,7 @@ pub fn alignment_button(align_props: &AlignmentButtonProps) -> Html {
 }
 
 #[function_component(TextAlignmentControls)]
-pub fn font_size_controls(TextAlignmentProps { text_alignment: _ }: &TextAlignmentProps) -> Html {
+pub fn text_alignment_controls(TextAlignmentProps { text_alignment: _ }: &TextAlignmentProps) -> Html {
     let range_state = use_state(|| None);
     let inner_range_state = range_state.clone();
     use_interval(

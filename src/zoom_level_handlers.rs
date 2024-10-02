@@ -37,9 +37,9 @@ fn zoom_decrease_handler(zoom_level: UseStateHandle<f64>) -> Callback<MouseEvent
         // Determine the new zoom level by decreasing by 10, ensuring it's rounded to the nearest multiple of 10
         // Prevent the zoom level from going below 0
         let new_zoom_level = if current_zoom % 10.0 == 0.0 {
-            (current_zoom - 10.0).max(0.0)
+            (current_zoom - 10.0).max(50.0)
         } else {
-            ((current_zoom / 10.0).floor() * 10.0).max(0.0)
+            ((current_zoom / 10.0).floor() * 10.0).max(50.0)
         };
         zoom_level.set(new_zoom_level);
     })
@@ -66,7 +66,7 @@ pub fn zoom_controls(ZoomProps { zoom_level }: &ZoomProps) -> Html {
         <div class="zoom_level_changer" id="zoom">
 
             <Icon icon_id={IconId::LucideMinus} class="zoom-button" title="Zoom Out" onclick={on_zoom_decrease}/>
-            <input type="range" min="0" max="200" class="zoom-slider" id="zoom-slider" title="Zoom" value={format!("{}", **zoom_level)} oninput={on_zoom_change} />
+            <input type="range" min="50" max="200" class="zoom-slider" id="zoom-slider" title="Zoom" value={format!("{}", **zoom_level)} oninput={on_zoom_change} />
             <Icon icon_id={IconId::LucidePlus} class = "zoom-button" title="Zoom In" onclick={on_zoom_increase}/>
             <span class="zoom-text" id="zoom-value">{format!("{}%", **zoom_level)}</span>
         </div>

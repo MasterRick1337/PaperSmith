@@ -25,10 +25,6 @@ use zoom_level_handlers::ZoomControls;
 mod text_alignment_handlers;
 use text_alignment_handlers::TextAlignmentControls;
 
-#[path = "text_styling_handlers.rs"]
-mod text_styling_handlers;
-use text_styling_handlers::TextStylingControls;
-
 //TODO Toast System
 //TODO File Opening
 
@@ -226,7 +222,6 @@ pub fn app() -> Html {
                 //<Icon icon_id={IconId::LucideBold} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 //<Icon icon_id={IconId::LucideItalic} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 //<Icon icon_id={IconId::LucideUnderline} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
-                <TextStylingControls text_styling={text_styling.clone()}/>
                 <Icon icon_id={IconId::LucideBaseline} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 <Icon icon_id={IconId::LucideHighlighter} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 <div class="separator"></div>
