@@ -8,6 +8,7 @@ use web_sys::HtmlElement;
 use yew::events::InputEvent;
 use yew::events::MouseEvent;
 use yew::prelude::*;
+use yew_hooks::use_interval;
 use yew_icons::{Icon, IconId};
 
 #[path = "font_size_handlers.rs"]
@@ -28,11 +29,6 @@ use session_time::SessionTime;
 
 #[path = "statistics/word_count.rs"]
 mod word_count;
-use word_count::WordCount;
-
-#[path = "statistics/char_count.rs"]
-mod char_count;
-use char_count::CharCount;
 
 //TODO Toast System
 //TODO File Opening
@@ -41,6 +37,11 @@ use char_count::CharCount;
 mod sidebar;
 use shared::Project;
 use sidebar::SideBar;
+
+#[path = "modal-system/modal.rs"]
+mod modal;
+use modal::ButtonProps as ModalButtonProps;
+use modal::Modal;
 
 #[wasm_bindgen]
 extern "C" {
@@ -70,6 +71,7 @@ pub fn app() -> Html {
     let sidebar = use_state(|| {
         html! { <>{ "No Project Loaded" }</> }
     });
+    let modal = use_state(|| html!());
 
     let start_time = use_state(|| None);
     let word_count = use_state(|| 0);
@@ -102,6 +104,26 @@ pub fn app() -> Html {
                         invoke("save_file", args).await;
                     }
                 }
+            });
+        })
+    };
+
+    let open_modal = {
+        let modal = modal.clone();
+        Callback::from(move |_| {
+            modal.set(html! {
+                <Modal
+                    content={html!({"This is some test text for me to know how this looks with more text in it bla bla bla bla"})}
+                    button_configs={vec![
+                        ModalButtonProps {text:"Cancel".to_string(), text_color:"crust".to_string(), bg_color:"maroon".to_string(), callback: {
+                        let modal = modal.clone();
+                        Callback::from(move |_| modal.set(html!()))
+                        }},
+                        ModalButtonProps {text:"Apply".to_string(), text_color:"crust".to_string(), bg_color:"mauve".to_string(), callback: {
+                        let modal = modal.clone();
+                        Callback::from(move |_| modal.set(html!()))
+                        }}]}
+                />
             });
         })
     };
@@ -141,8 +163,75 @@ pub fn app() -> Html {
         })
     };
 
+    #[function_component]
+    fn WordCount(WordCountProps { pages_ref }: &WordCountProps) -> Html {
+        let word_count = use_state(|| 0);
+        {
+            let pages_ref = pages_ref.clone();
+            let word_count = word_count.clone();
+            use_interval(
+                {
+                    let pages_ref = pages_ref;
+                    let word_count = word_count;
+                    move || {
+                        if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
+                            let text = pages_element.inner_text();
+                            let count = text.split_whitespace().count();
+                            word_count.set(count);
+                        }
+                    }
+                },
+                1500,
+            );
+        }
+
+        html! { <div>{ format!("{} Words", *word_count) }</div> }
+    }
+
+    #[derive(Properties, PartialEq)]
+    pub struct CharCountProps {
+        pub pages_ref: NodeRef,
+    }
+
+    #[function_component]
+    fn CharCount(CharCountProps { pages_ref }: &CharCountProps) -> Html {
+        let char_count = use_state(|| 0);
+        let char_count_no_spaces = use_state(|| 0);
+        {
+            let pages_ref = pages_ref.clone();
+            let char_count = char_count.clone();
+            let char_count_no_spaces = char_count_no_spaces.clone();
+            use_interval(
+                {
+                    move || {
+                        if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
+                            let text = pages_element.inner_text();
+                            let count = text.len();
+                            let count_no_spaces =
+                                text.chars().filter(|c| !c.is_whitespace()).count();
+                            // gloo_console::log!("Text: {}", text);
+                            // gloo_console::log!("Character count: {}", count);
+                            // gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
+                            char_count.set(count);
+                            char_count_no_spaces.set(count_no_spaces);
+                        }
+                    }
+                },
+                1500,
+            );
+        }
+        html! {
+            <div>
+                <p>
+                    { format!("Characters: {}, {} without spaces", *char_count, *char_count_no_spaces) }
+                </p>
+            </div>
+        }
+    }
+
     html! {
         <>
+            <div class="modal-wrapper">{ (*modal).clone() }</div>
             <style id="dynamic-style" />
             <div class="menubar">
                 <Icon
@@ -231,6 +320,7 @@ pub fn app() -> Html {
                 //<Icon icon_id={IconId::LucideSpellCheck}/>
                 <button onclick={save}>{ "Save" }</button>
                 <button onclick={on_load}>{ "Load" }</button>
+                <button onclick={open_modal}>{ "Modal" }</button>
             </div>
             <div class="sidebar">{ (*sidebar).clone() }</div>
             <div class="notepad-outer-container" ref={pages_ref.clone()}>
@@ -288,7 +378,6 @@ let save = {
         });
     })
 };*/
-
 
 fn text_input_handler(
     text_input_ref: NodeRef,
