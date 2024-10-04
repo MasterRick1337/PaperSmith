@@ -66,16 +66,14 @@ jobs:
           prerelease: false
           args: ${{ matrix.args }}
       
-      - name: add binaries to relase
+      - uses: djnicholson/release-action@v2.11
         if: matrix.platform == 'ubuntu-22.04'
-        - uses: djnicholson/release-action@v2.11
           with:
             token: ${{ secrets.GITHUB_TOKEN }}
             asset-name: 'papersmith-portable'
             file: 'target/release/paper-smith'
         if: matrix.platform == 'ubuntu-22.04'
-        - uses: djnicholson/release-action@v2.11
-          with:
+            with:
             token: ${{ secrets.GITHUB_TOKEN }}
             asset-name: 'papersmith-portable.exe'
             file: 'target/release/paperSmith.exe'
