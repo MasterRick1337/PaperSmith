@@ -30,8 +30,9 @@ use session_time::SessionTime;
 #[path = "statistics/word_count.rs"]
 mod word_count;
 
-//TODO Toast System
-//TODO File Opening
+#[path = "text_alignment_handlers.rs"]
+mod text_alignment_handlers;
+use text_alignment_handlers::TextAlignmentControls;
 
 #[path = "sidebar/sidebar.rs"]
 mod sidebar;
@@ -68,6 +69,7 @@ pub fn app() -> Html {
     let font_size = use_state(|| 16.0);
     let zoom_level = use_state(|| 100.0);
     let project: UseStateHandle<Option<Project>> = use_state(|| None);
+    let text_alignment = use_state(|| "left".to_string());
     let sidebar = use_state(|| {
         html! { <>{ "No Project Loaded" }</> }
     });
@@ -281,30 +283,7 @@ pub fn app() -> Html {
                     class="menubar-icon"
                 />
                 <div class="separator" />
-                <Icon
-                    icon_id={IconId::LucideAlignCenter}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <Icon
-                    icon_id={IconId::LucideAlignJustify}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <Icon
-                    icon_id={IconId::LucideAlignLeft}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <Icon
-                    icon_id={IconId::LucideAlignRight}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
+                <TextAlignmentControls text_alignment={text_alignment.clone()} />
                 <Icon
                     icon_id={IconId::LucideList}
                     width={"2em".to_owned()}
@@ -334,6 +313,7 @@ pub fn app() -> Html {
                             class="notepad-textarea"
                             id="notepad-textarea"
                             ref={text_input_ref}
+                            style={format!("text-align: {};", *text_alignment)}
                             contenteditable="true"
                             oninput={on_text_input}
                         />
