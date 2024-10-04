@@ -1,6 +1,10 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::{io::Write, path::Path};
+
+use std::fs;
+
 use rfd::FileDialog;
 use tauri::{CustomMenuItem, Menu, Submenu};
 
@@ -66,6 +70,29 @@ fn extract_div_contents(input: &str) -> Vec<String> {
     result
 }
 
+#[tauri::command]
+fn write_to_file(path: &str, content: &str) {
+    //let path = Path::new(&path);
+    // if !path.exists() {
+    //     match fs::create_dir_all("C:/Users/janni/Desktop/Schule/Diplomarbeit/PaperSmith/statistic") {
+    //         Ok(_) => println!("Directory created: {:?}", path),
+    //         Err(e) => eprintln!("Failed to create directory: {:?}", e),
+    //     }
+    // }
+
+    let mut file = fs::File::create(path).unwrap();
+     match write!(file, "{}", content) {
+        Ok(_) => println!("Directory created: {:?}", path),
+        Err(e) => eprintln!("Failed to create directory: {:?}", e),
+     }
+        
+    
+    // match fs::write(path, content) {
+    //     Ok(_) => println!("JSON file created successfully."),
+    //     Err(e) => eprintln!("Failed to write to file: {:?}", e),
+    // }
+}
+
 fn main() {
     // here `"quit".to_string()` defines the menu item id, and the second parameter is the menu item label.
 
@@ -74,6 +101,7 @@ fn main() {
             show_save_dialog,
             extract_div_contents,
             get_project,
+            write_to_file,
         ])
         .menu(generate_menu())
         .run(tauri::generate_context!())
