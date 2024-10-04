@@ -65,19 +65,3 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
-      
-      - name: add linux 
-        if: matrix.platform == 'ubuntu-22.04'
-        uses: djnicholson/release-action@v2.10
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          asset-name: 'papersmith-portable'
-          file: 'target/release/paper-smith'
-      
-      - name: add windows binary
-        if: matrix.platform == 'windows-latest'
-        uses: djnicholson/release-action@2.10
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          asset-name: 'papersmith-portable.exe'
-          file: 'target/release/paperSmith.exe'
