@@ -2,29 +2,20 @@ use web_sys::{window, Range};
 use yew::prelude::*;
 use yew_hooks::use_interval;
 use yew_icons::{Icon, IconId};
-use wasm_bindgen::JsCast;
 
-pub fn apply_styling_on_range(range: &Range, style: &str) {
-    let window = window().expect("should have a Window");
+fn apply_style(range: &Range, style: &str) {
+    let document = window().unwrap().document().unwrap();
 
-    let container = range.start_container().unwrap();
+    let selected_text = range.to_string();
 
-    // Navigate to parent div if necessary
-    let container = if container.node_type() != web_sys::Node::ELEMENT_NODE || container.node_name().to_lowercase() != "div" {
-        container.parent_node().unwrap()
-    } else {
-        container
-    };
+    let new_text = format!("{style}{selected_text}{style}");
 
-    let container: web_sys::HtmlElement = container.unchecked_into();
+    let text_node = document.create_text_node(&new_text);
+    range.delete_contents().unwrap();
+    range.insert_node(&text_node).unwrap();
 
-    match style {
-        "bold" => container.set_attribute("style", "font-weight: bold;").unwrap(),
-        "italic" => container.set_attribute("style", "font-style: italic;").unwrap(),
-        "underline" => container.set_attribute("style", "text-decoration: underline;").unwrap(),
-        _ => (),
-    }
-
+    // Clear the current selection
+    let window = window().unwrap();
     let selection = window.get_selection().unwrap().unwrap();
     selection.remove_all_ranges().unwrap();
     selection.add_range(range).unwrap();
@@ -37,22 +28,21 @@ pub struct TextStylingProps {
 }
 
 #[derive(Properties, PartialEq)]
-pub struct StylingButtonProps {
+pub struct StyleButtonProps {
     pub range: UseStateHandle<Option<Range>>,
     pub icon: IconId,
     pub title: String,
     pub style: String,
 }
 
-#[function_component(StylingButton)]
-pub fn styling_button(style_props: &StylingButtonProps) -> Html {
-    let style = style_props.style.clone();
+#[function_component(StyleButton)]
+pub fn style_button(style_props: &StyleButtonProps) -> Html {
     let range_state = style_props.range.clone();
+    let style = style_props.style.clone();
 
     let onclick = Callback::from(move |_| {
-        let range = (*range_state).clone();
-        if let Some(range) = range.as_ref() {
-            apply_styling_on_range(range, &style);
+        if let Some(range) = range_state.as_ref() {
+            apply_style(range, &style);
         }
     });
 
@@ -69,15 +59,15 @@ pub fn styling_button(style_props: &StylingButtonProps) -> Html {
 }
 
 #[function_component(TextStylingControls)]
-pub fn text_styling_controls(TextStylingProps { text_styling: _}: &TextStylingProps) -> Html {
+pub fn text_styling_controls() -> Html {
     let range_state = use_state(|| None);
     let inner_range_state = range_state.clone();
     use_interval(
         move || {
-            let window = window().expect("should have a Window");
-            let document = window.document().expect("should have a Document");
+            let window = window().unwrap();
+            let document = window.document().unwrap();
 
-            if let Some(selection) = document.get_selection().expect("should have a Selection") {
+            if let Some(selection) = document.get_selection().unwrap() {
                 if let Ok(range) = selection.get_range_at(0) {
                     let common_ancestor = range.common_ancestor_container().unwrap();
                     let notepad = document.get_element_by_id("notepad-textarea").unwrap();
@@ -105,23 +95,23 @@ pub fn text_styling_controls(TextStylingProps { text_styling: _}: &TextStylingPr
 
     html! {
         <div class="text-styling-changer">
-            <StylingButton
+            <StyleButton
                 range={range_state.clone()}
                 icon={IconId::LucideBold}
                 title="Bold"
-                style="bold"
+                style="**"
             />
-            <StylingButton
+            <StyleButton
                 range={range_state.clone()}
                 icon={IconId::LucideItalic}
                 title="Italic"
-                style="italic"
+                style="_"
             />
-            <StylingButton
+            <StyleButton
                 range={range_state.clone()}
                 icon={IconId::LucideUnderline}
                 title="Underline"
-                style="underline"
+                style="__"
             />
         </div>
     }
