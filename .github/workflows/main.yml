@@ -73,7 +73,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           asset-name: 'papersmith-portable'
           file: 'target/release/paper-smith'
-        if: matrix.platform == 'ubuntu-22.04'
+        if: matrix.platform == 'windows-latest'
         uses: djnicholson/release-action@2.11
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
