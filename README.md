@@ -41,7 +41,7 @@ This project is in a very early stage of development and currently NOT ready for
 - [ ] Words per minute count
 - [ ] Character count
 - [ ] Export to PDF, RTF, OTF, EPUB, ...
-- [ ] Search and Replace
+- [ ] Search and replace
 - [ ] Autosave
 - [ ] Backups
 - [ ] Settings
@@ -51,8 +51,4 @@ This project is in a very early stage of development and currently NOT ready for
 
 ### Installation
 
-Currently, there is no installation available. You can build it yourself by cloning the repository and running 
-```bash
-cargo tauri build
-``` 
-in the root directory.
+Just download and install our latest release and thats it!

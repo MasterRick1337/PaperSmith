@@ -5,7 +5,7 @@ use yew_icons::{Icon, IconId};
 use wasm_bindgen::JsCast;
 
 /*
-TODO: First line is no div!
+TODO: First line not working correctly when empty!
 TODO: Revise cursor handeling when applying text alignment?
 TODO: Text alignment not working properly when selecting multiple lines and there is a empty line between (or multiple). 
 */

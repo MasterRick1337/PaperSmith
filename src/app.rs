@@ -223,6 +223,7 @@ pub fn app() -> Html {
 
                 //<Icon icon_id={IconId::}/>
                 <div class="separator"></div>
+                <TextStylingControls/>
                 //<Icon icon_id={IconId::LucideBold} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 //<Icon icon_id={IconId::LucideItalic} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 //<Icon icon_id={IconId::LucideUnderline} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
