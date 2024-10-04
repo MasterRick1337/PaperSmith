@@ -1,5 +1,4 @@
 use chrono::prelude::*;
-use chrono::TimeDelta;
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -9,7 +8,6 @@ use web_sys::HtmlElement;
 use yew::events::InputEvent;
 use yew::events::MouseEvent;
 use yew::prelude::*;
-use yew_hooks::prelude::*;
 use yew_icons::{Icon, IconId};
 
 #[path = "font_size_handlers.rs"]
@@ -20,8 +18,21 @@ use font_size_handlers::FontSizeControls;
 mod zoom_level_handlers;
 use zoom_level_handlers::ZoomControls;
 
-#[path = "text_alignment_handlers.rs"]
-mod text_alignment_handlers;
+#[path = "statistics/wpm.rs"]
+mod wpm;
+use wpm::calculate_wpm;
+
+#[path = "statistics/session_time.rs"]
+mod session_time;
+use session_time::SessionTime;
+
+#[path = "statistics/word_count.rs"]
+mod word_count;
+use word_count::WordCount;
+
+#[path = "statistics/char_count.rs"]
+mod char_count;
+use char_count::CharCount;
 
 //TODO Toast System
 //TODO File Opening
@@ -372,42 +383,6 @@ let save = {
     })
 };*/
 
-#[function_component]
-fn SessionTime() -> Html {
-    let start_time = use_state(Local::now);
-    let session_time = use_state(|| TimeDelta::new(0, 0).unwrap());
-
-    use_interval(
-        {
-            let session_time = session_time.clone();
-            move || {
-                let current_time = Local::now();
-                session_time.set(current_time - *start_time);
-            }
-        },
-        1000,
-    );
-
-    let total_seconds = session_time.num_seconds();
-    let hours = total_seconds / 3600;
-    let minutes = (total_seconds % 3600) / 60;
-    let seconds = total_seconds % 60;
-
-    let formatted_time = format!("{hours:02}:{minutes:02}:{seconds:02}");
-
-    html! { <p>{ formatted_time }</p> }
-}
-
-fn calculate_wpm(word_count: usize, start_time: Option<DateTime<Local>>) -> f64 {
-    if let Some(start) = start_time {
-        let elapsed = Local::now() - start;
-        let elapsed_seconds = elapsed.num_seconds() as f64;
-        if elapsed_seconds > 0.0 {
-            return (word_count as f64 / elapsed_seconds) * 60.0;
-        }
-    }
-    0.0
-}
 
 fn text_input_handler(
     text_input_ref: NodeRef,
