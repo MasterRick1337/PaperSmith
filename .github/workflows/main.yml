@@ -68,7 +68,7 @@ jobs:
       
       - name: add linux 
         if: matrix.platform == 'ubuntu-22.04'
-        uses: djnicholson/release-action@v2.11
+        uses: djnicholson/release-action@v2.10
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           asset-name: 'papersmith-portable'
@@ -76,7 +76,7 @@ jobs:
       
       - name: add windows binary
         if: matrix.platform == 'windows-latest'
-        uses: djnicholson/release-action@2.11
+        uses: djnicholson/release-action@2.10
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           asset-name: 'papersmith-portable.exe'
