@@ -31,6 +31,11 @@ mod sidebar;
 use shared::Project;
 use sidebar::SideBar;
 
+#[path = "modal-system/modal.rs"]
+mod modal;
+use modal::ButtonProps as ModalButtonProps;
+use modal::Modal;
+
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
@@ -59,6 +64,7 @@ pub fn app() -> Html {
     let sidebar = use_state(|| {
         html! { <>{ "No Project Loaded" }</> }
     });
+    let modal = use_state(|| html!());
 
     let start_time = use_state(|| None);
     let word_count = use_state(|| 0);
@@ -91,6 +97,26 @@ pub fn app() -> Html {
                         invoke("save_file", args).await;
                     }
                 }
+            });
+        })
+    };
+
+    let open_modal = {
+        let modal = modal.clone();
+        Callback::from(move |_| {
+            modal.set(html! {
+                <Modal
+                    content={html!({"This is some test text for me to know how this looks with more text in it bla bla bla bla"})}
+                    button_configs={vec![
+                        ModalButtonProps {text:"Cancel".to_string(), text_color:"crust".to_string(), bg_color:"maroon".to_string(), callback: {
+                        let modal = modal.clone();
+                        Callback::from(move |_| modal.set(html!()))
+                        }},
+                        ModalButtonProps {text:"Apply".to_string(), text_color:"crust".to_string(), bg_color:"mauve".to_string(), callback: {
+                        let modal = modal.clone();
+                        Callback::from(move |_| modal.set(html!()))
+                        }}]}
+                />
             });
         })
     };
@@ -176,9 +202,9 @@ pub fn app() -> Html {
                             let count = text.len();
                             let count_no_spaces =
                                 text.chars().filter(|c| !c.is_whitespace()).count();
-                            gloo_console::log!("Text: {}", text);
-                            gloo_console::log!("Character count: {}", count);
-                            gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
+                            // gloo_console::log!("Text: {}", text);
+                            // gloo_console::log!("Character count: {}", count);
+                            // gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
                             char_count.set(count);
                             char_count_no_spaces.set(count_no_spaces);
                         }
@@ -198,6 +224,7 @@ pub fn app() -> Html {
 
     html! {
         <>
+            <div class="modal-wrapper">{ (*modal).clone() }</div>
             <style id="dynamic-style" />
             <div class="menubar">
                 <Icon
@@ -286,6 +313,7 @@ pub fn app() -> Html {
                 //<Icon icon_id={IconId::LucideSpellCheck}/>
                 <button onclick={save}>{ "Save" }</button>
                 <button onclick={on_load}>{ "Load" }</button>
+                <button onclick={open_modal}>{ "Modal" }</button>
             </div>
             <div class="sidebar">{ (*sidebar).clone() }</div>
             <div class="notepad-outer-container" ref={pages_ref.clone()}>
