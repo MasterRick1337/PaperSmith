@@ -8,6 +8,7 @@ use web_sys::HtmlElement;
 use yew::events::InputEvent;
 use yew::events::MouseEvent;
 use yew::prelude::*;
+use yew_hooks::use_interval;
 use yew_icons::{Icon, IconId};
 
 #[path = "font_size_handlers.rs"]
@@ -28,11 +29,6 @@ use session_time::SessionTime;
 
 #[path = "statistics/word_count.rs"]
 mod word_count;
-use word_count::WordCount;
-
-#[path = "statistics/char_count.rs"]
-mod char_count;
-use char_count::CharCount;
 
 //TODO Toast System
 //TODO File Opening
@@ -382,7 +378,6 @@ let save = {
         });
     })
 };*/
-
 
 fn text_input_handler(
     text_input_ref: NodeRef,
