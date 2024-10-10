@@ -29,6 +29,11 @@ use session_time::SessionTime;
 
 #[path = "statistics/word_count.rs"]
 mod word_count;
+use word_count::WordCount;
+
+#[path = "statistics/char_count.rs"]
+mod char_count;
+use char_count::CharCount;
 
 #[path = "text_alignment_handlers.rs"]
 mod text_alignment_handlers;
@@ -164,72 +169,6 @@ pub fn app() -> Html {
             }
         })
     };
-
-    #[function_component]
-    fn WordCount(WordCountProps { pages_ref }: &WordCountProps) -> Html {
-        let word_count = use_state(|| 0);
-        {
-            let pages_ref = pages_ref.clone();
-            let word_count = word_count.clone();
-            use_interval(
-                {
-                    let pages_ref = pages_ref;
-                    let word_count = word_count;
-                    move || {
-                        if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
-                            let text = pages_element.inner_text();
-                            let count = text.split_whitespace().count();
-                            word_count.set(count);
-                        }
-                    }
-                },
-                1500,
-            );
-        }
-
-        html! { <div>{ format!("{} Words", *word_count) }</div> }
-    }
-
-    #[derive(Properties, PartialEq)]
-    pub struct CharCountProps {
-        pub pages_ref: NodeRef,
-    }
-
-    #[function_component]
-    fn CharCount(CharCountProps { pages_ref }: &CharCountProps) -> Html {
-        let char_count = use_state(|| 0);
-        let char_count_no_spaces = use_state(|| 0);
-        {
-            let pages_ref = pages_ref.clone();
-            let char_count = char_count.clone();
-            let char_count_no_spaces = char_count_no_spaces.clone();
-            use_interval(
-                {
-                    move || {
-                        if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
-                            let text = pages_element.inner_text();
-                            let count = text.len();
-                            let count_no_spaces =
-                                text.chars().filter(|c| !c.is_whitespace()).count();
-                            // gloo_console::log!("Text: {}", text);
-                            // gloo_console::log!("Character count: {}", count);
-                            // gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
-                            char_count.set(count);
-                            char_count_no_spaces.set(count_no_spaces);
-                        }
-                    }
-                },
-                1500,
-            );
-        }
-        html! {
-            <div>
-                <p>
-                    { format!("Characters: {}, {} without spaces", *char_count, *char_count_no_spaces) }
-                </p>
-            </div>
-        }
-    }
 
     html! {
         <>

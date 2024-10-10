@@ -46,7 +46,7 @@ pub struct FileWriteData {
                                 "word_count": count
                             }).to_string();
                             
-                            let path = Path::new("C:\\Users\\janni\\Desktop\\Schule\\Diplomarbeit\\Program\\statistic\\word_count.json");
+                            let path = Path::new("C:\\Users\\Jannis\\Schule\\Diplomarbeit\\statistic\\word_count.json");
                             let fileWriteData = FileWriteData {path: path.to_string_lossy().to_string(), content: word_count_json};
                             
                             invoke("write_to_file", serde_wasm_bindgen::to_value(&fileWriteData).unwrap()).await;
