@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 :root {
-    --base: 234, 234, 242;
-    --border: 244, 244, 255;
-    --surface0: 219, 219, 219;
-    --surface1: 190, 190, 199;
+    --base: 30, 30, 42;
+    --border: 44, 44, 56;
+    --surface0: 35, 35, 45;
+    --surface1: 42, 42, 55;
     --overlay0: 69, 69, 82;
-    --text: 0, 0, 0;
+    --text: 209, 213, 219;
     --font-size: 16px;
     --line-height: 1.5;
     --aspect-ratio: 1.0;
@@ -16,20 +16,20 @@
 
 body {
     margin: 0;
-    padding-top: 0;
+    padding: 0;
     background-color: rgba(var(--base), 1);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     font-family: Arial, sans-serif;
-    padding-top: 45px;
-    padding-bottom: 25px;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 
 
-/*.toolbar {
+.toolbar {
     height: 25px;
     background-color: rgba(var(--surface0), 1);
     color: rgba(var(--text), 1);
@@ -42,7 +42,7 @@ body {
     right: 0;
     padding: 0 10px;
     border-bottom: 1px solid rgba(var(--border), 1);
-}*/
+}
 
 
 
@@ -261,47 +261,26 @@ svg.svg-icon {
 
 
 .notepad-outer-container {
-    margin-top: 0px;
-    margin-left: 310px;
-    padding-top: 15px;
-    padding-bottom: 20px;
+    margin-top: 45px;
+    margin-left: 330px;
+    padding: 10px;
     height: calc(100vh - 100px);
     width: calc(100vw - 360px);
     overflow: auto;
     background-color: rgba(var(--base), 1);
-    display: flex;
-    justify-content: flex-start;
-    gap: 20px;
 }
 
-.notepad-container-edit {
-    width: 48%;
+.notepad-container {
+    width: 210mm;
     height: 100%;
     background-color: rgba(var(--base), 1);
-    border: 2px solid rgba(var(--border), 1);
-    border-radius: 10px;
+    border: none;
     outline: none;
     box-shadow: none;
     padding: 20px;
     position: relative;
     margin: 0 auto;
     transform-origin: top; /* TODO: Make Zoom work with transform-origin: center*/
-    overflow-y: auto;
-}
-
-.notepad-container-compile {
-    width: 48%;
-    height: 100%;
-    background-color: rgba(var(--base), 1);
-    border: 2px solid rgba(var(--border), 1);
-    border-radius: 10px;
-    outline: none;
-    box-shadow: none;
-    padding: 20px;
-    position: relative;
-    margin: 0 auto;
-    transform-origin: top; /* TODO: Make Zoom work with transform-origin: center*/
-    overflow-y: auto;
 }
 
 .notepad-wrapper {

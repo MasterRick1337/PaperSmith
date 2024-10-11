@@ -1,118 +1,89 @@
-use web_sys::{window, Range};
 use yew::prelude::*;
-use yew_hooks::use_interval;
 use yew_icons::{Icon, IconId};
 
-fn apply_style(range: &Range, style: &str) {
-    let document = window().unwrap().document().unwrap();
+fn apply_style_textarea(textarea: &web_sys::HtmlTextAreaElement, style: &str) {
+    let value = textarea.value();
+    let selection_start = textarea.selection_start().unwrap().unwrap() as usize;
+    let selection_end = textarea.selection_end().unwrap().unwrap() as usize;
 
-    let selected_text = range.to_string();
-
+    let selected_text = &value[selection_start..selection_end];
     let new_text = format!("{style}{selected_text}{style}");
 
-    let text_node = document.create_text_node(&new_text);
-    range.delete_contents().unwrap();
-    range.insert_node(&text_node).unwrap();
+    let new_value = format!(
+        "{}{}{}",
+        &value[..selection_start],
+        new_text,
+        &value[selection_end..]
+    );
 
-    // Clear the current selection
-    let window = window().unwrap();
-    let selection = window.get_selection().unwrap().unwrap();
-    selection.remove_all_ranges().unwrap();
-    selection.add_range(range).unwrap();
-    range.collapse();
-}
+    textarea.set_value(&new_value);
 
-#[derive(Properties, PartialEq)]
-pub struct TextStylingProps {
-    pub text_styling: UseStateHandle<String>,
+    textarea.set_selection_range(selection_end as u32 + (style.len() * 2) as u32, selection_end as u32 + (style.len() * 2) as u32).unwrap();
 }
 
 #[derive(Properties, PartialEq)]
 pub struct StyleButtonProps {
-    pub range: UseStateHandle<Option<Range>>,
+    pub textarea_ref: NodeRef,
     pub icon: IconId,
     pub title: String,
     pub style: String,
 }
 
 #[function_component(StyleButton)]
-pub fn style_button(style_props: &StyleButtonProps) -> Html {
-    let range_state = style_props.range.clone();
-    let style = style_props.style.clone();
-
-    let onclick = Callback::from(move |_| {
-        if let Some(range) = range_state.as_ref() {
-            apply_style(range, &style);
+pub fn style_button(StyleButtonProps {textarea_ref, icon, title, style,}: &StyleButtonProps) -> Html {
+    let onclick = {
+        let textarea_ref = textarea_ref.clone();
+        let style = style.clone();
+        Callback::from(move |_| {
+        if let Some(textarea) = textarea_ref.cast::<web_sys::HtmlTextAreaElement>() {
+            apply_style_textarea(&textarea, &style);
         }
-    });
+    })
+    };
 
     html! {
         <Icon
-            icon_id={style_props.icon}
+            icon_id={*icon}
             width={"2em".to_owned()}
             height={"2em".to_owned()}
             class="menubar-icon"
-            title={style_props.title.clone()}
+            title={title.clone()}
             onclick={onclick}
         />
     }
 }
 
+#[derive(Properties, PartialEq)]
+pub struct TextStylingProps {
+    pub text_styling_ref: NodeRef,
+}
+
 #[function_component(TextStylingControls)]
-pub fn text_styling_controls() -> Html {
-    let range_state = use_state(|| None);
-    let inner_range_state = range_state.clone();
-    use_interval(
-        move || {
-            let window = window().unwrap();
-            let document = window.document().unwrap();
-
-            if let Some(selection) = document.get_selection().unwrap() {
-                if let Ok(range) = selection.get_range_at(0) {
-                    let common_ancestor = range.common_ancestor_container().unwrap();
-                    let notepad = document.get_element_by_id("notepad-textarea").unwrap();
-
-                    let mut is_within = false;
-                    let mut node = common_ancestor;
-                    while let Some(parent) = node.parent_node() {
-                        if parent.is_same_node(Some(&notepad)) {
-                            is_within = true;
-                            break;
-                        }
-                        node = parent;
-                    }
-
-                    if is_within {
-                        if let Ok(range) = selection.get_range_at(0) {
-                            inner_range_state.set(Some(range));
-                        }
-                    }
-                }
-            }
-        },
-        10,
-    );
+pub fn text_styling_controls(TextStylingProps { text_styling_ref }: &TextStylingProps) -> Html {
 
     html! {
-        <div class="text-styling-changer">
-            <StyleButton
-                range={range_state.clone()}
-                icon={IconId::LucideBold}
-                title="Bold"
-                style="**"
-            />
-            <StyleButton
-                range={range_state.clone()}
-                icon={IconId::LucideItalic}
-                title="Italic"
-                style="_"
-            />
-            <StyleButton
-                range={range_state.clone()}
-                icon={IconId::LucideUnderline}
-                title="Underline"
-                style="__"
-            />
-        </div>
+        <>
+            //<textarea id="notepad-textarea" ref={textarea_ref.clone()} class="notepad-textarea"></textarea>
+            <div class="text-styling-changer">
+                <StyleButton
+                    textarea_ref={text_styling_ref.clone()}
+                    icon={IconId::LucideBold}
+                    title="Bold"
+                    style="**"
+                />
+                <StyleButton
+                    textarea_ref={text_styling_ref.clone()}
+                    icon={IconId::LucideItalic}
+                    title="Italic"
+                    style="_"
+                />
+                <StyleButton
+                    textarea_ref={text_styling_ref.clone()}
+                    icon={IconId::LucideUnderline}
+                    title="Underline"
+                    style="__"
+                />
+            </div>
+        </>
     }
 }

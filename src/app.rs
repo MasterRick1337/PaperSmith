@@ -7,11 +7,10 @@ use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 use yew::events::InputEvent;
+use yew::events::MouseEvent;
 use yew::prelude::*;
 use yew_hooks::prelude::*;
 use yew_icons::{Icon, IconId};
-use yew::events::MouseEvent;
-
 
 #[path = "font_size_handlers.rs"]
 mod font_size_handlers;
@@ -34,13 +33,11 @@ use text_styling_handlers::TextStylingControls;
 
 #[path = "sidebar/sidebar.rs"]
 mod sidebar;
-use sidebar::SideBar;
 use shared::Project;
+use sidebar::SideBar;
 
 #[path = "markdown_handler.rs"]
 mod markdown_handler;
-
-
 
 #[wasm_bindgen]
 extern "C" {
@@ -53,7 +50,6 @@ struct SaveFileArgs {
     content: String,
     filename: String,
 }
-
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -74,8 +70,14 @@ pub fn app() -> Html {
     let word_count = use_state(|| 0);
     let wpm = use_state(|| 0.0);
 
-    let on_text_input = text_input_handler(text_input_ref.clone(), lines.clone(), start_time.clone(), word_count.clone(), wpm.clone());
-    
+    let on_text_input = text_input_handler(
+        text_input_ref.clone(),
+        lines.clone(),
+        start_time.clone(),
+        word_count.clone(),
+        wpm.clone(),
+    );
+
     let save = {
         let text_input_ref = text_input_ref.clone();
         Callback::from(move |_| {
@@ -162,8 +164,8 @@ pub fn app() -> Html {
         }
 
         html! {
-        <div>{format!("{} Words", *word_count)}</div>
-    }
+            <div>{format!("{} Words", *word_count)}</div>
+        }
     }
 
     #[derive(Properties, PartialEq)]
@@ -202,14 +204,12 @@ pub fn app() -> Html {
             )
         }
         html! {
-        <div>
-            <p>{format!("Characters: {}, {} without spaces", *char_count, *char_count_no_spaces)}</p>
-            </div>
+            <div>
+                <p>{format!("Characters: {}, {} without spaces", *char_count, *char_count_no_spaces)}</p>
+                </div>
 
+        }
     }
-    }
-
-
 
     html! {
         <>
@@ -226,7 +226,7 @@ pub fn app() -> Html {
 
                 //<Icon icon_id={IconId::}/>
                 <div class="separator"></div>
-                <TextStylingControls/>
+                <TextStylingControls text_styling_ref={text_input_ref.clone()}/>
                 //<Icon icon_id={IconId::LucideBold} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 //<Icon icon_id={IconId::LucideItalic} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 //<Icon icon_id={IconId::LucideUnderline} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
@@ -252,17 +252,16 @@ pub fn app() -> Html {
             </div>
 
             <div class="notepad-outer-container" ref={pages_ref.clone()}>
-                <div class="notepad-container-edit">
+                <div class="notepad-container" style={format!("transform: scale({});", *zoom_level / 100.0)}>
                     <a class="anchor"></a>
                     <div class="notepad-wrapper">
-                        <div
+                         <textarea
                             class="notepad-textarea"
                             id="notepad-textarea"
                             ref={text_input_ref}
-                            style={format!("text-align: {}; transform: scale({});", *text_alignment, *zoom_level / 100.0)}
-                            contenteditable = "true"
+                            style={format!("text-align: {}; width: 100%; height: 100%;", *text_alignment)}
                             oninput={on_text_input}
-                        />
+                        ></textarea>
                     </div>
                 </div>
                 <div class="notepad-container-compile"></div>
@@ -337,8 +336,6 @@ fn SessionTime() -> Html {
     }
 }
 
-
-
 fn calculate_wpm(word_count: usize, start_time: Option<DateTime<Local>>) -> f64 {
     if let Some(start) = start_time {
         let elapsed = Local::now() - start;
@@ -350,14 +347,12 @@ fn calculate_wpm(word_count: usize, start_time: Option<DateTime<Local>>) -> f64 
     0.0
 }
 
-
-
 fn text_input_handler(
     text_input_ref: NodeRef,
     lines: UseStateHandle<Vec<String>>,
     start_time: UseStateHandle<Option<DateTime<Local>>>,
     word_count: UseStateHandle<usize>,
-    wpm: UseStateHandle<f64>,     
+    wpm: UseStateHandle<f64>,
 ) -> Callback<InputEvent> {
     Callback::from(move |_| {
         if let Some(input) = text_input_ref.cast::<HtmlElement>() {
@@ -369,7 +364,7 @@ fn text_input_handler(
                 .iter()
                 .map(|line| markdown_handler::apply_markdown(line))
                 .collect();
-                
+
             // Update the lines state
             lines.set(compiled_lines.clone());
             gloo_console::log!(compiled_lines.clone());
@@ -394,24 +389,16 @@ pub struct MarkdownProps {
 
 #[function_component]
 fn Markdown(MarkdownProps { mark_ref }: &MarkdownProps) -> Html {
-
     {
-        let mark_ref=mark_ref.clone();
+        let mark_ref = mark_ref.clone();
         let text = mark_ref.cast::<HtmlElement>().unwrap().inner_text();
-        use_effect_with(text.clone(), move |_| {
-            gloo_console::log!("balalbla")
-        });
+        use_effect_with(text.clone(), move |_| gloo_console::log!("balalbla"));
     }
-    
+
     if let Some(pages_element) = mark_ref.cast::<HtmlElement>() {
-            let text = pages_element.inner_text();
-            gloo_console::log!(text);
-        }
-
-
-    
-
-    html! {
-
+        let text = pages_element.inner_text();
+        gloo_console::log!(text);
     }
+
+    html! {}
 }
