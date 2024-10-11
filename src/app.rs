@@ -261,6 +261,7 @@ pub fn app() -> Html {
                             ref={text_input_ref}
                             style={format!("text-align: {}; width: 100%; height: 100%;", *text_alignment)}
                             oninput={on_text_input}
+                            contenteditable="true"
                         ></textarea>
                     </div>
                 </div>
