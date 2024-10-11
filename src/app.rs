@@ -17,9 +17,9 @@ use yew::events::MouseEvent;
 mod font_size_handlers;
 use font_size_handlers::FontSizeControls;
 
-#[path = "zoom_level_handlers.rs"]
-mod zoom_level_handlers;
-use zoom_level_handlers::ZoomControls;
+//#[path = "zoom_level_handlers.rs"]
+//mod zoom_level_handlers;
+//use zoom_level_handlers::ZoomControls;
 
 #[path = "text_alignment_handlers.rs"]
 mod text_alignment_handlers;
@@ -252,19 +252,20 @@ pub fn app() -> Html {
             </div>
 
             <div class="notepad-outer-container" ref={pages_ref.clone()}>
-                <div class="notepad-container" style={format!("transform: scale({});", *zoom_level / 100.0)}>
+                <div class="notepad-container-edit">
                     <a class="anchor"></a>
                     <div class="notepad-wrapper">
                         <div
                             class="notepad-textarea"
                             id="notepad-textarea"
                             ref={text_input_ref}
-                            style={format!("text-align: {};", *text_alignment)}
+                            style={format!("text-align: {}; transform: scale({});", *text_alignment, *zoom_level / 100.0)}
                             contenteditable = "true"
                             oninput={on_text_input}
                         />
                     </div>
                 </div>
+                <div class="notepad-container-compile"></div>
             </div>
 
             <div class="bottombar">
@@ -276,7 +277,7 @@ pub fn app() -> Html {
                 </div>
 
                 <div class="bottombar-right">
-                    <ZoomControls zoom_level={zoom_level.clone()} />
+                    //<ZoomControls zoom_level={zoom_level.clone()} />
                 </div>
             </div>
         </>
