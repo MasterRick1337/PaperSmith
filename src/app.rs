@@ -223,7 +223,7 @@ pub fn app() -> Html {
 
                 //<Icon icon_id={IconId::}/>
                 <div class="separator"></div>
-                <TextStylingControls/>
+                <TextStylingControls text_styling_ref={text_input_ref.clone()}/>
                 //<Icon icon_id={IconId::LucideBold} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 //<Icon icon_id={IconId::LucideItalic} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 //<Icon icon_id={IconId::LucideUnderline} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
@@ -252,14 +252,13 @@ pub fn app() -> Html {
                 <div class="notepad-container" style={format!("transform: scale({});", *zoom_level / 100.0)}>
                     <a class="anchor"></a>
                     <div class="notepad-wrapper">
-                        <div
+                         <textarea
                             class="notepad-textarea"
                             id="notepad-textarea"
                             ref={text_input_ref}
-                            style={format!("text-align: {};", *text_alignment)}
-                            contenteditable = "true"
+                            style={format!("text-align: {}; width: 100%; height: 100%;", *text_alignment)}
                             oninput={on_text_input}
-                        ></div>
+                        ></textarea>
                     </div>
                 </div>
             </div>
