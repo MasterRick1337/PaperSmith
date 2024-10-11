@@ -37,6 +37,9 @@ mod sidebar;
 use sidebar::SideBar;
 use shared::Project;
 
+#[path = "markdown_handler.rs"]
+mod markdown_handler;
+
 
 
 #[wasm_bindgen]
@@ -187,9 +190,9 @@ pub fn app() -> Html {
                             let count = text.len();
                             let count_no_spaces =
                                 text.chars().filter(|c| !c.is_whitespace()).count();
-                            gloo_console::log!("Text: {}", text.to_string());
-                            gloo_console::log!("Character count: {}", count);
-                            gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
+                            // gloo_console::log!("Text: {}", text.to_string());
+                            // gloo_console::log!("Character count: {}", count);
+                            // gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
                             char_count.set(count);
                             char_count_no_spaces.set(count_no_spaces);
                         }
@@ -259,7 +262,7 @@ pub fn app() -> Html {
                             style={format!("text-align: {};", *text_alignment)}
                             contenteditable = "true"
                             oninput={on_text_input}
-                        ></div>
+                        />
                     </div>
                 </div>
             </div>
@@ -359,7 +362,16 @@ fn text_input_handler(
         if let Some(input) = text_input_ref.cast::<HtmlElement>() {
             let inner_text = input.inner_text();
             let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
-            lines.set(new_lines);
+
+            // Process the lines with markdown handler
+            let compiled_lines: Vec<String> = new_lines
+                .iter()
+                .map(|line| markdown_handler::apply_markdown(line))
+                .collect();
+                
+            // Update the lines state
+            lines.set(compiled_lines.clone());
+            gloo_console::log!(compiled_lines.clone());
 
             let words = inner_text.split_whitespace().count();
             word_count.set(words);
@@ -372,4 +384,33 @@ fn text_input_handler(
             wpm.set(calculated_wpm);
         }
     })
+}
+
+#[derive(Properties, PartialEq)]
+pub struct MarkdownProps {
+    pub mark_ref: NodeRef,
+}
+
+#[function_component]
+fn Markdown(MarkdownProps { mark_ref }: &MarkdownProps) -> Html {
+
+    {
+        let mark_ref=mark_ref.clone();
+        let text = mark_ref.cast::<HtmlElement>().unwrap().inner_text();
+        use_effect_with(text.clone(), move |_| {
+            gloo_console::log!("balalbla")
+        });
+    }
+    
+    if let Some(pages_element) = mark_ref.cast::<HtmlElement>() {
+            let text = pages_element.inner_text();
+            gloo_console::log!(text);
+        }
+
+
+    
+
+    html! {
+
+    }
 }
