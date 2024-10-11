@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{io::Write, path::Path};
+use std::fs::OpenOptions;
 
 use std::fs;
 
@@ -71,26 +72,78 @@ fn extract_div_contents(input: &str) -> Vec<String> {
 }
 
 #[tauri::command]
-fn write_to_file(path: &str, content: &str) {
-    //let path = Path::new(&path);
-    // if !path.exists() {
-    //     match fs::create_dir_all("C:/Users/janni/Desktop/Schule/Diplomarbeit/PaperSmith/statistic") {
-    //         Ok(_) => println!("Directory created: {:?}", path),
-    //         Err(e) => eprintln!("Failed to create directory: {:?}", e),
-    //     }
-    // }
+fn write_to_json(path: &str, content: &str) {
+
 
     let mut file = fs::File::create(path).unwrap();
      match write!(file, "{}", content) {
         Ok(_) => println!("Directory created: {:?}", path),
         Err(e) => eprintln!("Failed to create directory: {:?}", e),
      }
-        
-    
-    // match fs::write(path, content) {
-    //     Ok(_) => println!("JSON file created successfully."),
+
+    // use std::fs::{self, OpenOptions};
+    // use std::io::Write;
+
+    // // Ensure the directory exists
+    // let path = std::path::Path::new(path);
+    // if let Some(parent) = path.parent() {
+    //     if !parent.exists() {
+    //         match fs::create_dir_all(parent) {
+    //             Ok(_) => println!("Directory created: {:?}", parent),
+    //             Err(e) => eprintln!("Failed to create directory: {:?}", e),
+    //         }
+    //     }
+    // }
+
+    // Open the file in append mode or create it if it doesn't exist
+    // let mut file = match OpenOptions::new().append(true).create(true).open(path) {
+    //     Ok(f) => f,
+    //     Err(e) => {
+    //         eprintln!("Failed to open or create the file: {:?}", e);
+    //         return;
+    //     }
+    // };
+
+    // // Write the content to the file
+    // match write!(file, "{}", content) {
+    //     Ok(_) => println!("Content appended to file: {:?}", path),
     //     Err(e) => eprintln!("Failed to write to file: {:?}", e),
     // }
+}
+
+
+
+#[tauri::command]
+fn write_to_file(path: &str, content: &str) {
+
+    use std::fs::{self, OpenOptions};
+    use std::io::Write;
+
+    // Ensure the directory exists
+    let path = std::path::Path::new(path);
+    if let Some(parent) = path.parent() {
+        if !parent.exists() {
+            match fs::create_dir_all(parent) {
+                Ok(_) => println!("Directory created: {:?}", parent),
+                Err(e) => eprintln!("Failed to create directory: {:?}", e),
+            }
+        }
+    }
+
+    // Open the file in append mode or create it if it doesn't exist
+    let mut file = match OpenOptions::new().append(true).create(true).open(path) {
+        Ok(f) => f,
+        Err(e) => {
+            eprintln!("Failed to open or create the file: {:?}", e);
+            return;
+        }
+    };
+
+    // Write the content to the file
+    match write!(file, "{}", content) {
+        Ok(_) => println!("Content appended to file: {:?}", path),
+        Err(e) => eprintln!("Failed to write to file: {:?}", e),
+    }
 }
 
 fn main() {
@@ -102,6 +155,7 @@ fn main() {
             extract_div_contents,
             get_project,
             write_to_file,
+            write_to_json,
         ])
         .menu(generate_menu())
         .run(tauri::generate_context!())

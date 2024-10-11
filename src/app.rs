@@ -23,17 +23,9 @@ use zoom_level_handlers::ZoomControls;
 mod wpm;
 use wpm::calculate_wpm;
 
-#[path = "statistics/session_time.rs"]
-mod session_time;
-use session_time::SessionTime;
-
-#[path = "statistics/word_count.rs"]
-mod word_count;
-use word_count::WordCount;
-
-#[path = "statistics/char_count.rs"]
-mod char_count;
-use char_count::CharCount;
+#[path = "statistics/statistic.rs"]
+mod statistic;
+use statistic::Statistics;
 
 #[path = "text_alignment_handlers.rs"]
 mod text_alignment_handlers;
@@ -261,9 +253,10 @@ pub fn app() -> Html {
             </div>
             <div class="bottombar">
                 <div class="bottombar-left">
-                    <SessionTime />
-                    <WordCount pages_ref={pages_ref.clone()} />
-                    <CharCount pages_ref={pages_ref.clone()} />
+                    <Statistics pages_ref={pages_ref.clone()}/>
+                    // <SessionTime />
+                    // <WordCount pages_ref={pages_ref.clone()} />
+                    // <CharCount pages_ref={pages_ref.clone()} />
                     <p>{ format!("WPM: {:.2}", *wpm) }</p>
                 </div>
                 <div class="bottombar-right">
