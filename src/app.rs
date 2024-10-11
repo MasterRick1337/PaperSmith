@@ -7,19 +7,18 @@ use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 use yew::events::InputEvent;
+use yew::events::MouseEvent;
 use yew::prelude::*;
 use yew_hooks::prelude::*;
 use yew_icons::{Icon, IconId};
-use yew::events::MouseEvent;
-
 
 #[path = "font_size_handlers.rs"]
 mod font_size_handlers;
 use font_size_handlers::FontSizeControls;
 
-#[path = "zoom_level_handlers.rs"]
-mod zoom_level_handlers;
-use zoom_level_handlers::ZoomControls;
+//#[path = "zoom_level_handlers.rs"]
+//mod zoom_level_handlers;
+//use zoom_level_handlers::ZoomControls;
 
 #[path = "text_alignment_handlers.rs"]
 mod text_alignment_handlers;
@@ -34,10 +33,11 @@ use text_styling_handlers::TextStylingControls;
 
 #[path = "sidebar/sidebar.rs"]
 mod sidebar;
-use sidebar::SideBar;
 use shared::Project;
+use sidebar::SideBar;
 
-
+#[path = "markdown_handler.rs"]
+mod markdown_handler;
 
 #[wasm_bindgen]
 extern "C" {
@@ -50,7 +50,6 @@ struct SaveFileArgs {
     content: String,
     filename: String,
 }
-
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -71,8 +70,14 @@ pub fn app() -> Html {
     let word_count = use_state(|| 0);
     let wpm = use_state(|| 0.0);
 
-    let on_text_input = text_input_handler(text_input_ref.clone(), lines.clone(), start_time.clone(), word_count.clone(), wpm.clone());
-    
+    let on_text_input = text_input_handler(
+        text_input_ref.clone(),
+        lines.clone(),
+        start_time.clone(),
+        word_count.clone(),
+        wpm.clone(),
+    );
+
     let save = {
         let text_input_ref = text_input_ref.clone();
         Callback::from(move |_| {
@@ -159,8 +164,8 @@ pub fn app() -> Html {
         }
 
         html! {
-        <div>{format!("{} Words", *word_count)}</div>
-    }
+            <div>{format!("{} Words", *word_count)}</div>
+        }
     }
 
     #[derive(Properties, PartialEq)]
@@ -187,9 +192,9 @@ pub fn app() -> Html {
                             let count = text.len();
                             let count_no_spaces =
                                 text.chars().filter(|c| !c.is_whitespace()).count();
-                            gloo_console::log!("Text: {}", text.to_string());
-                            gloo_console::log!("Character count: {}", count);
-                            gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
+                            // gloo_console::log!("Text: {}", text.to_string());
+                            // gloo_console::log!("Character count: {}", count);
+                            // gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
                             char_count.set(count);
                             char_count_no_spaces.set(count_no_spaces);
                         }
@@ -199,14 +204,12 @@ pub fn app() -> Html {
             )
         }
         html! {
-        <div>
-            <p>{format!("Characters: {}, {} without spaces", *char_count, *char_count_no_spaces)}</p>
-            </div>
+            <div>
+                <p>{format!("Characters: {}, {} without spaces", *char_count, *char_count_no_spaces)}</p>
+                </div>
 
+        }
     }
-    }
-
-
 
     html! {
         <>
@@ -240,7 +243,7 @@ pub fn app() -> Html {
                 //<Icon icon_id={IconId::LucideSpellCheck}/>
 
                 <button style="visibility:hidden" onclick={save}>{"Save"} </button>
-                <button style="visibility:hidden" onclick={on_load}>{"Load"}</button>
+                <button onclick={on_load}>{"Load"}</button>
 
             </div>
 
@@ -261,6 +264,7 @@ pub fn app() -> Html {
                         ></textarea>
                     </div>
                 </div>
+                <div class="notepad-container-compile"></div>
             </div>
 
             <div class="bottombar">
@@ -272,7 +276,7 @@ pub fn app() -> Html {
                 </div>
 
                 <div class="bottombar-right">
-                    <ZoomControls zoom_level={zoom_level.clone()} />
+                    //<ZoomControls zoom_level={zoom_level.clone()} />
                 </div>
             </div>
         </>
@@ -332,8 +336,6 @@ fn SessionTime() -> Html {
     }
 }
 
-
-
 fn calculate_wpm(word_count: usize, start_time: Option<DateTime<Local>>) -> f64 {
     if let Some(start) = start_time {
         let elapsed = Local::now() - start;
@@ -345,20 +347,27 @@ fn calculate_wpm(word_count: usize, start_time: Option<DateTime<Local>>) -> f64 
     0.0
 }
 
-
-
 fn text_input_handler(
     text_input_ref: NodeRef,
     lines: UseStateHandle<Vec<String>>,
     start_time: UseStateHandle<Option<DateTime<Local>>>,
     word_count: UseStateHandle<usize>,
-    wpm: UseStateHandle<f64>,     
+    wpm: UseStateHandle<f64>,
 ) -> Callback<InputEvent> {
     Callback::from(move |_| {
         if let Some(input) = text_input_ref.cast::<HtmlElement>() {
             let inner_text = input.inner_text();
             let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
-            lines.set(new_lines);
+
+            // Process the lines with markdown handler
+            let compiled_lines: Vec<String> = new_lines
+                .iter()
+                .map(|line| markdown_handler::apply_markdown(line))
+                .collect();
+
+            // Update the lines state
+            lines.set(compiled_lines.clone());
+            gloo_console::log!(compiled_lines.clone());
 
             let words = inner_text.split_whitespace().count();
             word_count.set(words);
@@ -371,4 +380,25 @@ fn text_input_handler(
             wpm.set(calculated_wpm);
         }
     })
+}
+
+#[derive(Properties, PartialEq)]
+pub struct MarkdownProps {
+    pub mark_ref: NodeRef,
+}
+
+#[function_component]
+fn Markdown(MarkdownProps { mark_ref }: &MarkdownProps) -> Html {
+    {
+        let mark_ref = mark_ref.clone();
+        let text = mark_ref.cast::<HtmlElement>().unwrap().inner_text();
+        use_effect_with(text.clone(), move |_| gloo_console::log!("balalbla"));
+    }
+
+    if let Some(pages_element) = mark_ref.cast::<HtmlElement>() {
+        let text = pages_element.inner_text();
+        gloo_console::log!(text);
+    }
+
+    html! {}
 }
