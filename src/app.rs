@@ -37,7 +37,6 @@ use wizard::ProjectWizard;
 
 #[path = "modal-system/modal.rs"]
 mod modal;
-use modal::ButtonProps as ModalButtonProps;
 use modal::Modal;
 
 #[wasm_bindgen]
@@ -101,16 +100,16 @@ pub fn app() -> Html {
         Callback::from(move |_| {
             modal.set(html! {
                 <Modal
-                    content={html! {<ProjectWizard default_location={"/home/elena/Documents/"}/>}}
-                    button_configs={vec![
-                        ModalButtonProps {text:"Cancel".to_string(), text_color:"crust".to_string(), bg_color:"maroon".to_string(), callback: {
-                        let modal = modal.clone();
-                        Callback::from(move |_| modal.set(html!()))
-                        }},
-                        ModalButtonProps {text:"Apply".to_string(), text_color:"crust".to_string(), bg_color:"mauve".to_string(), callback: {
-                        let modal = modal.clone();
-                        Callback::from(move |_| modal.set(html!()))
-                        }}]}
+                    content={html! {
+                    <ProjectWizard
+                        default_location={"/home/elena/Documents/"}
+
+                        closing_callback={
+                            let modal = modal.clone();
+                            Callback::from(move |_| modal.set(html!()))
+                        }
+                    />
+                    }}
                 />
             });
         })

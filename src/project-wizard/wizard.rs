@@ -15,6 +15,7 @@ extern "C" {
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub default_location: String,
+    pub closing_callback: Callback<MouseEvent>,
 }
 
 #[derive(Serialize)]
@@ -22,10 +23,17 @@ struct ChooseFolderArgs {
     title: String,
 }
 
-// TODO: validation
+// TODO:
+// validate before doing anything
+// implement project creation tauri function
 
 #[function_component(ProjectWizard)]
-pub fn project_wizard(Props { default_location }: &Props) -> Html {
+pub fn project_wizard(
+    Props {
+        default_location,
+        closing_callback,
+    }: &Props,
+) -> Html {
     let location = use_state(|| default_location.clone());
     let is_hovered = use_state(|| false);
 
@@ -62,8 +70,6 @@ pub fn project_wizard(Props { default_location }: &Props) -> Html {
         Callback::from(move |_: MouseEvent| {
             let location = location.clone();
             spawn_local(async move {
-                gloo_console::log!("choosing folder");
-
                 let save_args = ChooseFolderArgs {
                     title: "Choose location".to_string(),
                 };
@@ -81,9 +87,15 @@ pub fn project_wizard(Props { default_location }: &Props) -> Html {
 
     html!(
         <>
-            <div>{ "Create Project" }</div>
-            <input />
-            <div class="flex rounded-lg border-2 m-2 border-transparent hover:border-mauve">
+            <div class="text-xl font-bold">{ "Create Project" }</div>
+            <br />
+            <div class="font-semibold">{ "Name:" }</div>
+            <div class="flex rounded-lg border-2 my-2 border-transparent hover:border-mauve">
+                <input class="outline-none w-full bg-crust text-text p-2 rounded-lg" />
+            </div>
+            <br />
+            <div class="font-semibold">{ "Location:" }</div>
+            <div class="flex rounded-lg border-2 my-2 border-transparent hover:border-mauve">
                 <input
                     value={(*location).clone()}
                     class="outline-none w-full bg-crust text-text p-2 rounded-tl-lg rounded-bl-lg"
@@ -97,8 +109,27 @@ pub fn project_wizard(Props { default_location }: &Props) -> Html {
                     { icon }
                 </div>
             </div>
-            <div>{ "Cancel" }</div>
-            <div>{ "Confirm" }</div>
+            <div id="footer" class="flex justify-end w-full pt-8">
+                <button
+                    onclick={closing_callback}
+                    class={format!("rounded-lg px-2 py-1 ml-4 bg-red text-text")}
+                >
+                    { "Close" }
+                </button>
+            </div>
         </>
     )
 }
+
+//html!(
+//    <>
+//        <div class="bg-maroon text-crust" />
+//        <div class="bg-mauve text-crust" />
+//        <button
+//            onclick={callback}
+//            class={format!("rounded-lg px-2 py-1 ml-4 bg-{bg_color} text-{text_color}")}
+//        >
+//            { text }
+//        </button>
+//    </>
+//)
