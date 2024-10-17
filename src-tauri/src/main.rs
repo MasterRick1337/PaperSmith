@@ -3,12 +3,12 @@
 
 use std::{io::Write, path::Path};
 use std::fs::OpenOptions;
-
-use std::fs;
-
+use std::fs::{self, File};
+use chrono::Local;
 use rfd::FileDialog;
 use tauri::{CustomMenuItem, Menu, Submenu};
-
+use lazy_static::lazy_static;
+use std::sync::Mutex;
 mod loader;
 
 use loader::parse_project;
@@ -71,47 +71,46 @@ fn extract_div_contents(input: &str) -> Vec<String> {
     result
 }
 
-#[tauri::command]
-fn write_to_json(path: &str, content: &str) {
-
-
-    let mut file = fs::File::create(path).unwrap();
-     match write!(file, "{}", content) {
-        Ok(_) => println!("Directory created: {:?}", path),
-        Err(e) => eprintln!("Failed to create directory: {:?}", e),
-     }
-
-    // use std::fs::{self, OpenOptions};
-    // use std::io::Write;
-
-    // // Ensure the directory exists
-    // let path = std::path::Path::new(path);
-    // if let Some(parent) = path.parent() {
-    //     if !parent.exists() {
-    //         match fs::create_dir_all(parent) {
-    //             Ok(_) => println!("Directory created: {:?}", parent),
-    //             Err(e) => eprintln!("Failed to create directory: {:?}", e),
-    //         }
-    //     }
-    // }
-
-    // Open the file in append mode or create it if it doesn't exist
-    // let mut file = match OpenOptions::new().append(true).create(true).open(path) {
-    //     Ok(f) => f,
-    //     Err(e) => {
-    //         eprintln!("Failed to open or create the file: {:?}", e);
-    //         return;
-    //     }
-    // };
-
-    // // Write the content to the file
-    // match write!(file, "{}", content) {
-    //     Ok(_) => println!("Content appended to file: {:?}", path),
-    //     Err(e) => eprintln!("Failed to write to file: {:?}", e),
-    // }
+// Definiere eine globale Variable für die Startzeit
+lazy_static! {
+    static ref START_TIME: Mutex<String> = Mutex::new(Local::now().format("%Y-%m-%d_%H-%M-%S").to_string());
 }
 
+#[tauri::command]
+fn write_to_json(path: &str, content: &str) {
+    // Sperre die START_TIME und verwende sie als Dateinamen
+    let start_time = START_TIME.lock().unwrap().clone();
+    let file_name = format!("{}.json", start_time);
 
+    // Vergewissere dich, dass das Verzeichnis existiert; erstelle es, wenn nicht
+    if !Path::new(path).exists() {
+        match fs::create_dir_all(path) {
+            Ok(_) => println!("Verzeichnis erstellt: {:?}", path),
+            Err(e) => {
+                eprintln!("Fehler beim Erstellen des Verzeichnisses: {:?}", e);
+                return;
+            }
+        }
+    }
+
+    // Erstelle den vollständigen Pfad für die Datei
+    let file_path = format!("{}/{}", path, file_name);
+
+    // Erstelle die Datei oder überschreibe sie, falls sie existiert
+    let mut file = match File::create(&file_path) {
+        Ok(f) => f,
+        Err(e) => {
+            eprintln!("Fehler beim Erstellen der Datei: {:?}", e);
+            return;
+        }
+    };
+
+    // Schreibe den Inhalt in die Datei
+    match write!(file, "{}", content) {
+        Ok(_) => println!("Inhalt in Datei geschrieben: {:?}", file_path),
+        Err(e) => eprintln!("Fehler beim Schreiben in die Datei: {:?}", e),
+    }
+}
 
 #[tauri::command]
 fn write_to_file(path: &str, content: &str) {

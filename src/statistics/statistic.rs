@@ -1,14 +1,10 @@
 use chrono::prelude::*;
-use chrono::TimeDelta;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 use yew_hooks::prelude::*;
-
 use wasm_bindgen::prelude::wasm_bindgen;
-
 use serde_json::json;
-use std::fs::File;
 use std::path::Path;
 use wasm_bindgen::JsValue;
 
@@ -95,13 +91,13 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
                                 "char_count_with_no_spaces": *char_count_no_spaces.clone()
                             }).to_string();
                             
-                            let path = Path::new("C:\\Users\\janni\\Desktop\\Schule\\Diplomarbeit\\Program\\statistic\\statistic.json");
-                            let jsonWrite = FileWriteData {
+                            let path = Path::new("C:\\Users\\Jannis\\Schule\\Diplomarbeit\\statistic");
+                            let json_write = FileWriteData {
                                 path: path.to_string_lossy().to_string(),
                                 content: json 
                             };
 
-                            invoke("write_to_json", serde_wasm_bindgen::to_value(&jsonWrite).unwrap()).await;
+                            invoke("write_to_json", serde_wasm_bindgen::to_value(&json_write).unwrap()).await;
                         }
                     });
                 }
@@ -111,6 +107,6 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
     }
 
     html! {
-        <div>{format!("Session Time: {}, {} Words; Characters: {}, {} without spaces;", *session_time, *word_count, *char_count,*char_count_no_spaces)}</div>
+        <div>{format!("{}, {} Words; Characters: {}, {} without spaces;", *session_time, *word_count, *char_count,*char_count_no_spaces)}</div>
     }
 }
