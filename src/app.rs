@@ -8,7 +8,6 @@ use web_sys::HtmlElement;
 use yew::events::InputEvent;
 use yew::events::MouseEvent;
 use yew::prelude::*;
-use yew_hooks::use_interval;
 use yew_icons::{Icon, IconId};
 
 #[path = "font_size_handlers.rs"]
@@ -23,13 +22,6 @@ use zoom_level_handlers::ZoomControls;
 mod wpm;
 use wpm::calculate_wpm;
 
-#[path = "statistics/session_time.rs"]
-mod session_time;
-use session_time::SessionTime;
-
-#[path = "statistics/word_count.rs"]
-mod word_count;
-
 #[path = "text_alignment_handlers.rs"]
 mod text_alignment_handlers;
 use text_alignment_handlers::TextAlignmentControls;
@@ -38,6 +30,10 @@ use text_alignment_handlers::TextAlignmentControls;
 mod sidebar;
 use shared::Project;
 use sidebar::SideBar;
+
+#[path = "project-wizard/wizard.rs"]
+mod wizard;
+use wizard::ProjectWizard;
 
 #[path = "modal-system/modal.rs"]
 mod modal;
@@ -54,11 +50,6 @@ extern "C" {
 struct SaveFileArgs {
     content: String,
     filename: String,
-}
-
-#[derive(Properties, PartialEq)]
-pub struct WordCountProps {
-    pub pages_ref: NodeRef,
 }
 
 #[function_component(App)]
@@ -79,13 +70,8 @@ pub fn app() -> Html {
     let word_count = use_state(|| 0);
     let wpm = use_state(|| 0.0);
 
-    let on_text_input = text_input_handler(
-        text_input_ref.clone(),
-        lines,
-        start_time,
-        word_count,
-        wpm.clone(),
-    );
+    let on_text_input =
+        text_input_handler(text_input_ref.clone(), lines, start_time, word_count, wpm);
 
     let save = {
         let text_input_ref = text_input_ref.clone();
@@ -115,7 +101,7 @@ pub fn app() -> Html {
         Callback::from(move |_| {
             modal.set(html! {
                 <Modal
-                    content={html!({"This is some test text for me to know how this looks with more text in it bla bla bla bla"})}
+                    content={html! {<ProjectWizard default_location={"/home/elena/Documents/"}/>}}
                     button_configs={vec![
                         ModalButtonProps {text:"Cancel".to_string(), text_color:"crust".to_string(), bg_color:"maroon".to_string(), callback: {
                         let modal = modal.clone();
@@ -164,72 +150,6 @@ pub fn app() -> Html {
             }
         })
     };
-
-    #[function_component]
-    fn WordCount(WordCountProps { pages_ref }: &WordCountProps) -> Html {
-        let word_count = use_state(|| 0);
-        {
-            let pages_ref = pages_ref.clone();
-            let word_count = word_count.clone();
-            use_interval(
-                {
-                    let pages_ref = pages_ref;
-                    let word_count = word_count;
-                    move || {
-                        if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
-                            let text = pages_element.inner_text();
-                            let count = text.split_whitespace().count();
-                            word_count.set(count);
-                        }
-                    }
-                },
-                1500,
-            );
-        }
-
-        html! { <div>{ format!("{} Words", *word_count) }</div> }
-    }
-
-    #[derive(Properties, PartialEq)]
-    pub struct CharCountProps {
-        pub pages_ref: NodeRef,
-    }
-
-    #[function_component]
-    fn CharCount(CharCountProps { pages_ref }: &CharCountProps) -> Html {
-        let char_count = use_state(|| 0);
-        let char_count_no_spaces = use_state(|| 0);
-        {
-            let pages_ref = pages_ref.clone();
-            let char_count = char_count.clone();
-            let char_count_no_spaces = char_count_no_spaces.clone();
-            use_interval(
-                {
-                    move || {
-                        if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
-                            let text = pages_element.inner_text();
-                            let count = text.len();
-                            let count_no_spaces =
-                                text.chars().filter(|c| !c.is_whitespace()).count();
-                            // gloo_console::log!("Text: {}", text);
-                            // gloo_console::log!("Character count: {}", count);
-                            // gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
-                            char_count.set(count);
-                            char_count_no_spaces.set(count_no_spaces);
-                        }
-                    }
-                },
-                1500,
-            );
-        }
-        html! {
-            <div>
-                <p>
-                    { format!("Characters: {}, {} without spaces", *char_count, *char_count_no_spaces) }
-                </p>
-            </div>
-        }
-    }
 
     html! {
         <>
@@ -321,12 +241,7 @@ pub fn app() -> Html {
                 </div>
             </div>
             <div class="bottombar">
-                <div class="bottombar-left">
-                    <SessionTime />
-                    <WordCount pages_ref={pages_ref.clone()} />
-                    <CharCount pages_ref={pages_ref.clone()} />
-                    <p>{ format!("WPM: {:.2}", *wpm) }</p>
-                </div>
+                <div class="bottombar-left" />
                 <div class="bottombar-right">
                     <ZoomControls zoom_level={zoom_level.clone()} />
                 </div>

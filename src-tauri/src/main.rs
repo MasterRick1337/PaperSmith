@@ -1,9 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{io::Write, path::Path};
-
 use std::fs;
+use std::io::Write;
 
 use rfd::FileDialog;
 use tauri::{CustomMenuItem, Menu, Submenu};
@@ -71,6 +70,16 @@ fn extract_div_contents(input: &str) -> Vec<String> {
 }
 
 #[tauri::command]
+fn choose_folder(title: String) -> String {
+    let path = FileDialog::new().set_title(title).pick_folder();
+
+    println!("choosing folder tauri");
+    path.map_or_else(
+        || "No file selected".to_string(),
+        |path| path.to_string_lossy().to_string(),
+    )
+}
+#[tauri::command]
 fn write_to_file(path: &str, content: &str) {
     //let path = Path::new(&path);
     // if !path.exists() {
@@ -81,12 +90,11 @@ fn write_to_file(path: &str, content: &str) {
     // }
 
     let mut file = fs::File::create(path).unwrap();
-     match write!(file, "{}", content) {
+    match write!(file, "{}", content) {
         Ok(_) => println!("Directory created: {:?}", path),
         Err(e) => eprintln!("Failed to create directory: {:?}", e),
-     }
-        
-    
+    }
+
     // match fs::write(path, content) {
     //     Ok(_) => println!("JSON file created successfully."),
     //     Err(e) => eprintln!("Failed to write to file: {:?}", e),
@@ -102,6 +110,7 @@ fn main() {
             extract_div_contents,
             get_project,
             write_to_file,
+            choose_folder
         ])
         .menu(generate_menu())
         .run(tauri::generate_context!())
