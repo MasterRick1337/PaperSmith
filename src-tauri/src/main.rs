@@ -92,7 +92,8 @@ fn write_to_json(path: &str, content: &str) {
             return;
         }
     };
-    // match write!(file, "{}", content) {
+    let result = write!(file, "{}", content);
+    // match result {
     //     Ok(_) => println!("Wrote in file: {:?}", file_path),
     //     Err(e) => eprintln!("Error when writing in file: {:?}", e),
     // }
