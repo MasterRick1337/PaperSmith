@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 :root {
-    --base: 234, 234, 242;
-    --border: 244, 244, 255;
-    --surface0: 219, 219, 219;
-    --surface1: 190, 190, 199;
+    --base: 30, 30, 42;
+    --border: 44, 44, 56;
+    --surface0: 35, 35, 45;
+    --surface1: 42, 42, 55;
     --overlay0: 69, 69, 82;
-    --text: 0, 0, 0;
+    --text: 209, 213, 219;
     --font-size: 16px;
     --line-height: 1.5;
     --aspect-ratio: 1.0;

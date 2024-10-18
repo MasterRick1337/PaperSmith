@@ -11,6 +11,10 @@ use yew::prelude::*;
 use yew_hooks::prelude::*;
 use yew_icons::{Icon, IconId};
 use yew::events::MouseEvent;
+use markdown_it::MarkdownIt;
+use yew::virtual_dom::VNode;
+
+
 
 
 #[path = "font_size_handlers.rs"]
@@ -36,9 +40,6 @@ use text_styling_handlers::TextStylingControls;
 mod sidebar;
 use sidebar::SideBar;
 use shared::Project;
-
-#[path = "markdown_handler.rs"]
-mod markdown_handler;
 
 
 
@@ -69,6 +70,10 @@ pub fn app() -> Html {
             <>{"No Project Loaded"}</>
         }
     });
+
+    let parser = &mut markdown_it::MarkdownIt::new();
+    markdown_it::plugins::cmark::add(parser);
+    markdown_it::plugins::extra::add(parser);
 
     let start_time = use_state(|| None);
     let word_count = use_state(|| 0);
@@ -190,9 +195,9 @@ pub fn app() -> Html {
                             let count = text.len();
                             let count_no_spaces =
                                 text.chars().filter(|c| !c.is_whitespace()).count();
-                            // gloo_console::log!("Text: {}", text.to_string());
-                            // gloo_console::log!("Character count: {}", count);
-                            // gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
+                            gloo_console::log!("Text: {}", text.to_string());
+                            gloo_console::log!("Character count: {}", count);
+                            gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
                             char_count.set(count);
                             char_count_no_spaces.set(count_no_spaces);
                         }
@@ -211,6 +216,9 @@ pub fn app() -> Html {
 
 
 
+    let ast  = parser.parse("Hello **world**!");
+    let html = ast.render();
+    
     html! {
         <>
             <style id="dynamic-style"></style>
@@ -243,7 +251,7 @@ pub fn app() -> Html {
                 //<Icon icon_id={IconId::LucideSpellCheck}/>
 
                 <button style="visibility:hidden" onclick={save}>{"Save"} </button>
-                <button onclick={on_load}>{"Load"}</button>
+                <button style="visibility:hidden" onclick={on_load}>{"Load"}</button>
 
             </div>
 
@@ -262,7 +270,8 @@ pub fn app() -> Html {
                             style={format!("text-align: {}; transform: scale({});", *text_alignment, *zoom_level / 100.0)}
                             contenteditable = "true"
                             oninput={on_text_input}
-                        />
+                            dangerously_set_inner_html={html.clone()}
+                        ></div>
                     </div>
                 </div>
                 <div class="notepad-container-compile"></div>
@@ -363,16 +372,7 @@ fn text_input_handler(
         if let Some(input) = text_input_ref.cast::<HtmlElement>() {
             let inner_text = input.inner_text();
             let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
-
-            // Process the lines with markdown handler
-            let compiled_lines: Vec<String> = new_lines
-                .iter()
-                .map(|line| markdown_handler::apply_markdown(line))
-                .collect();
-                
-            // Update the lines state
-            lines.set(compiled_lines.clone());
-            gloo_console::log!(compiled_lines.clone());
+            lines.set(new_lines);
 
             let words = inner_text.split_whitespace().count();
             word_count.set(words);
@@ -385,33 +385,4 @@ fn text_input_handler(
             wpm.set(calculated_wpm);
         }
     })
-}
-
-#[derive(Properties, PartialEq)]
-pub struct MarkdownProps {
-    pub mark_ref: NodeRef,
-}
-
-#[function_component]
-fn Markdown(MarkdownProps { mark_ref }: &MarkdownProps) -> Html {
-
-    {
-        let mark_ref=mark_ref.clone();
-        let text = mark_ref.cast::<HtmlElement>().unwrap().inner_text();
-        use_effect_with(text.clone(), move |_| {
-            gloo_console::log!("balalbla")
-        });
-    }
-    
-    if let Some(pages_element) = mark_ref.cast::<HtmlElement>() {
-            let text = pages_element.inner_text();
-            gloo_console::log!(text);
-        }
-
-
-    
-
-    html! {
-
-    }
 }

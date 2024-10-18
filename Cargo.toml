@@ -21,7 +21,7 @@ yew-hooks = "0.3.2"
 gloo-console = "0.3.0"
 chrono = "0.4.38"
 text_io = "0.1.12"
-markdown = "0.3.0"
+markdown-it = "0.6.1"
 
 
 [workspace]
