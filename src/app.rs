@@ -1,5 +1,6 @@
 use chrono::prelude::*;
 use chrono::TimeDelta;
+use markdown_it::MarkdownIt;
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -7,15 +8,11 @@ use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 use yew::events::InputEvent;
+use yew::events::MouseEvent;
 use yew::prelude::*;
+use yew::virtual_dom::VNode;
 use yew_hooks::prelude::*;
 use yew_icons::{Icon, IconId};
-use yew::events::MouseEvent;
-use markdown_it::MarkdownIt;
-use yew::virtual_dom::VNode;
-
-
-
 
 #[path = "font_size_handlers.rs"]
 mod font_size_handlers;
@@ -38,10 +35,8 @@ use text_styling_handlers::TextStylingControls;
 
 #[path = "sidebar/sidebar.rs"]
 mod sidebar;
-use sidebar::SideBar;
 use shared::Project;
-
-
+use sidebar::SideBar;
 
 #[wasm_bindgen]
 extern "C" {
@@ -54,7 +49,6 @@ struct SaveFileArgs {
     content: String,
     filename: String,
 }
-
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -75,12 +69,27 @@ pub fn app() -> Html {
     markdown_it::plugins::cmark::add(parser);
     markdown_it::plugins::extra::add(parser);
 
+    let ast = parser.parse("Hello **world**!");
+    let html = ast.render();
+
+    let test_ref = use_node_ref();
+
+    if let Some(test_element) = test_ref.cast::<HtmlElement>() {
+        test_element.set_inner_html(html.as_str());
+    }
+
     let start_time = use_state(|| None);
     let word_count = use_state(|| 0);
     let wpm = use_state(|| 0.0);
 
-    let on_text_input = text_input_handler(text_input_ref.clone(), lines.clone(), start_time.clone(), word_count.clone(), wpm.clone());
-    
+    let on_text_input = text_input_handler(
+        text_input_ref.clone(),
+        lines.clone(),
+        start_time.clone(),
+        word_count.clone(),
+        wpm.clone(),
+    );
+
     let save = {
         let text_input_ref = text_input_ref.clone();
         Callback::from(move |_| {
@@ -167,8 +176,8 @@ pub fn app() -> Html {
         }
 
         html! {
-        <div>{format!("{} Words", *word_count)}</div>
-    }
+            <div>{format!("{} Words", *word_count)}</div>
+        }
     }
 
     #[derive(Properties, PartialEq)]
@@ -207,18 +216,13 @@ pub fn app() -> Html {
             )
         }
         html! {
-        <div>
-            <p>{format!("Characters: {}, {} without spaces", *char_count, *char_count_no_spaces)}</p>
-            </div>
+            <div>
+                <p>{format!("Characters: {}, {} without spaces", *char_count, *char_count_no_spaces)}</p>
+                </div>
 
+        }
     }
-    }
 
-
-
-    let ast  = parser.parse("Hello **world**!");
-    let html = ast.render();
-    
     html! {
         <>
             <style id="dynamic-style"></style>
@@ -270,11 +274,12 @@ pub fn app() -> Html {
                             style={format!("text-align: {}; transform: scale({});", *text_alignment, *zoom_level / 100.0)}
                             contenteditable = "true"
                             oninput={on_text_input}
-                            dangerously_set_inner_html={html.clone()}
-                        ></div>
+                        >
+                        {html.clone()}
+                        </div>
                     </div>
                 </div>
-                <div class="notepad-container-compile"></div>
+                <div class="notepad-container-compile" ref={test_ref}></div>
             </div>
 
             <div class="bottombar">
@@ -346,8 +351,6 @@ fn SessionTime() -> Html {
     }
 }
 
-
-
 fn calculate_wpm(word_count: usize, start_time: Option<DateTime<Local>>) -> f64 {
     if let Some(start) = start_time {
         let elapsed = Local::now() - start;
@@ -359,14 +362,12 @@ fn calculate_wpm(word_count: usize, start_time: Option<DateTime<Local>>) -> f64 
     0.0
 }
 
-
-
 fn text_input_handler(
     text_input_ref: NodeRef,
     lines: UseStateHandle<Vec<String>>,
     start_time: UseStateHandle<Option<DateTime<Local>>>,
     word_count: UseStateHandle<usize>,
-    wpm: UseStateHandle<f64>,     
+    wpm: UseStateHandle<f64>,
 ) -> Callback<InputEvent> {
     Callback::from(move |_| {
         if let Some(input) = text_input_ref.cast::<HtmlElement>() {
@@ -385,4 +386,13 @@ fn text_input_handler(
             wpm.set(calculated_wpm);
         }
     })
+}
+
+fn rendering_handler() {
+    let parser = &mut markdown_it::MarkdownIt::new();
+    markdown_it::plugins::cmark::add(parser);
+    markdown_it::plugins::extra::add(parser);
+
+    let ast = parser.parse("Hello **world**!");
+    let html = ast.render();
 }
