@@ -5,10 +5,13 @@ use yew::prelude::*;
 use yew_hooks::prelude::*;
 use wasm_bindgen::prelude::wasm_bindgen;
 use serde_json::json;
-use std::path::Path;
 use wasm_bindgen::JsValue;
 
 use serde::{Deserialize, Serialize};
+
+#[path ="wpm.rs"]
+mod wpm;
+use wpm::calculate_wpm;
 
 #[wasm_bindgen]
 extern "C" {
@@ -34,6 +37,7 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
     let word_count = use_state(|| 0);
     let session_time = use_state(|| String::from("00:00:00"));
     let start_time = use_state(Local::now);
+    let calculated_wpm = calculate_wpm(*word_count, Some(*start_time));
 
     // Use an interval to update statistics every 1500 milliseconds
     {
@@ -43,6 +47,7 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
         let session_time = session_time.clone();
         let start_time = start_time.clone();
         let pages_ref = pages_ref.clone();
+        let calculated_wpm = calculated_wpm.clone();
 
         use_interval(
             {
@@ -52,6 +57,7 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
                 let session_time = session_time.clone();
                 let start_time = start_time.clone();
                 let pages_ref = pages_ref.clone();
+                let calculated_wpm = calculated_wpm.clone();
 
                 move || {
                     let char_count = char_count.clone();
@@ -60,6 +66,7 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
                     let session_time = session_time.clone();
                     let start_time = start_time.clone();
                     let pages_ref = pages_ref.clone();
+                    let calculated_wpm = calculated_wpm.clone();
                     spawn_local(async move {
                         if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
                             let text = pages_element.inner_text();
@@ -88,12 +95,19 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
                                 "session_time": <std::string::String as Clone>::clone(&*session_time.clone()),
                                 "word_count": word_count_value,
                                 "char_count": count,
-                                "char_count_with_no_spaces": *char_count_no_spaces.clone()
+                                "char_count_with_no_spaces": *char_count_no_spaces.clone(),
+                                "wpm": calculated_wpm
                             }).to_string();
                             
-                            let path = Path::new("C:\\Users\\Jannis\\Schule\\Diplomarbeit\\statistic");
+                            
+                            let path_jsvalue = invoke("get_data_dir", JsValue::null()).await;
+
+                            let mut path_string = path_jsvalue.as_string().expect("Geming").to_owned();
+
+                            path_string.push_str("\\PaperSmith\\");
+
                             let json_write = FileWriteData {
-                                path: path.to_string_lossy().to_string(),
+                                path: path_string,
                                 content: json 
                             };
 
@@ -107,6 +121,6 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
     }
 
     html! {
-        <div>{format!("{}, {} Words; Characters: {}, {} without spaces;", *session_time, *word_count, *char_count,*char_count_no_spaces)}</div>
+        <div>{format!("{}, {} Words; Characters: {}, {} without spaces, {:.2} wpm", *session_time, *word_count, *char_count,*char_count_no_spaces, calculated_wpm)}</div>
     }
 }

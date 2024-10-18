@@ -19,9 +19,6 @@ use font_size_handlers::FontSizeControls;
 mod zoom_level_handlers;
 use zoom_level_handlers::ZoomControls;
 
-#[path = "statistics/wpm.rs"]
-mod wpm;
-use wpm::calculate_wpm;
 
 #[path = "statistics/statistic.rs"]
 mod statistic;
@@ -72,16 +69,10 @@ pub fn app() -> Html {
     });
     let modal = use_state(|| html!());
 
-    let start_time = use_state(|| None);
-    let word_count = use_state(|| 0);
-    let wpm = use_state(|| 0.0);
 
     let on_text_input = text_input_handler(
         text_input_ref.clone(),
         lines,
-        start_time,
-        word_count,
-        wpm.clone(),
     );
 
     let save = {
@@ -254,10 +245,6 @@ pub fn app() -> Html {
             <div class="bottombar">
                 <div class="bottombar-left">
                     <Statistics pages_ref={pages_ref.clone()}/>
-                    // <SessionTime />
-                    // <WordCount pages_ref={pages_ref.clone()} />
-                    // <CharCount pages_ref={pages_ref.clone()} />
-                    <p>{ format!("WPM: {:.2}", *wpm) }</p>
                 </div>
                 <div class="bottombar-right">
                     <ZoomControls zoom_level={zoom_level.clone()} />
@@ -294,25 +281,12 @@ let save = {
 fn text_input_handler(
     text_input_ref: NodeRef,
     lines: UseStateHandle<Vec<String>>,
-    start_time: UseStateHandle<Option<DateTime<Local>>>,
-    word_count: UseStateHandle<usize>,
-    wpm: UseStateHandle<f64>,
 ) -> Callback<InputEvent> {
     Callback::from(move |_| {
         if let Some(input) = text_input_ref.cast::<HtmlElement>() {
             let inner_text = input.inner_text();
             let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
             lines.set(new_lines);
-
-            let words = inner_text.split_whitespace().count();
-            word_count.set(words);
-
-            if start_time.is_none() {
-                start_time.set(Some(Local::now()));
-            }
-
-            let calculated_wpm = calculate_wpm(*word_count, *start_time);
-            wpm.set(calculated_wpm);
         }
     })
 }

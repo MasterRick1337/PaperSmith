@@ -4,11 +4,12 @@
 use std::{io::Write, path::Path};
 use std::fs::OpenOptions;
 use std::fs::{self, File};
-use chrono::Local;
+use chrono::{Utc, DateTime};
 use rfd::FileDialog;
 use tauri::{CustomMenuItem, Menu, Submenu};
 use lazy_static::lazy_static;
 use std::sync::Mutex;
+use dirs_next;
 mod loader;
 
 use loader::parse_project;
@@ -73,42 +74,36 @@ fn extract_div_contents(input: &str) -> Vec<String> {
 
 // Definiere eine globale Variable für die Startzeit
 lazy_static! {
-    static ref START_TIME: Mutex<String> = Mutex::new(Local::now().format("%Y-%m-%d_%H-%M-%S").to_string());
+    static ref START_TIME: Mutex<DateTime<Utc>> = Mutex::new(Utc::now());
 }
 
 #[tauri::command]
 fn write_to_json(path: &str, content: &str) {
-    // Sperre die START_TIME und verwende sie als Dateinamen
     let start_time = START_TIME.lock().unwrap().clone();
-    let file_name = format!("{}.json", start_time);
+    let formatted_time = start_time.format("%Y-%m-%dT%H-%M-%S").to_string();
 
-    // Vergewissere dich, dass das Verzeichnis existiert; erstelle es, wenn nicht
-    if !Path::new(path).exists() {
-        match fs::create_dir_all(path) {
-            Ok(_) => println!("Verzeichnis erstellt: {:?}", path),
-            Err(e) => {
-                eprintln!("Fehler beim Erstellen des Verzeichnisses: {:?}", e);
-                return;
-            }
-        }
-    }
-
-    // Erstelle den vollständigen Pfad für die Datei
+    let file_name = format!("{}.json", formatted_time);
     let file_path = format!("{}/{}", path, file_name);
 
-    // Erstelle die Datei oder überschreibe sie, falls sie existiert
     let mut file = match File::create(&file_path) {
         Ok(f) => f,
         Err(e) => {
-            eprintln!("Fehler beim Erstellen der Datei: {:?}", e);
+            eprintln!("Error when creating: {:?}", e);
             return;
         }
     };
+    // match write!(file, "{}", content) {
+    //     Ok(_) => println!("Wrote in file: {:?}", file_path),
+    //     Err(e) => eprintln!("Error when writing in file: {:?}", e),
+    // }
+}
 
-    // Schreibe den Inhalt in die Datei
-    match write!(file, "{}", content) {
-        Ok(_) => println!("Inhalt in Datei geschrieben: {:?}", file_path),
-        Err(e) => eprintln!("Fehler beim Schreiben in die Datei: {:?}", e),
+#[tauri::command]
+fn get_data_dir() -> String {
+    if let Some(config_dir) = dirs_next::data_dir() {
+         return config_dir.to_string_lossy().to_string();
+    } else {
+        return "No path".to_string();
     }
 }
 
@@ -155,6 +150,7 @@ fn main() {
             get_project,
             write_to_file,
             write_to_json,
+            get_data_dir,
         ])
         .menu(generate_menu())
         .run(tauri::generate_context!())
