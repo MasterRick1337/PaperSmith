@@ -19,16 +19,10 @@ use font_size_handlers::FontSizeControls;
 mod zoom_level_handlers;
 use zoom_level_handlers::ZoomControls;
 
-#[path = "statistics/wpm.rs"]
-mod wpm;
-use wpm::calculate_wpm;
 
-#[path = "statistics/session_time.rs"]
-mod session_time;
-use session_time::SessionTime;
-
-#[path = "statistics/word_count.rs"]
-mod word_count;
+#[path = "statistics/statistic.rs"]
+mod statistic;
+use statistic::Statistics;
 
 #[path = "text_alignment_handlers.rs"]
 mod text_alignment_handlers;
@@ -75,16 +69,10 @@ pub fn app() -> Html {
     });
     let modal = use_state(|| html!());
 
-    let start_time = use_state(|| None);
-    let word_count = use_state(|| 0);
-    let wpm = use_state(|| 0.0);
 
     let on_text_input = text_input_handler(
         text_input_ref.clone(),
         lines,
-        start_time,
-        word_count,
-        wpm.clone(),
     );
 
     let save = {
@@ -164,72 +152,6 @@ pub fn app() -> Html {
             }
         })
     };
-
-    #[function_component]
-    fn WordCount(WordCountProps { pages_ref }: &WordCountProps) -> Html {
-        let word_count = use_state(|| 0);
-        {
-            let pages_ref = pages_ref.clone();
-            let word_count = word_count.clone();
-            use_interval(
-                {
-                    let pages_ref = pages_ref;
-                    let word_count = word_count;
-                    move || {
-                        if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
-                            let text = pages_element.inner_text();
-                            let count = text.split_whitespace().count();
-                            word_count.set(count);
-                        }
-                    }
-                },
-                1500,
-            );
-        }
-
-        html! { <div>{ format!("{} Words", *word_count) }</div> }
-    }
-
-    #[derive(Properties, PartialEq)]
-    pub struct CharCountProps {
-        pub pages_ref: NodeRef,
-    }
-
-    #[function_component]
-    fn CharCount(CharCountProps { pages_ref }: &CharCountProps) -> Html {
-        let char_count = use_state(|| 0);
-        let char_count_no_spaces = use_state(|| 0);
-        {
-            let pages_ref = pages_ref.clone();
-            let char_count = char_count.clone();
-            let char_count_no_spaces = char_count_no_spaces.clone();
-            use_interval(
-                {
-                    move || {
-                        if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
-                            let text = pages_element.inner_text();
-                            let count = text.len();
-                            let count_no_spaces =
-                                text.chars().filter(|c| !c.is_whitespace()).count();
-                            // gloo_console::log!("Text: {}", text);
-                            // gloo_console::log!("Character count: {}", count);
-                            // gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
-                            char_count.set(count);
-                            char_count_no_spaces.set(count_no_spaces);
-                        }
-                    }
-                },
-                1500,
-            );
-        }
-        html! {
-            <div>
-                <p>
-                    { format!("Characters: {}, {} without spaces", *char_count, *char_count_no_spaces) }
-                </p>
-            </div>
-        }
-    }
 
     html! {
         <>
@@ -322,10 +244,7 @@ pub fn app() -> Html {
             </div>
             <div class="bottombar">
                 <div class="bottombar-left">
-                    <SessionTime />
-                    <WordCount pages_ref={pages_ref.clone()} />
-                    <CharCount pages_ref={pages_ref.clone()} />
-                    <p>{ format!("WPM: {:.2}", *wpm) }</p>
+                    <Statistics pages_ref={pages_ref.clone()}/>
                 </div>
                 <div class="bottombar-right">
                     <ZoomControls zoom_level={zoom_level.clone()} />
@@ -362,25 +281,12 @@ let save = {
 fn text_input_handler(
     text_input_ref: NodeRef,
     lines: UseStateHandle<Vec<String>>,
-    start_time: UseStateHandle<Option<DateTime<Local>>>,
-    word_count: UseStateHandle<usize>,
-    wpm: UseStateHandle<f64>,
 ) -> Callback<InputEvent> {
     Callback::from(move |_| {
         if let Some(input) = text_input_ref.cast::<HtmlElement>() {
             let inner_text = input.inner_text();
             let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
             lines.set(new_lines);
-
-            let words = inner_text.split_whitespace().count();
-            word_count.set(words);
-
-            if start_time.is_none() {
-                start_time.set(Some(Local::now()));
-            }
-
-            let calculated_wpm = calculate_wpm(*word_count, *start_time);
-            wpm.set(calculated_wpm);
         }
     })
 }

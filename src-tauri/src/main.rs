@@ -2,12 +2,14 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{io::Write, path::Path};
-
-use std::fs;
-
+use std::fs::OpenOptions;
+use std::fs::{self, File};
+use chrono::{Utc, DateTime};
 use rfd::FileDialog;
 use tauri::{CustomMenuItem, Menu, Submenu};
-
+use lazy_static::lazy_static;
+use std::sync::Mutex;
+use dirs_next;
 mod loader;
 
 use loader::parse_project;
@@ -70,27 +72,72 @@ fn extract_div_contents(input: &str) -> Vec<String> {
     result
 }
 
+// Definiere eine globale Variable für die Startzeit
+lazy_static! {
+    static ref START_TIME: Mutex<DateTime<Utc>> = Mutex::new(Utc::now());
+}
+
+#[tauri::command]
+fn write_to_json(path: &str, content: &str) {
+    let start_time = START_TIME.lock().unwrap().clone();
+    let formatted_time = start_time.format("%Y-%m-%dT%H-%M-%S").to_string();
+
+    let file_name = format!("{}.json", formatted_time);
+    let file_path = format!("{}/{}", path, file_name);
+
+    let mut file = match File::create(&file_path) {
+        Ok(f) => f,
+        Err(e) => {
+            eprintln!("Error when creating: {:?}", e);
+            return;
+        }
+    };
+    // match write!(file, "{}", content) {
+    //     Ok(_) => println!("Wrote in file: {:?}", file_path),
+    //     Err(e) => eprintln!("Error when writing in file: {:?}", e),
+    // }
+}
+
+#[tauri::command]
+fn get_data_dir() -> String {
+    if let Some(config_dir) = dirs_next::data_dir() {
+         return config_dir.to_string_lossy().to_string();
+    } else {
+        return "No path".to_string();
+    }
+}
+
 #[tauri::command]
 fn write_to_file(path: &str, content: &str) {
-    //let path = Path::new(&path);
-    // if !path.exists() {
-    //     match fs::create_dir_all("C:/Users/janni/Desktop/Schule/Diplomarbeit/PaperSmith/statistic") {
-    //         Ok(_) => println!("Directory created: {:?}", path),
-    //         Err(e) => eprintln!("Failed to create directory: {:?}", e),
-    //     }
-    // }
 
-    let mut file = fs::File::create(path).unwrap();
-     match write!(file, "{}", content) {
-        Ok(_) => println!("Directory created: {:?}", path),
-        Err(e) => eprintln!("Failed to create directory: {:?}", e),
-     }
-        
-    
-    // match fs::write(path, content) {
-    //     Ok(_) => println!("JSON file created successfully."),
-    //     Err(e) => eprintln!("Failed to write to file: {:?}", e),
-    // }
+    use std::fs::{self, OpenOptions};
+    use std::io::Write;
+
+    // Ensure the directory exists
+    let path = std::path::Path::new(path);
+    if let Some(parent) = path.parent() {
+        if !parent.exists() {
+            match fs::create_dir_all(parent) {
+                Ok(_) => println!("Directory created: {:?}", parent),
+                Err(e) => eprintln!("Failed to create directory: {:?}", e),
+            }
+        }
+    }
+
+    // Open the file in append mode or create it if it doesn't exist
+    let mut file = match OpenOptions::new().append(true).create(true).open(path) {
+        Ok(f) => f,
+        Err(e) => {
+            eprintln!("Failed to open or create the file: {:?}", e);
+            return;
+        }
+    };
+
+    // Write the content to the file
+    match write!(file, "{}", content) {
+        Ok(_) => println!("Content appended to file: {:?}", path),
+        Err(e) => eprintln!("Failed to write to file: {:?}", e),
+    }
 }
 
 fn main() {
@@ -102,6 +149,8 @@ fn main() {
             extract_div_contents,
             get_project,
             write_to_file,
+            write_to_json,
+            get_data_dir,
         ])
         .menu(generate_menu())
         .run(tauri::generate_context!())
