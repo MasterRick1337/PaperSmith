@@ -75,12 +75,12 @@ fn main() {
             extract_div_contents,
             get_project,
         ])
-        .menu(generate_menu())
+        //.menu(generate_menu())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
-fn generate_menu() -> Menu {
+/*fn generate_menu() -> Menu {
     let new = CustomMenuItem::new("new".to_string(), "New").accelerator("CTRL+N");
     let open = CustomMenuItem::new("open".to_string(), "Open...").accelerator("CTRL+O");
     let recent_submenu = Submenu::new(
@@ -193,4 +193,4 @@ fn generate_menu() -> Menu {
         .add_submenu(edit_submenu)
         .add_submenu(format_submenu)
         .add_submenu(misc_submenu)
-}
+}*/

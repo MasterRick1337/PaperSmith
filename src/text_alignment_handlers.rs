@@ -46,6 +46,7 @@ pub struct AlignmentButtonProps {
     pub icon: IconId,
     pub title: String,
     pub align: String,
+    pub class_name: String,
 }
 
 #[function_component(AlignmentButton)]
@@ -60,12 +61,14 @@ pub fn alignment_button(align_props: &AlignmentButtonProps) -> Html {
         }
     });
 
+    let combined_class = classes!("menubar-icon", align_props.class_name.clone());
+
     html! {
         <Icon
             icon_id={align_props.icon}
             width={"2em".to_owned()}
             height={"2em".to_owned()}
-            class="menubar-icon"
+            class={combined_class}
             title={align_props.title.clone()}
             onclick={onclick}
         />
@@ -117,24 +120,28 @@ pub fn text_alignment_controls(TextAlignmentProps { text_alignment: _ }: &TextAl
     html! {
         <div class="text-alignment-changer">
             <AlignmentButton
+            class_name={"align-center-button".to_string()}
                 range={range_state.clone()}
                 icon={IconId::LucideAlignCenter}
                 title="Align Center"
                 align="center"
             />
             <AlignmentButton
+                class_name={"align-justify-button".to_string()}
                 range={range_state.clone()}
                 icon={IconId::LucideAlignJustify}
                 title="Align Justify"
                 align="justify"
             />
             <AlignmentButton
+                class_name={"align-left-button".to_string()}
                 range={range_state.clone()}
                 icon={IconId::LucideAlignLeft}
                 title="Align Left"
                 align="left"
             />
             <AlignmentButton
+                class_name={"align-right-button".to_string()}
                 range={range_state.clone()}
                 icon={IconId::LucideAlignRight}
                 title="Align Right"
