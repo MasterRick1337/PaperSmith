@@ -302,6 +302,7 @@ svg.svg-icon {
     margin: 0 auto;
     transform-origin: top; /* TODO: Make Zoom work with transform-origin: center*/
     overflow-y: auto;
+    color: rgba(var(--text), 1);
 }
 
 .notepad-wrapper {

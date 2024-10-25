@@ -65,18 +65,7 @@ pub fn app() -> Html {
         }
     });
 
-    let parser = &mut markdown_it::MarkdownIt::new();
-    markdown_it::plugins::cmark::add(parser);
-    markdown_it::plugins::extra::add(parser);
-
-    let ast = parser.parse("Hello **world**!");
-    let html = ast.render();
-
-    let test_ref = use_node_ref();
-
-    if let Some(test_element) = test_ref.cast::<HtmlElement>() {
-        test_element.set_inner_html(html.as_str());
-    }
+    let render_ref = use_node_ref();
 
     let start_time = use_state(|| None);
     let word_count = use_state(|| 0);
@@ -88,6 +77,7 @@ pub fn app() -> Html {
         start_time.clone(),
         word_count.clone(),
         wpm.clone(),
+        render_ref.clone(),
     );
 
     let save = {
@@ -204,9 +194,9 @@ pub fn app() -> Html {
                             let count = text.len();
                             let count_no_spaces =
                                 text.chars().filter(|c| !c.is_whitespace()).count();
-                            gloo_console::log!("Text: {}", text.to_string());
-                            gloo_console::log!("Character count: {}", count);
-                            gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
+                            //gloo_console::log!("Text: {}", text.to_string());
+                            //gloo_console::log!("Character count: {}", count);
+                            //gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
                             char_count.set(count);
                             char_count_no_spaces.set(count_no_spaces);
                         }
@@ -274,12 +264,10 @@ pub fn app() -> Html {
                             style={format!("text-align: {}; transform: scale({});", *text_alignment, *zoom_level / 100.0)}
                             contenteditable = "true"
                             oninput={on_text_input}
-                        >
-                        {html.clone()}
-                        </div>
+                        />
                     </div>
                 </div>
-                <div class="notepad-container-compile" ref={test_ref}></div>
+                <div class="notepad-container-compile" ref={render_ref}></div>
             </div>
 
             <div class="bottombar">
@@ -368,12 +356,14 @@ fn text_input_handler(
     start_time: UseStateHandle<Option<DateTime<Local>>>,
     word_count: UseStateHandle<usize>,
     wpm: UseStateHandle<f64>,
+    render_ref: NodeRef,
 ) -> Callback<InputEvent> {
     Callback::from(move |_| {
         if let Some(input) = text_input_ref.cast::<HtmlElement>() {
             let inner_text = input.inner_text();
             let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
-            lines.set(new_lines);
+            //lines.set(new_lines);
+            rendering_handler(render_ref.clone(), new_lines.clone());
 
             let words = inner_text.split_whitespace().count();
             word_count.set(words);
@@ -388,11 +378,28 @@ fn text_input_handler(
     })
 }
 
-fn rendering_handler() {
+fn rendering_handler(render_ref: NodeRef, new_lines: Vec<String>) {
     let parser = &mut markdown_it::MarkdownIt::new();
     markdown_it::plugins::cmark::add(parser);
     markdown_it::plugins::extra::add(parser);
-
-    let ast = parser.parse("Hello **world**!");
-    let html = ast.render();
+    
+    let mut collected: Vec<String> = Vec::new();
+    
+    for line in new_lines {
+        let ast = parser.parse(line.as_str());
+        let html = ast.render();
+    
+        collected.push(html);
+    }
+    
+    let mut html_string: String = String::new();
+    
+    for html in collected {
+        html_string += html.as_str();
+        html_string += "\n";
+    }
+    
+    if let Some(rendered) = render_ref.cast::<HtmlElement>() {
+        rendered.set_inner_html(&html_string);
+    }
 }
