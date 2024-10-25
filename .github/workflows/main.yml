@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches:
+      - main
       - action-testing
-      - release-testing
 
 jobs:
   publish-tauri:
@@ -65,3 +65,23 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+      
+      - name: Calculate file hashes
+        run: |
+          echo "Calculating file hashes..."
+    
+          # Linux
+          shasum -a 256 "${{ github.workspace }}/target/release/app-linux-x86_64-snapshot-${{ github.sha }}.tar.gz" > hashes/linux.txt
+    
+          # Windows
+          shasum -a 256 "${{ github.workspace }}/target/release/app-windows-x86_64-snapshot-${{ github.sha }}.exe" > hashes/windows.txt
+    
+          echo "File hashes generated:"
+          cat hashes/*.txt
+
+      - name: Upload hash artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-hashes
+          path: hashes
+
