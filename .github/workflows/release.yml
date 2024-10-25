@@ -62,6 +62,6 @@ jobs:
           releaseName: 'App v__VERSION__'
           releaseBody: 'See the assets to download this version and install.'
           iconPath: 'src-tauri/icons/icon.png'
-          releaseDraft: true
-          prerelease: false
+          releaseDraft: false
+          prerelease: true
           args: ${{ matrix.args }}

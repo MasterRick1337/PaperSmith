@@ -2,6 +2,8 @@ name: 'generate hashes'
 
 on:
   release:
+    types:
+      - prereleased
 
 jobs:
   generate-hashes:
