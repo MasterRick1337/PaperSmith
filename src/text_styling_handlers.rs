@@ -33,6 +33,7 @@ pub struct StyleButtonProps {
     pub icon: IconId,
     pub title: String,
     pub style: String,
+    pub class_name: String,
 }
 
 #[function_component(StyleButton)]
@@ -46,12 +47,14 @@ pub fn style_button(style_props: &StyleButtonProps) -> Html {
         }
     });
 
+    let combined_class = classes!("menubar-icon", style_props.class_name.clone());
+
     html! {
         <Icon
             icon_id={style_props.icon}
             width={"2em".to_owned()}
             height={"2em".to_owned()}
-            class="menubar-icon"
+            class={combined_class}
             title={style_props.title.clone()}
             onclick={onclick}
         />
@@ -96,18 +99,21 @@ pub fn text_styling_controls() -> Html {
     html! {
         <div class="text-styling-changer">
             <StyleButton
+                class_name={"bold-button".to_string()}
                 range={range_state.clone()}
                 icon={IconId::LucideBold}
                 title="Bold"
                 style="**"
             />
             <StyleButton
+                class_name={"italic-button".to_string()}
                 range={range_state.clone()}
                 icon={IconId::LucideItalic}
                 title="Italic"
                 style="_"
             />
             <StyleButton
+                class_name={"underline-button".to_string()}
                 range={range_state.clone()}
                 icon={IconId::LucideUnderline}
                 title="Underline"
