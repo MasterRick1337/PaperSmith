@@ -1,0 +1,21 @@
+name: 'generate hashes'
+
+on:
+  release:
+
+jobs:
+  generate-hashes:
+    permissions:
+      contents: write
+
+    runs-on: 'ubuntu-22.04'
+    steps:
+      - uses: MCJack123/ghaction-generate-release-hashes@v3
+        with:
+          hash-type: md5
+          file-name: hashes.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Asset Hashes
+          path: hashes.txt
