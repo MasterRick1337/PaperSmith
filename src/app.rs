@@ -1,6 +1,7 @@
 use chrono::prelude::*;
 use chrono::TimeDelta;
 use markdown_it::MarkdownIt;
+use pulldown_cmark::{html, Options, Parser};
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -10,7 +11,6 @@ use web_sys::HtmlElement;
 use yew::events::InputEvent;
 use yew::events::MouseEvent;
 use yew::prelude::*;
-use yew::virtual_dom::VNode;
 use yew_hooks::prelude::*;
 use yew_icons::{Icon, IconId};
 
@@ -267,7 +267,8 @@ pub fn app() -> Html {
                         />
                     </div>
                 </div>
-                <div class="notepad-container-compile" ref={render_ref}></div>
+                <div class="notepad-container-compile" ref={render_ref}>
+                </div>
             </div>
 
             <div class="bottombar">
@@ -379,27 +380,22 @@ fn text_input_handler(
 }
 
 fn rendering_handler(render_ref: NodeRef, new_lines: Vec<String>) {
-    let parser = &mut markdown_it::MarkdownIt::new();
-    markdown_it::plugins::cmark::add(parser);
-    markdown_it::plugins::extra::add(parser);
-    
-    let mut collected: Vec<String> = Vec::new();
-    
-    for line in new_lines {
-        let ast = parser.parse(line.as_str());
-        let html = ast.render();
-    
-        collected.push(html);
-    }
-    
-    let mut html_string: String = String::new();
-    
-    for html in collected {
-        html_string += html.as_str();
-        html_string += "\n";
-    }
-    
+    let html_strings: Vec<String> = new_lines
+        .iter()
+        .map(|line| {
+            let mut options = Options::empty();
+            options.insert(Options::ENABLE_STRIKETHROUGH);
+
+            let parser = Parser::new_ext(line.as_str(), options);
+            let mut html_output = String::new();
+            html::push_html(&mut html_output, parser);
+            html_output
+        })
+        .collect();
+
+    let html_string: String = html_strings.join("\n");
+
     if let Some(rendered) = render_ref.cast::<HtmlElement>() {
-        rendered.set_inner_html(&html_string);
+        rendered.set_inner_html(html_string.as_str());
     }
 }
