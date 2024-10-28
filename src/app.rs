@@ -1,6 +1,5 @@
 use chrono::prelude::*;
 use chrono::TimeDelta;
-use markdown_it::MarkdownIt;
 use pulldown_cmark::{html, Options, Parser};
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
@@ -226,14 +225,10 @@ pub fn app() -> Html {
 
                 <FontSizeControls font_size={font_size.clone()}/>
 
-                //<Icon icon_id={IconId::}/>
                 <div class="separator"></div>
                 <TextStylingControls/>
-                //<Icon icon_id={IconId::LucideBold} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
-                //<Icon icon_id={IconId::LucideItalic} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
-                //<Icon icon_id={IconId::LucideUnderline} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
+
                 <Icon icon_id={IconId::LucideBaseline} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
-                <Icon icon_id={IconId::LucideHighlighter} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 <div class="separator"></div>
 
                 <TextAlignmentControls text_alignment={text_alignment.clone()}/>
@@ -256,10 +251,10 @@ pub fn app() -> Html {
             <div class="notepad-outer-container" ref={pages_ref.clone()}>
                 <div class="notepad-container-edit">
                     <a class="anchor"></a>
-                    <div class="notepad-wrapper">
+                    <div class="notepad-wrapper-edit">
                         <div
-                            class="notepad-textarea"
-                            id="notepad-textarea"
+                            class="notepad-textarea-edit"
+                            id="notepad-textarea-edit"
                             ref={text_input_ref}
                             style={format!("text-align: {}; transform: scale({});", *text_alignment, *zoom_level / 100.0)}
                             contenteditable = "true"
@@ -267,7 +262,14 @@ pub fn app() -> Html {
                         />
                     </div>
                 </div>
-                <div class="notepad-container-compile" ref={render_ref}>
+                <div class="notepad-container-compile">
+                    <div class="notepad-wrapper-compile">
+                        <div 
+                            class="notepad-textarea-compile"
+                            id="notepad-textarea-compile"
+                            ref={render_ref}
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -379,6 +381,7 @@ fn text_input_handler(
     })
 }
 
+// ad br tag after end of each line (make it one string)
 fn rendering_handler(render_ref: NodeRef, new_lines: Vec<String>) {
     let html_strings: Vec<String> = new_lines
         .iter()

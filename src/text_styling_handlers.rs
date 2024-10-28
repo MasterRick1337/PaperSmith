@@ -119,6 +119,13 @@ pub fn text_styling_controls() -> Html {
                 title="Underline"
                 style="__"
             />
+            <StyleButton
+                class_name={"highlight-button".to_string()}
+                range={range_state.clone()}
+                icon={IconId::LucideHighlighter}
+                title="Highlighter"
+                style="//"
+            />
         </div>
     }
 }
