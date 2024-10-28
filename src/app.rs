@@ -1,6 +1,6 @@
 use chrono::prelude::*;
 use chrono::TimeDelta;
-use markdown_it::MarkdownIt;
+// use markdown_it::MarkdownIt;
 use pulldown_cmark::{html, Options, Parser};
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
@@ -73,7 +73,6 @@ pub fn app() -> Html {
 
     let on_text_input = text_input_handler(
         text_input_ref.clone(),
-        lines.clone(),
         start_time.clone(),
         word_count.clone(),
         wpm.clone(),
@@ -353,7 +352,6 @@ fn calculate_wpm(word_count: usize, start_time: Option<DateTime<Local>>) -> f64 
 
 fn text_input_handler(
     text_input_ref: NodeRef,
-    lines: UseStateHandle<Vec<String>>,
     start_time: UseStateHandle<Option<DateTime<Local>>>,
     word_count: UseStateHandle<usize>,
     wpm: UseStateHandle<f64>,
