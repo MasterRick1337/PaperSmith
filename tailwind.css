@@ -140,6 +140,18 @@ body {
     border-radius: 5px;
 }
 
+.font-size-button,
+.bold-button,
+.italic-button,
+.underline-button,
+.highlight-button,
+.align-center-button,
+.align-justify-button,
+.align-left-button,
+.align-right-button
+{
+    box-sizing: border-box;
+}
 
 .text-styling-changer {
     display: flex;
