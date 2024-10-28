@@ -67,14 +67,19 @@ jobs:
       - name: Download Assets
         run: |
           mkdir -p assets
-          for asset in $(curl -s "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/$GITHUB_REF_NAME/assets" | jq -r '.[].browser_download_url'); do
-            wget "$asset" -P assets/
+          # Get the release information for the current tag
+          release_info=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/$GITHUB_REF_NAME")
+    
+          # Extract asset URLs from the release information
+          echo "$release_info" | jq -r '.assets[] | .browser_download_url' | while read asset_url; do
+            wget "$asset_url" -P assets/
           done
 
       - name: Generate Individual Hash Files
         run: |
           for file in assets/*; do
-            echo "$(basename "$file") $(md5sum "$file" | awk '{print $1}') > "$(basename "$file").md5"
+            md5sum "$file" | awk '{print $1}' > "$(basename "$file").md5"
+            echo "$(basename "$file") $(< "$(basename "$file").md5")" >> "$(basename "$file").md5"
           done
 
       - name: Upload Hash Artifacts
