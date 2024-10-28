@@ -1,23 +1,32 @@
-name: 'generate hashes'
-
+name: Generate Individual Release Hashes
 on:
   release:
-    types:
-      - prereleased
+    types: [created]
 
 jobs:
-  generate-hashes:
-    permissions:
-      contents: write
-
-    runs-on: 'ubuntu-22.04'
+  generate_hashes:
+    runs-on: ubuntu-latest
     steps:
-      - uses: MCJack123/ghaction-generate-release-hashes@v3
-        with:
-          hash-type: md5
-          file-name: hashes.txt
+      - name: Setup
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y md5sum
 
-      - uses: actions/upload-artifact@v4
+      - name: Download Assets
+        run: |
+          mkdir -p assets
+          for asset in $(curl -s "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/$GITHUB_REF_NAME/assets" | jq -r '.[].browser_download_url'); do
+            wget "$asset" -P assets/
+          done
+
+      - name: Generate Individual Hash Files
+        run: |
+          for file in assets/*; do
+            echo "$(basename "$file") $(md5sum "$file" | awk '{print $1}') > "$(basename "$file").md5"
+          done
+
+      - name: Upload Hash Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: Asset Hashes
-          path: hashes.txt
+          name: release-hashes
+          path: assets/*.md5
