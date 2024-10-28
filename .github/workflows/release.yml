@@ -15,10 +15,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - platform: 'macos-latest' # for Arm based macs (M1 and above).
-          #  args: '--target aarch64-apple-darwin'
-          #- platform: 'macos-latest' # for Intel based macs.
-          #  args: '--target x86_64-apple-darwin'
           - platform: 'ubuntu-22.04'
             args: ''
           - platform: 'windows-latest'
@@ -29,25 +25,18 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
+        if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev
 
       - name: install Rust stable
-        uses: dtolnay/rust-toolchain@stable # Set this to dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@stable
         with:
-          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
-
-          #- name: cargo installs
-          #run: |
-          #cargo install --locked trunk
-          #cargo install tauri-cli
 
       - uses: jetli/trunk-action@v0.5.0
         with:
-        # Optional version of trunk to install(eg. 'v0.19.1', 'latest')
           version: 'latest'
 
       - name: add target
@@ -58,10 +47,41 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          tagName: app-v__VERSION__
           releaseName: 'App v__VERSION__'
           releaseBody: 'See the assets to download this version and install.'
           iconPath: 'src-tauri/icons/icon.png'
           releaseDraft: false
           prerelease: true
           args: ${{ matrix.args }}
+
+  generate-hashes:
+    permissions:
+      contents: write
+
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y md5sum
+
+      - name: Download Assets
+        run: |
+          mkdir -p assets
+          for asset in $(curl -s "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/$GITHUB_REF_NAME/assets" | jq -r '.[].browser_download_url'); do
+            wget "$asset" -P assets/
+          done
+
+      - name: Generate Individual Hash Files
+        run: |
+          for file in assets/*; do
+            echo "$(basename "$file") $(md5sum "$file" | awk '{print $1}') > "$(basename "$file").md5"
+          done
+
+      - name: Upload Hash Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-hashes
+          path: assets/*.md5
