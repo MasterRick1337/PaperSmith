@@ -85,13 +85,23 @@ jobs:
 
       - id: get_version
         # uses: battila7/get-version-action@v2
-        run: echo "version=$(curl "https://api.github.com/repos/$repo/tags" | jq -r '.[1].name')" >> $GITHUB_OUTPUT
+        run: |
+          version=$(curl "https://api.github.com/repos/$repo/tags" | jq -r '.[1].name')
+          echo "version=$version" >> $GITHUB_OUTPUT
         
       - id: get_version_number
-        run: echo "version_number=$(version_number=$(curl  "https://api.github.com/repos/MasterRick1337/PaperSmith/tags" | jq -r '.[1].name'); echo ${version_number:4})" >> $GITHUB_OUTPUT
+        run: |
+          version_number=$(version_number=$(curl  "https://api.github.com/repos/MasterRick1337/PaperSmith/tags" | jq -r '.[1].name'); echo ${version_number:4})
+          echo "version_number=$version_number" >> $GITHUB_OUTPUT
 
-      - name: version debug
-        run: echo ${{ steps.get_version.outputs.version }}
+      - name: Debug Version
+        run: |
+          echo "Debug: version=${{ steps.get_version.outputs.version }}"
+
+      - name: Debug Version Number
+        run: |
+          echo "Debug: version_number=${{ steps.get_version_number.outputs.version_number }}"
+
 
       - name: Upload Release with MD5 Files
         uses: softprops/action-gh-release@v2.0.8
