@@ -80,8 +80,7 @@ jobs:
       - name: Generate Individual Hash Files
         run: |
           for file in assets/*; do
-            md5sum "$file" | awk '{print $1}' > "$(basename "$file").md5"
-            echo "$(basename "$file") $(< "$(basename "$file").md5")" >> "$(basename "$file").md5"
+            md5sum "$file" | awk '{print $1}' > "assets/$(basename "$file").md5"
           done
 
       - name: Upload Hash Artifacts
