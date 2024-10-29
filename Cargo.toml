@@ -51,7 +51,7 @@ gloo-console = "0.3.0"
 chrono = "0.4.38"
 text_io = "0.1.12"
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
-
+log = "0.4"
 
 [workspace]
 members = ["shared", "src-tauri"]

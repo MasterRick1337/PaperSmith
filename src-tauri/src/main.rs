@@ -17,15 +17,9 @@ use loader::parse_project;
 use shared::Project;
 
 #[tauri::command]
-async fn show_save_dialog() -> Result<String, String> {
-    let path = FileDialog::new()
-        .set_title("Save File")
-        .add_filter("Text", &["txt"])
-        .add_filter("MarkDown", &["md"])
-        .save_file()
-        .ok_or_else(|| "No file selected".to_string())?;
-
-    Ok(path.to_str().unwrap_or_default().to_string())
+fn show_save_dialog(content: String) {
+    //REMAKE TO SAVE FILE IN CONTENT.MD !!!!!!!!!!!!!!!!!!!!
+    
 }
 
 #[tauri::command]
@@ -33,19 +27,6 @@ fn get_project() -> Option<Project> {
     let project_path = FileDialog::new().pick_folder().unwrap();
     parse_project(project_path)
 }
-
-/*this one worked--------------------------------------------------------------
-#[tauri::command]
-async fn show_save_dialog() {
-    let test: &str = "Test";
-    println!("{}", test);
-    dialog::FileDialogBuilder::default()
-        .add_filter("Markdown", &["md"])
-        .pick_file(|path_buf| match path_buf {
-            Some(p) => {}
-            _ => {}
-        });
-}*/
 
 #[tauri::command]
 fn extract_div_contents(input: &str) -> Vec<String> {
@@ -92,10 +73,7 @@ fn write_to_json(path: &str, content: &str) {
             return;
         }
     };
-    // match write!(file, "{}", content) {
-    //     Ok(_) => println!("Wrote in file: {:?}", file_path),
-    //     Err(e) => eprintln!("Error when writing in file: {:?}", e),
-    // }
+    write!(file, "{}", content);
 }
 
 #[tauri::command]
@@ -109,23 +87,11 @@ fn get_data_dir() -> String {
 
 #[tauri::command]
 fn write_to_file(path: &str, content: &str) {
-
-    use std::fs::{self, OpenOptions};
+    use std::fs::OpenOptions;
     use std::io::Write;
 
-    // Ensure the directory exists
-    let path = std::path::Path::new(path);
-    if let Some(parent) = path.parent() {
-        if !parent.exists() {
-            match fs::create_dir_all(parent) {
-                Ok(_) => println!("Directory created: {:?}", parent),
-                Err(e) => eprintln!("Failed to create directory: {:?}", e),
-            }
-        }
-    }
-
-    // Open the file in append mode or create it if it doesn't exist
-    let mut file = match OpenOptions::new().append(true).create(true).open(path) {
+    // Open the file in write mode (truncate it) or create it if it doesn't exist
+    let mut file = match OpenOptions::new().write(true).create(true).truncate(true).open(path) {
         Ok(f) => f,
         Err(e) => {
             eprintln!("Failed to open or create the file: {:?}", e);
@@ -134,10 +100,7 @@ fn write_to_file(path: &str, content: &str) {
     };
 
     // Write the content to the file
-    match write!(file, "{}", content) {
-        Ok(_) => println!("Content appended to file: {:?}", path),
-        Err(e) => eprintln!("Failed to write to file: {:?}", e),
-    }
+    write!(file, "{}", content);
 }
 
 fn main() {

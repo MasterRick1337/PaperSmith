@@ -1,6 +1,4 @@
 use chrono::prelude::*;
-use serde::Serialize;
-use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
@@ -10,6 +8,8 @@ use yew::events::MouseEvent;
 use yew::prelude::*;
 use yew_hooks::use_interval;
 use yew_icons::{Icon, IconId};
+use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
 #[path = "font_size_handlers.rs"]
 mod font_size_handlers;
@@ -55,6 +55,12 @@ pub struct WordCountProps {
     pub pages_ref: NodeRef,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct FileWriteData {
+    pub path: String,
+    pub content: String
+}
+
 #[function_component(App)]
 pub fn app() -> Html {
     let pages_ref: NodeRef = use_node_ref();
@@ -75,23 +81,31 @@ pub fn app() -> Html {
         lines,
     );
 
+
+    let project_path = project.as_ref().and_then(|proj| Some(proj.path.clone()));
+
     let save = {
         let text_input_ref = text_input_ref.clone();
+        let project_path = project_path.clone();
         Callback::from(move |_| {
             let text_input_ref = text_input_ref.clone();
+            let project_path = project_path.clone();
             spawn_local(async move {
                 if let Some(input_element) = text_input_ref.cast::<HtmlElement>() {
                     let text = input_element.inner_text();
-                    let result: Option<String> =
-                        invoke("show_save_dialog", JsValue::NULL).await.as_string();
-                    if let Some(path) = result {
-                        let save_args = SaveFileArgs {
-                            content: text,
-                            filename: path.clone(),
+
+                    if let Some(mut path) = project_path.clone() {
+                        // Append the desired sub-path to the existing project path
+                        path.push("Chapters");
+                        path.push("Beginning");
+                        path.push("Content.md");
+    
+                        let write_data = FileWriteData {
+                            path: path.to_string_lossy().to_string(),
+                            content: text
                         };
 
-                        let args = to_value(&save_args).unwrap();
-                        invoke("save_file", args).await;
+                        invoke("write_to_file", serde_wasm_bindgen::to_value(&write_data).unwrap()).await;
                     }
                 }
             });
@@ -110,6 +124,23 @@ pub fn app() -> Html {
                         Callback::from(move |_| modal.set(html!()))
                         }},
                         ModalButtonProps {text:"Apply".to_string(), text_color:"crust".to_string(), bg_color:"mauve".to_string(), callback: {
+                        let modal = modal.clone();
+                        Callback::from(move |_| modal.set(html!()))
+                        }}]}
+                />
+            });
+        })
+    };
+
+    let statistic_window = {
+        let modal = modal.clone();
+        let pages_ref = pages_ref.clone();
+        Callback::from(move |_| {
+            modal.set(html! {
+                <Modal
+                content={html!{<Statistics pages_ref={pages_ref.clone()}/>}}
+                    button_configs={vec![
+                        ModalButtonProps {text:"Close".to_string(), text_color:"crust".to_string(), bg_color:"maroon".to_string(), callback: {
                         let modal = modal.clone();
                         Callback::from(move |_| modal.set(html!()))
                         }}]}
@@ -222,6 +253,7 @@ pub fn app() -> Html {
                 <button onclick={save}>{ "Save" }</button>
                 <button onclick={on_load}>{ "Load" }</button>
                 <button onclick={open_modal}>{ "Modal" }</button>
+                <button onclick={statistic_window}>{"Statistic"}</button>
             </div>
             <div class="sidebar">{ (*sidebar).clone() }</div>
             <div class="notepad-outer-container" ref={pages_ref.clone()}>
