@@ -81,15 +81,9 @@ fn open_explorer(path: String) {
 }
 
 #[tauri::command]
-async fn show_save_dialog() -> Result<String, String> {
-    let path = FileDialog::new()
-        .set_title("Save File")
-        .add_filter("Text", &["txt"])
-        .add_filter("MarkDown", &["md"])
-        .save_file()
-        .ok_or_else(|| "No file selected".to_string())?;
-
-    Ok(path.to_str().unwrap_or_default().to_string())
+fn show_save_dialog(content: String) {
+    //REMAKE TO SAVE FILE IN CONTENT.MD !!!!!!!!!!!!!!!!!!!!
+    
 }
 
 #[tauri::command]
@@ -105,18 +99,31 @@ fn get_documents_folder() -> String {
         .unwrap()
         .to_string()
 }
-/*this one worked--------------------------------------------------------------
+
 #[tauri::command]
-async fn show_save_dialog() {
-    let test: &str = "Test";
-    println!("{}", test);
-    dialog::FileDialogBuilder::default()
-        .add_filter("Markdown", &["md"])
-        .pick_file(|path_buf| match path_buf {
-            Some(p) => {}
-            _ => {}
-        });
-}*/
+fn extract_div_contents(input: &str) -> Vec<String> {
+    // Initialize an empty vector to store the extracted contents
+    let mut result = Vec::new();
+
+    // Define the start and end tag strings
+    let start_tag = "<div>";
+    let end_tag = "</div>";
+
+    // Split the input string by the start tag
+    let parts: Vec<&str> = input.split(start_tag).collect();
+
+    // Iterate over the parts and extract the contents between the start and end tags
+    for part in parts {
+        if let Some(end_index) = part.find(end_tag) {
+            if part.contains("<br>") {
+            } else {
+                let content = &part[..end_index];
+                result.push(content.to_string());
+            }
+        }
+    }
+    result
+}
 
 // Definiere eine globale Variable für die Startzeit
 lazy_static! {
@@ -137,11 +144,7 @@ fn write_to_json(path: &str, content: &str) {
             return;
         }
     };
-    let _result = write!(file, "{content}");
-    // match result {
-    //     Ok(_) => println!("Wrote in file: {:?}", file_path),
-    //     Err(e) => eprintln!("Error when writing in file: {:?}", e),
-    // }
+    write!(file, "{}", content);
 }
 
 #[tauri::command]
