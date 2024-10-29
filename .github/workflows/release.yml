@@ -83,13 +83,15 @@ jobs:
             sha256sum "$file" | awk '{print $1}' > "hashes/$(basename "$file").sum"
           done
 
-      - id: get_version
+      - name: get version
+        id: get_version
         # uses: battila7/get-version-action@v2
         run: |
-          version=$(curl "https://api.github.com/repos/$repo/tags" | jq -r '.[1].name')
+          version=$(curl "https://api.github.com/repos/MasterRick1337/PaperSmith/tags" | jq -r '.[1].name')
           echo "version=$version" >> $GITHUB_OUTPUT
         
-      - id: get_version_number
+      - name: get version number
+        id: get_version_number
         run: |
           version_number=$(version_number=$(curl  "https://api.github.com/repos/MasterRick1337/PaperSmith/tags" | jq -r '.[1].name'); echo ${version_number:4})
           echo "version_number=$version_number" >> $GITHUB_OUTPUT
