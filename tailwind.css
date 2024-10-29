@@ -411,13 +411,14 @@ svg.svg-icon {
 .notepad-container-compile {
     width: 48%;
     height: calc(100% - 5px);
+    /*padding: 20px;*/
     background-color: rgba(var(--base), 1);
     border: 2px solid rgba(var(--border), 1);
     border-radius: 10px;
     outline: none;
     box-shadow: none;
     position: relative;
-    margin: 0 auto;
+    /* margin: 0 auto; */
     transform-origin: top; /* TODO: Make Zoom work with transform-origin: center*/
     overflow-y: auto;
     color: rgba(var(--text), 1);
@@ -450,11 +451,16 @@ svg.svg-icon {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    white-space: pre-wrap;
+    /* white-space: pre-wrap; */
+}
+
+p {
+    margin-block-start: 0;
+    margin-block-end: 0;
 }
 
 .notepad-textarea-compile {
-
+    padding: 20px;
 }
 
 .anchor {
