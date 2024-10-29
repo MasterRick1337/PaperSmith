@@ -21,7 +21,7 @@ This project is in a very early stage of development and currently NOT ready for
 
 - MasterRick1337: Writing features
 - Toll25: Project Explorer & Miscellaneous Stuff
-- DotDo1: Statistics Window, Saving
+- DotDo1: Statistic Window
 - Alllpacka: Markdown Compiler, Settings & CI/CD
 
 ### Roadmap
