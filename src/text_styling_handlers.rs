@@ -73,7 +73,7 @@ pub fn text_styling_controls() -> Html {
             if let Some(selection) = document.get_selection().unwrap() {
                 if let Ok(range) = selection.get_range_at(0) {
                     let common_ancestor = range.common_ancestor_container().unwrap();
-                    let notepad = document.get_element_by_id("notepad-textarea").unwrap();
+                    let notepad = document.get_element_by_id("notepad-textarea-edit").unwrap();
 
                     let mut is_within = false;
                     let mut node = common_ancestor;
@@ -118,6 +118,13 @@ pub fn text_styling_controls() -> Html {
                 icon={IconId::LucideUnderline}
                 title="Underline"
                 style="__"
+            />
+            <StyleButton
+                class_name={"highlight-button".to_string()}
+                range={range_state.clone()}
+                icon={IconId::LucideHighlighter}
+                title="Highlighter"
+                style="//"
             />
         </div>
     }

@@ -21,7 +21,6 @@ yew-hooks = "0.3.2"
 gloo-console = "0.3.0"
 chrono = "0.4.38"
 text_io = "0.1.12"
-markdown-it = "0.6.1"
 pulldown-cmark = "0.12.2"
 
 
