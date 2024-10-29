@@ -83,15 +83,17 @@ jobs:
             md5sum "$file" | awk '{print $1}' > "hashes/$(basename "$file").md5"
           done
 
+      - id: get_version
+        uses: battila7/get-version-action@v2
 
       - name: Upload Release with MD5 Files
         uses: softprops/action-gh-release@v2.0.8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          release_name: 'App v__VERSION__'
-          release_body: 'See the assets to download this version and install.'
-          tag_name: ${{ github.ref }}
+          name: 'App v__VERSION__'
+          body: 'See the assets to download this version and install.'
+          tag_name: "app-${{ steps.get_version.outputs.version }}"
           draft: false
           prerelease: true
           files: |
