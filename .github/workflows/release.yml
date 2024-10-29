@@ -68,7 +68,9 @@ jobs:
         run: |
           mkdir -p assets
           # Get the release information for the current tag
-          release_info=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/$GITHUB_REF_NAME")
+          repo="MasterRick1337/PaperSmith"
+          ref_name=$(curl  "https://api.github.com/repos/$repo/tags" | jq -r '.[1].name')
+          release_info=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/$repo/releases/tags/$ref_name")
     
           # Extract asset URLs from the release information
           echo "$release_info" | jq -r '.assets[] | .browser_download_url' | while read asset_url; do
