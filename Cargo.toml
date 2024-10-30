@@ -12,6 +12,8 @@ wasm-bindgen-futures = "0.4"
 web-sys = { version = "0.3.69", features = [
   "HtmlElement",
   "HtmlInputElement",
+  "HtmlButtonElement",
+  "CssStyleDeclaration",
   "HtmlDocument",
   "console",
   "Document",
@@ -44,6 +46,8 @@ yew_icons = { version = "0.8", features = [
   "LucideBaseline",
   "LucideList",
   "LucideListChecks",
+  "LucideFolder",
+  "LucideFolderOpen",
 ] }
 gloo-timers = "0.3.0"
 yew-hooks = "0.3.2"

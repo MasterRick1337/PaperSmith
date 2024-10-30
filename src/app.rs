@@ -8,7 +8,6 @@ use web_sys::HtmlElement;
 use yew::events::InputEvent;
 use yew::events::MouseEvent;
 use yew::prelude::*;
-use yew_hooks::use_interval;
 use yew_icons::{Icon, IconId};
 
 #[path = "font_size_handlers.rs"]
@@ -18,7 +17,6 @@ use font_size_handlers::FontSizeControls;
 #[path = "zoom_level_handlers.rs"]
 mod zoom_level_handlers;
 use zoom_level_handlers::ZoomControls;
-
 
 #[path = "statistics/statistic.rs"]
 mod statistic;
@@ -33,9 +31,12 @@ mod sidebar;
 use shared::Project;
 use sidebar::SideBar;
 
+#[path = "project-wizard/wizard.rs"]
+mod wizard;
+use wizard::ProjectWizard;
+
 #[path = "modal-system/modal.rs"]
 mod modal;
-use modal::ButtonProps as ModalButtonProps;
 use modal::Modal;
 
 #[wasm_bindgen]
@@ -48,11 +49,6 @@ extern "C" {
 struct SaveFileArgs {
     content: String,
     filename: String,
-}
-
-#[derive(Properties, PartialEq)]
-pub struct WordCountProps {
-    pub pages_ref: NodeRef,
 }
 
 #[function_component(App)]
@@ -68,7 +64,6 @@ pub fn app() -> Html {
         html! { <>{ "No Project Loaded" }</> }
     });
     let modal = use_state(|| html!());
-
 
     let on_text_input = text_input_handler(
         text_input_ref.clone(),
@@ -100,19 +95,20 @@ pub fn app() -> Html {
 
     let open_modal = {
         let modal = modal.clone();
+        let project = project.clone();
         Callback::from(move |_| {
             modal.set(html! {
                 <Modal
-                    content={html!({"This is some test text for me to know how this looks with more text in it bla bla bla bla"})}
-                    button_configs={vec![
-                        ModalButtonProps {text:"Cancel".to_string(), text_color:"crust".to_string(), bg_color:"maroon".to_string(), callback: {
-                        let modal = modal.clone();
-                        Callback::from(move |_| modal.set(html!()))
-                        }},
-                        ModalButtonProps {text:"Apply".to_string(), text_color:"crust".to_string(), bg_color:"mauve".to_string(), callback: {
-                        let modal = modal.clone();
-                        Callback::from(move |_| modal.set(html!()))
-                        }}]}
+                    content={html! {
+                    <ProjectWizard
+
+                        closing_callback={
+                            let modal = modal.clone();
+                            Callback::from(move |_| modal.set(html!()))
+                        }
+                        project_ref={project.clone()}
+                    />
+                    }}
                 />
             });
         })
@@ -145,8 +141,6 @@ pub fn app() -> Html {
                         serde_wasm_bindgen::from_value(project_jsvalue).unwrap();
                     if project_or_none.is_some() {
                         project.set(project_or_none);
-                    } else {
-                        gloo_console::log!("bruh");
                     }
                 });
             }
