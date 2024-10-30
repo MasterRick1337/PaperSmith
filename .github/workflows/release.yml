@@ -21,6 +21,8 @@ jobs:
             args: ''
 
     runs-on: ${{ matrix.platform }}
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -43,12 +45,18 @@ jobs:
         run: |
           rustup target add wasm32-unknown-unknown
 
+      - name: get version
+        id: get_version
+        run: |
+          version=$(cat Cargo.toml | sed -n '/^version =/,/^}/p' | awk '/^version =/{print $NF}' | sed 's/"//g')
+          echo "version=$version" >> $GITHUB_OUTPUT
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: app-v__VERSION__
-          releaseName: 'App v__VERSION__'
+          tagName: "app-v${{ steps.get_version.outputs.version }}"
+          releaseName: "App v${{ steps.get_version.outputs.version }}"
           releaseBody: 'See the assets to download this version and install.'
           iconPath: 'src-tauri/icons/icon.png'
           releaseDraft: false
@@ -57,12 +65,13 @@ jobs:
       
       - name: upload binary
         if: matrix.platform == 'ubuntu-22.04'
-        run: |
-          cd ${{github.workspace}}
-          gh release upload ${{ github.event.release.tag_name }} target/release/paper-smith
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ github.TOKEN }}
+        uses: djnicholson/release-action@v2.10
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          asset-name: 'papersmith-portable'
+          file: 'target/release/paper-smith'
+          release-name: "App v${{ steps.get_version.outputs.version }}"
+          tag-name: "app-v${{ steps.get_version.outputs.version }}"
 
   generate-hashes:
     permissions:
@@ -92,36 +101,14 @@ jobs:
             sha256sum "$file" | awk '{print $1}' > "hashes/$(basename "$file").sum"
           done
 
-      - name: get version
-        id: get_version
-        # uses: battila7/get-version-action@v2
-        run: |
-          version=$(curl "https://api.github.com/repos/MasterRick1337/PaperSmith/tags" | jq -r '.[1].name')
-          echo "version=$version" >> $GITHUB_OUTPUT
-        
-      - name: get version number
-        id: get_version_number
-        run: |
-          version_number=$(version_number=$(curl  "https://api.github.com/repos/MasterRick1337/PaperSmith/tags" | jq -r '.[1].name'); echo ${version_number:4})
-          echo "version_number=$version_number" >> $GITHUB_OUTPUT
-
-      - name: Debug Version
-        run: |
-          echo "Debug: version=${{ steps.get_version.outputs.version }}"
-
-      - name: Debug Version Number
-        run: |
-          echo "Debug: version_number=${{ steps.get_version_number.outputs.version_number }}"
-
-
       - name: Upload Release with MD5 Files
         uses: softprops/action-gh-release@v2.0.8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: "App ${{ steps.get_version_number.outputs.version_number }}"
+          name: "App v${{ needs.publish-tauri.outputs.version }}"
           body: 'See the assets to download this version and install.'
-          tag_name: ${{ steps.get_version.outputs.version }}
+          tag_name: "app-v${{ needs.publish-tauri.outputs.version }}"
           draft: false
           prerelease: true
           files: |
