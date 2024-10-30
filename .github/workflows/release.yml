@@ -20,7 +20,9 @@ jobs:
       - name: get version
         id: get_version
         run: |
+          ls
           version=$(cat Cargo.toml | sed -n '/^version =/,/^}/p' | awk '/^version =/{print $NF}' | sed 's/"//g')
+          echo $version
           echo "version=$version" >> $GITHUB_OUTPUT
 
   publish-tauri:
