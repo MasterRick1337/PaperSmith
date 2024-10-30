@@ -54,6 +54,15 @@ jobs:
           releaseDraft: false
           prerelease: true
           args: ${{ matrix.args }}
+      
+      - name: upload binary
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          cd ${{github.workspace}}
+          gh release upload ${{ github.event.release.tag_name }} target/release/paper-smith
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.TOKEN }}
 
   generate-hashes:
     permissions:
