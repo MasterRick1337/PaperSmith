@@ -261,13 +261,11 @@ pub fn app() -> Html {
                     </div>
                 </div>
                 <div class="notepad-container-compile">
-                    <div class="notepad-wrapper-compile">
                         <div 
                             class="notepad-textarea-compile"
                             id="notepad-textarea-compile"
                             ref={render_ref}
                         />
-                    </div>
                 </div>
             </div>
 
