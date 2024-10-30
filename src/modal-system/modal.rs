@@ -7,7 +7,6 @@ pub struct Props {
 
 #[function_component(Modal)]
 pub fn modal(Props { content }: &Props) -> Html {
-    gloo_console::log!("Created Modal");
     html!(
         <>
             <div

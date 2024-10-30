@@ -143,8 +143,6 @@ pub fn app() -> Html {
                         serde_wasm_bindgen::from_value(project_jsvalue).unwrap();
                     if project_or_none.is_some() {
                         project.set(project_or_none);
-                    } else {
-                        gloo_console::log!("bruh");
                     }
                 });
             }

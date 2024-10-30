@@ -22,17 +22,14 @@ pub struct Props {
 }
 
 #[derive(Serialize)]
-struct ChooseFolderArgs {
+struct TitleArgs {
     title: String,
 }
 
 #[derive(Serialize)]
-struct CheckFolderArgs {
+struct PathArgs {
     path: String,
 }
-// TODO:
-// implement project creation tauri function
-// *including error checking*
 
 #[function_component(ProjectWizard)]
 pub fn project_wizard(
@@ -106,18 +103,9 @@ pub fn project_wizard(
 
                 let complete_path = PathBuf::from(&*location).join(&*title);
 
-                gloo_console::log!(format!(
-                    "Complete Path: {}",
-                    &complete_path
-                        .clone()
-                        .into_os_string()
-                        .into_string()
-                        .unwrap()
-                ));
-
                 let result = invoke(
                     "can_create_path",
-                    serde_wasm_bindgen::to_value(&CheckFolderArgs {
+                    serde_wasm_bindgen::to_value(&PathArgs {
                         path: complete_path.into_os_string().into_string().unwrap(),
                     })
                     .unwrap(),
@@ -125,7 +113,6 @@ pub fn project_wizard(
                 .await
                 .as_string()
                 .expect("Something went horribly wrong in validation");
-                //gloo_console::log!(format!("{}{}", &*location, &*is_data_valid));
                 let (is_valid, message) = match result.as_str() {
                     "" => (true, ""),
                     e => (false, e),
@@ -142,7 +129,6 @@ pub fn project_wizard(
         let is_data_valid = is_data_valid.clone();
         use_effect_with(is_data_valid.clone(), move |_| {
             if let Some(button) = confirm_button_ref.cast::<HtmlButtonElement>() {
-                gloo_console::log!(format!("Is valid: {}", *is_data_valid));
                 if *is_data_valid {
                     let _ = button.style().set_property("opacity", "1");
                     button.set_disabled(false);
@@ -179,20 +165,20 @@ pub fn project_wizard(
             let location = location.clone();
             let location_ref = location_ref.clone();
             spawn_local(async move {
-                let save_args = ChooseFolderArgs {
+                let save_args = TitleArgs {
                     title: "Choose location".to_string(),
                 };
 
                 let args = to_value(&save_args).unwrap();
                 let location_jsvalue = invoke("choose_folder", args).await;
                 let location_string = location_jsvalue.as_string();
-                match location_string {
-                    None => (),
+                match location_string.as_deref() {
+                    Some("") | None => (),
                     Some(e) => {
                         if let Some(input) = location_ref.cast::<HtmlInputElement>() {
-                            input.set_value(&e);
+                            input.set_value(e);
                         }
-                        location.set(e);
+                        location.set(e.to_string());
                     }
                 }
             });
@@ -206,7 +192,6 @@ pub fn project_wizard(
             let location = location.clone();
             let title = title.clone();
             let project_ref = project_ref.clone();
-            gloo_console::log!("Help!");
             if !*is_data_valid {
                 return;
             }
@@ -214,7 +199,7 @@ pub fn project_wizard(
                 let complete_path = PathBuf::from(&*location).join(&*title);
                 let project_jsvalue = invoke(
                     "create_project",
-                    serde_wasm_bindgen::to_value(&CheckFolderArgs {
+                    serde_wasm_bindgen::to_value(&PathArgs {
                         path: complete_path.into_os_string().into_string().unwrap(),
                     })
                     .unwrap(),
@@ -224,11 +209,9 @@ pub fn project_wizard(
                     serde_wasm_bindgen::from_value(project_jsvalue).unwrap();
                 if project_or_none.is_some() {
                     project_ref.set(project_or_none);
-                } else {
-                    gloo_console::log!("bruh");
                 }
             });
-            on_close.emit(MouseEvent::new("ahhhh").unwrap());
+            on_close.emit(MouseEvent::new("Dummy").unwrap());
         })
     };
 
@@ -268,13 +251,13 @@ pub fn project_wizard(
                 <button
                     ref={confirm_button_ref}
                     onclick={on_confirm}
-                    class={format!("rounded-lg text-lg px-2 py-1 ml-4 bg-mauve text-crust hover:scale-105")}
+                    class={"rounded-lg text-lg px-2 py-1 ml-4 bg-mauve text-crust hover:scale-105"}
                 >
                     { "Confirm" }
                 </button>
                 <button
                     onclick={on_close}
-                    class={format!("rounded-lg text-lg px-2 py-1 ml-4 bg-red text-crust hover:scale-105")}
+                    class={"rounded-lg text-lg px-2 py-1 ml-4 bg-red text-crust hover:scale-105"}
                 >
                     { "Close" }
                 </button>
@@ -283,18 +266,6 @@ pub fn project_wizard(
     )
 }
 
-//html!(
-//    <>
-//        <div class="bg-maroon text-crust" />
-//        <div class="bg-mauve text-crust" />
-//        <button
-//            onclick={callback}
-//            class={format!("rounded-lg px-2 py-1 ml-4 bg-{bg_color} text-{text_color}")}
-//        >
-//            { text }
-//        </button>
-//    </>
-//)
 fn text_input_handler(value: UseStateHandle<String>) -> Callback<InputEvent> {
     Callback::from(move |e: InputEvent| {
         if let Some(input) = e.target_dyn_into::<HtmlInputElement>() {

@@ -12,11 +12,7 @@ pub fn check_if_folder_exists(path: &str) -> bool {
 pub fn choose_folder(title: String) -> String {
     let path = FileDialog::new().set_title(title).pick_folder();
 
-    println!("choosing folder tauri");
-    path.map_or_else(
-        || "No folder selected".to_string(),
-        |path| path.to_string_lossy().to_string(),
-    )
+    path.map_or_else(String::new, |path| path.to_string_lossy().to_string())
 }
 
 #[tauri::command]
@@ -27,25 +23,10 @@ pub fn can_create_path(path: &str) -> String {
         return "Path already exists.".into();
     }
 
-    // Check if the path is empty or just whitespace.
     if path.trim().is_empty() {
         return "Path cannot be empty.".into();
     }
 
-    // Check if the path is too long (some OSes have limitations, e.g., 255 characters).
-    //if parsed_path
-    //    .file_name()
-    //    .expect("yo")
-    //    .to_str()
-    //    .expect("yo")
-    //    .chars()
-    //    .count()
-    //    > 255
-    //{
-    //    return "Path is too long.".into();
-    //}
-
-    // Check if the parent directory exists.
     if let Some(parent) = parsed_path.parent() {
         if !parent.exists() {
             return format!("Directory '{}' does not exist.", parent.display());
@@ -54,7 +35,6 @@ pub fn can_create_path(path: &str) -> String {
         return "Path does not have a parent directory.".into();
     }
 
-    // Check if the path is a reserved name (e.g., on Windows).
     #[cfg(target_os = "windows")]
     {
         let reserved_names = [
@@ -66,10 +46,9 @@ pub fn can_create_path(path: &str) -> String {
         }
     }
 
-    // Check if we can write to the target directory.
     let temp_file_path = parsed_path
         .parent()
-        .expect("fuck")
+        .expect("")
         .join(".can_create_check.tmp");
     match fs::File::create(&temp_file_path) {
         Ok(_) => {
