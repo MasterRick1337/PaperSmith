@@ -97,6 +97,7 @@ pub fn app() -> Html {
 
     let open_modal = {
         let modal = modal.clone();
+        let project = project.clone();
         Callback::from(move |_| {
             modal.set(html! {
                 <Modal
@@ -108,6 +109,7 @@ pub fn app() -> Html {
                             let modal = modal.clone();
                             Callback::from(move |_| modal.set(html!()))
                         }
+                        project_ref={project.clone()}
                     />
                     }}
                 />

@@ -23,15 +23,27 @@ pub fn choose_folder(title: String) -> String {
 pub fn can_create_path(path: &str) -> String {
     let parsed_path = Path::new(path);
 
+    if parsed_path.exists() {
+        return "Path already exists.".into();
+    }
+
     // Check if the path is empty or just whitespace.
     if path.trim().is_empty() {
         return "Path cannot be empty.".into();
     }
 
     // Check if the path is too long (some OSes have limitations, e.g., 255 characters).
-    if path.len() > 255 {
-        return "Path is too long.".into();
-    }
+    //if parsed_path
+    //    .file_name()
+    //    .expect("yo")
+    //    .to_str()
+    //    .expect("yo")
+    //    .chars()
+    //    .count()
+    //    > 255
+    //{
+    //    return "Path is too long.".into();
+    //}
 
     // Check if the parent directory exists.
     if let Some(parent) = parsed_path.parent() {

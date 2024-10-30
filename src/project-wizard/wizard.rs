@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
+use shared::Project;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
@@ -19,6 +20,7 @@ extern "C" {
 pub struct Props {
     pub default_location: String,
     pub closing_callback: Callback<MouseEvent>,
+    pub project_ref: UseStateHandle<Option<Project>>,
 }
 
 #[derive(Serialize)]
@@ -38,7 +40,8 @@ struct CheckFolderArgs {
 pub fn project_wizard(
     Props {
         default_location,
-        closing_callback,
+        closing_callback: on_close,
+        project_ref,
     }: &Props,
 ) -> Html {
     let title = use_state(String::new);
@@ -76,6 +79,7 @@ pub fn project_wizard(
     {
         let is_data_valid = is_data_valid.clone();
         let location = location.clone();
+        let title = title.clone();
         let error_message = error_message.clone();
         use_effect_with((location.clone(), title.clone()), move |_| {
             let is_data_valid = is_data_valid.clone();
@@ -131,6 +135,7 @@ pub fn project_wizard(
 
     {
         let confirm_button_ref = confirm_button_ref.clone();
+        let is_data_valid = is_data_valid.clone();
         use_effect_with(is_data_valid.clone(), move |_| {
             if let Some(button) = confirm_button_ref.cast::<HtmlButtonElement>() {
                 gloo_console::log!(format!("Is valid: {}", *is_data_valid));
@@ -163,7 +168,7 @@ pub fn project_wizard(
         }
     };
 
-    let on_load = {
+    let on_choose_folder = {
         let location = location.clone();
         let location_ref = location_ref.clone();
         Callback::from(move |_: MouseEvent| {
@@ -190,6 +195,42 @@ pub fn project_wizard(
         })
     };
 
+    let on_confirm = {
+        let is_data_valid = is_data_valid.clone();
+        let location = location.clone();
+        let title = title.clone();
+        let on_close = on_close.clone();
+        let project_ref = project_ref.clone();
+        Callback::from(move |_| {
+            let location = location.clone();
+            let title = title.clone();
+            let project_ref = project_ref.clone();
+            gloo_console::log!("Help!");
+            if !*is_data_valid {
+                return;
+            }
+            spawn_local(async move {
+                let complete_path = PathBuf::from(&*location).join(&*title);
+                let project_jsvalue = invoke(
+                    "create_project",
+                    serde_wasm_bindgen::to_value(&CheckFolderArgs {
+                        path: complete_path.into_os_string().into_string().unwrap(),
+                    })
+                    .unwrap(),
+                )
+                .await;
+                let project_or_none: Option<Project> =
+                    serde_wasm_bindgen::from_value(project_jsvalue).unwrap();
+                if project_or_none.is_some() {
+                    project_ref.set(project_or_none);
+                } else {
+                    gloo_console::log!("bruh");
+                }
+            });
+            on_close.emit(MouseEvent::new("ahhhh").unwrap());
+        })
+    };
+
     html!(
         <>
             <div class="text-xl font-bold">{ "Create Project" }</div>
@@ -213,7 +254,7 @@ pub fn project_wizard(
                 <div
                     onmouseover={on_mouse_over}
                     onmouseout={on_mouse_out}
-                    onclick={on_load}
+                    onclick={on_choose_folder}
                     class="content-center hover:text-mauve rounded-tr-lg border-l-2 border-overlay0 rounded-br-lg bg-crust p-2"
                 >
                     { icon }
@@ -225,14 +266,14 @@ pub fn project_wizard(
                 </div>
                 <button
                     ref={confirm_button_ref}
-                    onclick={closing_callback}
-                    class={format!("rounded-lg px-2 py-1 ml-4 bg-mauve text-crust")}
+                    onclick={on_confirm}
+                    class={format!("rounded-lg text-lg px-2 py-1 ml-4 bg-mauve text-crust hover:scale-105")}
                 >
                     { "Confirm" }
                 </button>
                 <button
-                    onclick={closing_callback}
-                    class={format!("rounded-lg px-2 py-1 ml-4 bg-red text-crust")}
+                    onclick={on_close}
+                    class={format!("rounded-lg text-lg px-2 py-1 ml-4 bg-red text-crust hover:scale-105")}
                 >
                     { "Close" }
                 </button>

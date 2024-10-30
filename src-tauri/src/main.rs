@@ -17,6 +17,9 @@ use checking::choose_folder;
 mod menu;
 use menu::generate as generate_menu;
 
+mod saving;
+use saving::create_project;
+
 use shared::Project;
 
 fn main() {
@@ -30,7 +33,8 @@ fn main() {
             write_to_file,
             choose_folder,
             check_if_folder_exists,
-            can_create_path
+            can_create_path,
+            create_project
         ])
         .menu(generate_menu())
         .run(tauri::generate_context!())
