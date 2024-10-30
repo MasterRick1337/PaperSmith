@@ -8,7 +8,24 @@ on:
       - action-testing
 
 jobs:
+  get-version:
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.get-version.version }}
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: get version
+        id: get_version
+        run: |
+          version=$(cat Cargo.toml | sed -n '/^version =/,/^}/p' | awk '/^version =/{print $NF}' | sed 's/"//g')
+          echo "version=$version" >> $GITHUB_OUTPUT
+
   publish-tauri:
+    needs:
+      - get-version
     permissions:
       contents: write
     strategy:
@@ -21,8 +38,6 @@ jobs:
             args: ''
 
     runs-on: ${{ matrix.platform }}
-    outputs:
-      version: ${{ steps.get_version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -45,18 +60,12 @@ jobs:
         run: |
           rustup target add wasm32-unknown-unknown
 
-      - name: get version
-        id: get_version
-        run: |
-          version=$(cat Cargo.toml | sed -n '/^version =/,/^}/p' | awk '/^version =/{print $NF}' | sed 's/"//g')
-          echo "version=$version" >> $GITHUB_OUTPUT
-
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: "app-v${{ steps.get_version.outputs.version }}"
-          releaseName: "App v${{ steps.get_version.outputs.version }}"
+          tagName: "app-v${{ needs.get-version.outputs.version }}"
+          releaseName: "App v${{ needs.get-version.outputs.version }}"
           releaseBody: 'See the assets to download this version and install.'
           iconPath: 'src-tauri/icons/icon.png'
           releaseDraft: false
@@ -70,15 +79,15 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           asset-name: 'papersmith-portable'
           file: 'target/release/paper-smith'
-          release-name: "App v${{ steps.get_version.outputs.version }}"
-          tag-name: "app-v${{ steps.get_version.outputs.version }}"
+          release-name: "App v${{ needs.get-version.outputs.version }}"
+          tag-name: "app-v${{ needs.get-version.outputs.version }}"
 
   generate-hashes:
     permissions:
       contents: write
 
     if: github.event_name != 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - publish-tauri
     steps:
@@ -106,9 +115,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: "App v${{ needs.publish-tauri.outputs.version }}"
+          name: "App v${{ needs.get-version.outputs.version }}"
           body: 'See the assets to download this version and install.'
-          tag_name: "app-v${{ needs.publish-tauri.outputs.version }}"
+          tag_name: "app-v${{ needs.get-version.outputs.version }}"
           draft: false
           prerelease: true
           files: |
