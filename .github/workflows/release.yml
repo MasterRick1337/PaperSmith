@@ -66,9 +66,10 @@ jobs:
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          version: ${{ needs.get-version.outputs.version }}
         with:
-          tagName: "app-v${{ needs.get-version.outputs.version }}"
-          releaseName: "App v${{ needs.get-version.outputs.version }}"
+          tagName: "app-v$version"
+          releaseName: "App v$version"
           releaseBody: 'See the assets to download this version and install.'
           iconPath: 'src-tauri/icons/icon.png'
           releaseDraft: false
@@ -76,14 +77,16 @@ jobs:
           args: ${{ matrix.args }}
       
       - name: upload binary
+        env: 
+          version: ${{ needs.get-version.outputs.version }}
         if: matrix.platform == 'ubuntu-22.04'
         uses: djnicholson/release-action@v2.10
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           asset-name: 'papersmith-portable'
           file: 'target/release/paper-smith'
-          release-name: "App v${{ needs.get-version.outputs.version }}"
-          tag-name: "app-v${{ needs.get-version.outputs.version }}"
+          release-name: "App v$version"
+          tag-name: "app-v$version"
 
   generate-hashes:
     permissions:
@@ -121,10 +124,11 @@ jobs:
         uses: softprops/action-gh-release@v2.0.8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          version: ${{ needs.get-version.outputs.version }}
         with:
-          name: "App v${{ needs.get-version.outputs.version }}"
+          name: "App v$version"
           body: 'See the assets to download this version and install.'
-          tag_name: "app-v${{ needs.get-version.outputs.version }}"
+          tag_name: "app-v$version"
           draft: false
           prerelease: true
           files: |
