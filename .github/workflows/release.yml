@@ -94,6 +94,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs:
       - publish-tauri
+      - get-version
     steps:
       - name: Download Assets
         run: |
@@ -117,15 +118,27 @@ jobs:
           for file in assets/*; do
             sha256sum "$file" | awk '{print $1}' > "hashes/$(basename "$file").sum"
           done
-
+      - name: get version
+        id: get_version
+        # uses: battila7/get-version-action@v2
+        run: |
+          version=$(curl "https://api.github.com/repos/MasterRick1337/PaperSmith/tags" | jq -r '.[1].name')
+          echo "version=$version" >> $GITHUB_OUTPUT
+        
+      - name: get version number
+        id: get_version_number
+        run: |
+          version_number=$(version_number=$(curl  "https://api.github.com/repos/MasterRick1337/PaperSmith/tags" | jq -r '.[1].name'); echo ${version_number:4})
+          echo "version_number=$version_number" >> $GITHUB_OUTPUT
+          
       - name: Upload Release with MD5 Files
         uses: softprops/action-gh-release@v2.0.8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: "App v${{ needs.get-version.outputs.version }}"
+          name: "App ${{ steps.get_version_number.outputs.version_number }}"
           body: 'See the assets to download this version and install.'
-          tag_name: "app-v${{ needs.get-version.outputs.version }}"
+          tag_name: ${{ steps.get_version.outputs.version }}
           draft: false
           prerelease: true
           files: |
