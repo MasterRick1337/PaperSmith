@@ -60,6 +60,9 @@ jobs:
         run: |
           rustup target add wasm32-unknown-unknown
 
+      - name: debug version output
+        run: echo ${{ needs.get-version.outputs.version }}
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -101,7 +104,11 @@ jobs:
     
           # Extract asset URLs from the release information
           echo "$release_info" | jq -r '.assets[] | .browser_download_url' | while read asset_url; do
-            wget "$asset_url" -P assets/
+            if [[ ! "$asset_url" =~ \.sum$ ]]; then
+              wget "$asset_url" -P assets/
+            else
+              echo "skipping $asset_url"
+            fi
           done
 
       - name: Generate Individual Hash Files
