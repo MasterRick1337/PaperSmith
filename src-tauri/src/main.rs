@@ -34,7 +34,8 @@ fn main() {
             choose_folder,
             check_if_folder_exists,
             can_create_path,
-            create_project
+            create_project,
+            get_documents_folder
         ])
         .menu(generate_menu())
         .run(tauri::generate_context!())
@@ -59,6 +60,14 @@ fn get_project() -> Option<Project> {
     parse_project(project_path)
 }
 
+#[tauri::command]
+fn get_documents_folder() -> String {
+    dirs_next::document_dir()
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .to_string()
+}
 /*this one worked--------------------------------------------------------------
 #[tauri::command]
 async fn show_save_dialog() {

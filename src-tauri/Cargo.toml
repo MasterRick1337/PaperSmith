@@ -11,11 +11,12 @@ edition = "2021"
 tauri-build = { version = "1", features = [] }
 
 [dependencies]
-tauri = { version = "1", features = [ "api-all"] }
+tauri = { version = "1", features = ["api-all"] }
 serde = { version = "1", features = ["derive"] }
 shared = { path = "../shared" }
 serde_json = "1"
 rfd = "0.14.1"
+dirs-next = "2.0"
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

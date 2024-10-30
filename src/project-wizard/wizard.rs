@@ -1,12 +1,11 @@
-use std::path::{Path, PathBuf};
-
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
 use shared::Project;
+use std::path::PathBuf;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
-use web_sys::{HtmlButtonElement, HtmlElement, HtmlInputElement};
+use web_sys::{HtmlButtonElement, HtmlInputElement};
 use yew::prelude::*;
 use yew_icons::{Icon, IconId};
 
@@ -18,7 +17,6 @@ extern "C" {
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub default_location: String,
     pub closing_callback: Callback<MouseEvent>,
     pub project_ref: UseStateHandle<Option<Project>>,
 }
@@ -39,13 +37,12 @@ struct CheckFolderArgs {
 #[function_component(ProjectWizard)]
 pub fn project_wizard(
     Props {
-        default_location,
         closing_callback: on_close,
         project_ref,
     }: &Props,
 ) -> Html {
     let title = use_state(String::new);
-    let location = use_state(|| default_location.clone());
+    let location = use_state(String::new);
     let title_ref = use_node_ref();
     let location_ref = use_node_ref();
     let confirm_button_ref = use_node_ref();
@@ -57,11 +54,18 @@ pub fn project_wizard(
     let on_location_input = text_input_handler(location.clone());
 
     {
-        let default_location = default_location.clone();
+        let location = location.clone();
         let location_ref = location_ref.clone();
         use_effect_with((), move |()| {
             if let Some(input) = location_ref.cast::<HtmlInputElement>() {
-                input.set_value(&default_location);
+                spawn_local(async move {
+                    let document_folder = invoke("get_documents_folder", JsValue::NULL)
+                        .await
+                        .as_string()
+                        .unwrap();
+                    location.set(document_folder.clone());
+                    input.set_value(&document_folder);
+                });
             }
         });
     }
@@ -196,9 +200,6 @@ pub fn project_wizard(
     };
 
     let on_confirm = {
-        let is_data_valid = is_data_valid.clone();
-        let location = location.clone();
-        let title = title.clone();
         let on_close = on_close.clone();
         let project_ref = project_ref.clone();
         Callback::from(move |_| {
@@ -298,7 +299,7 @@ fn text_input_handler(value: UseStateHandle<String>) -> Callback<InputEvent> {
     Callback::from(move |e: InputEvent| {
         if let Some(input) = e.target_dyn_into::<HtmlInputElement>() {
             let text = input.value();
-            value.set(text.clone());
+            value.set(text);
         }
     })
 }

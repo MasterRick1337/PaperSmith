@@ -103,7 +103,6 @@ pub fn app() -> Html {
                 <Modal
                     content={html! {
                     <ProjectWizard
-                        default_location={"/home/elena/Documents/"}
 
                         closing_callback={
                             let modal = modal.clone();
