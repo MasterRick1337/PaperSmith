@@ -61,7 +61,9 @@ jobs:
           rustup target add wasm32-unknown-unknown
 
       - name: debug version output
-        run: echo ${{ needs.get-version.outputs.version }}
+        env: 
+          version: ${{ needs.get-version.outputs.version }}
+        run: echo $version
 
       - uses: tauri-apps/tauri-action@v0
         env:
