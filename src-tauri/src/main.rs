@@ -1,15 +1,12 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{io::Write, path::Path};
-use std::fs::OpenOptions;
-use std::fs::{self, File};
-use chrono::{Utc, DateTime};
-use rfd::FileDialog;
-use tauri::{CustomMenuItem, Menu, Submenu};
+use chrono::{DateTime, Utc};
 use lazy_static::lazy_static;
+use rfd::FileDialog;
+use std::fs::File;
+use std::io::Write;
 use std::sync::Mutex;
-use dirs_next;
 
 mod loader;
 use loader::parse_project;
@@ -29,7 +26,6 @@ use shared::Project;
 
 fn main() {
     // here `"quit".to_string()` defines the menu item id, and the second parameter is the menu item label.
-show_save_dialog,            
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             show_save_dialog,
@@ -120,19 +116,19 @@ lazy_static! {
 
 #[tauri::command]
 fn write_to_json(path: &str, content: &str) {
-    let start_time = START_TIME.lock().unwrap().clone();
+    let start_time = *START_TIME.lock().unwrap();
     let formatted_time = start_time.format("%Y-%m-%dT%H-%M-%S").to_string();
-    let file_name = format!("{}.json", formatted_time);
-    let file_path = format!("{}/{}", path, file_name);
+    let file_name = format!("{formatted_time}.json");
+    let file_path = format!("{path}/{file_name}");
 
     let mut file = match File::create(&file_path) {
         Ok(f) => f,
         Err(e) => {
-            eprintln!("Error when creating: {:?}", e);
+            eprintln!("Error when creating: {e:?}");
             return;
         }
     };
-    let result = write!(file, "{}", content);
+    let _result = write!(file, "{content}");
     // match result {
     //     Ok(_) => println!("Wrote in file: {:?}", file_path),
     //     Err(e) => eprintln!("Error when writing in file: {:?}", e),
@@ -142,15 +138,13 @@ fn write_to_json(path: &str, content: &str) {
 #[tauri::command]
 fn get_data_dir() -> String {
     if let Some(config_dir) = dirs_next::data_dir() {
-         return config_dir.to_string_lossy().to_string();
-    } else {
-        return "No path".to_string();
+        return config_dir.to_string_lossy().to_string();
     }
+    "No path".to_string()
 }
 
 #[tauri::command]
 fn write_to_file(path: &str, content: &str) {
-
     use std::fs::{self, OpenOptions};
     use std::io::Write;
 
@@ -159,8 +153,8 @@ fn write_to_file(path: &str, content: &str) {
     if let Some(parent) = path.parent() {
         if !parent.exists() {
             match fs::create_dir_all(parent) {
-                Ok(_) => println!("Directory created: {:?}", parent),
-                Err(e) => eprintln!("Failed to create directory: {:?}", e),
+                Ok(()) => println!("Directory created: {parent:?}"),
+                Err(e) => eprintln!("Failed to create directory: {e:?}"),
             }
         }
     }
@@ -169,14 +163,15 @@ fn write_to_file(path: &str, content: &str) {
     let mut file = match OpenOptions::new().append(true).create(true).open(path) {
         Ok(f) => f,
         Err(e) => {
-            eprintln!("Failed to open or create the file: {:?}", e);
+            eprintln!("Failed to open or create the file: {e:?}");
             return;
         }
     };
 
     // Write the content to the file
-    match write!(file, "{}", content) {
-        Ok(_) => println!("Content appended to file: {:?}", path),
-        Err(e) => eprintln!("Failed to write to file: {:?}", e),
+    match write!(file, "{content}") {
+        Ok(()) => println!("Content appended to file: {path:?}"),
+        Err(e) => eprintln!("Failed to write to file: {e:?}"),
     }
 }
+

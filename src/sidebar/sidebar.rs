@@ -9,7 +9,7 @@ mod dropdown;
 use dropdown::Dropdown;
 use dropdown::Type;
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, PartialEq, Eq)]
 pub struct SideBarProps {
     pub project: Project,
 }

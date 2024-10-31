@@ -1,6 +1,6 @@
 use chrono::prelude::*;
 
-pub fn calculate_wpm(word_count: usize, start_time: Option<DateTime<Local>>) -> f64 {
+pub fn calculate(word_count: usize, start_time: Option<DateTime<Local>>) -> f64 {
     if let Some(start) = start_time {
         let elapsed = Local::now() - start;
         let elapsed_seconds = elapsed.num_seconds() as f64;
@@ -10,3 +10,4 @@ pub fn calculate_wpm(word_count: usize, start_time: Option<DateTime<Local>>) -> 
     }
     0.0
 }
+

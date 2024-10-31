@@ -1,4 +1,3 @@
-use chrono::prelude::*;
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -65,10 +64,7 @@ pub fn app() -> Html {
     });
     let modal = use_state(|| html!());
 
-    let on_text_input = text_input_handler(
-        text_input_ref.clone(),
-        lines,
-    );
+    let on_text_input = text_input_handler(text_input_ref.clone(), lines);
 
     let save = {
         let text_input_ref = text_input_ref.clone();
