@@ -411,14 +411,13 @@ svg.svg-icon {
 .notepad-container-compile {
     width: 48%;
     height: calc(100% - 5px);
-    /*padding: 20px;*/
     background-color: rgba(var(--base), 1);
     border: 2px solid rgba(var(--border), 1);
     border-radius: 10px;
     outline: none;
     box-shadow: none;
     position: relative;
-    /* margin: 0 auto; */
+    margin: 0 auto;
     transform-origin: top;
     overflow-y: auto;
     color: rgba(var(--text), 1);
