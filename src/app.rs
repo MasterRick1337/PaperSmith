@@ -21,9 +21,9 @@ use font_size_handlers::FontSizeControls;
 //mod zoom_level_handlers;
 //use zoom_level_handlers::ZoomControls;
 
-#[path = "text_alignment_handlers.rs"]
-mod text_alignment_handlers;
-use text_alignment_handlers::TextAlignmentControls;
+//#[path = "text_alignment_handlers.rs"]
+//mod text_alignment_handlers;
+//use text_alignment_handlers::TextAlignmentControls;
 
 #[path = "text_styling_handlers.rs"]
 mod text_styling_handlers;
@@ -229,7 +229,7 @@ pub fn app() -> Html {
                 <Icon icon_id={IconId::LucideBaseline} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 <div class="separator"></div>
 
-                <TextAlignmentControls text_alignment={text_alignment.clone()}/>
+                //<TextAlignmentControls text_alignment={text_alignment.clone()}/>
 
                 <div class="separator"></div>
                 <Icon icon_id={IconId::LucideList} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
@@ -384,10 +384,14 @@ fn rendering_handler(render_ref: NodeRef, new_lines: Vec<String>) {
             let mut options = Options::empty();
             options.insert(Options::ENABLE_STRIKETHROUGH);
 
-            let parser = Parser::new_ext(line.as_str(), options);
-            let mut html_output = String::new();
-            html::push_html(&mut html_output, parser);
-            html_output
+            if line.trim().is_empty() {
+                "<br>".to_string()
+            } else {
+                let parser = Parser::new_ext(line.as_str(), options);
+                let mut html_output = String::new();
+                html::push_html(&mut html_output, parser);
+                html_output
+            }
         })
         .collect();
 

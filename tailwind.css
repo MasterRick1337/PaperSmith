@@ -462,6 +462,12 @@ p {
     padding: 0;
 }
 
+.notepad-textarea-compile br {
+    display: block;
+    content: "";
+    margin-bottom: 1em;
+}
+
 .anchor {
     position: fixed;
     top: 0;
