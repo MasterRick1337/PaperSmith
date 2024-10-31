@@ -3,12 +3,12 @@ use yew::prelude::*;
 use yew_hooks::use_interval;
 use yew_icons::{Icon, IconId};
 
-fn apply_style(range: &Range, style: &str) {
+fn apply_style(range: &Range, opening_style: &str, closing_style: &str) {
     let document = window().unwrap().document().unwrap();
 
     let selected_text = range.to_string();
 
-    let new_text = format!("{style}{selected_text}{style}");
+    let new_text = format!("{opening_style}{selected_text}{closing_style}");
 
     let text_node = document.create_text_node(&new_text);
     range.delete_contents().unwrap();
@@ -32,18 +32,20 @@ pub struct StyleButtonProps {
     pub range: UseStateHandle<Option<Range>>,
     pub icon: IconId,
     pub title: String,
-    pub style: String,
+    pub opening_style: String,
+    pub closing_style: String,
     pub class_name: String,
 }
 
 #[function_component(StyleButton)]
 pub fn style_button(style_props: &StyleButtonProps) -> Html {
     let range_state = style_props.range.clone();
-    let style = style_props.style.clone();
+    let opening_style = style_props.opening_style.clone();
+    let closing_style = style_props.closing_style.clone();
 
     let onclick = Callback::from(move |_| {
         if let Some(range) = range_state.as_ref() {
-            apply_style(range, &style);
+            apply_style(range, &opening_style, &closing_style);
         }
     });
 
@@ -103,28 +105,32 @@ pub fn text_styling_controls() -> Html {
                 range={range_state.clone()}
                 icon={IconId::LucideBold}
                 title="Bold"
-                style="**"
+                opening_style="**"
+                closing_style="**"
             />
             <StyleButton
                 class_name={"italic-button".to_string()}
                 range={range_state.clone()}
                 icon={IconId::LucideItalic}
                 title="Italic"
-                style="_"
+                opening_style="_"
+                closing_style="_"
             />
             <StyleButton
                 class_name={"underline-button".to_string()}
                 range={range_state.clone()}
                 icon={IconId::LucideUnderline}
                 title="Underline"
-                style="__"
+                opening_style="<u>"
+                    closing_style="</u>"
             />
             <StyleButton
                 class_name={"highlight-button".to_string()}
                 range={range_state.clone()}
                 icon={IconId::LucideHighlighter}
                 title="Highlighter"
-                style="//"
+                opening_style="<mark>"
+                closing_style="</mark>"
             />
         </div>
     }
