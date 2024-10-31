@@ -35,16 +35,16 @@ pub fn can_create_path(path: &str) -> String {
         return "Path does not have a parent directory.".into();
     }
 
-    #[cfg(target_os = "windows")]
-    {
-        let reserved_names = [
-            "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7",
-            "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
-        ];
-        if reserved_names.contains(&path.file_name().unwrap_or_default().to_str().unwrap_or("")) {
-            return "The path uses a reserved name.".into();
-        }
-    }
+    //#[cfg(target_os = "windows")]
+    //{
+    //    let reserved_names = [
+    //        "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7",
+    //        "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+    //    ];
+    //    if reserved_names.contains(&path.file_name().unwrap_or_default().to_str().unwrap_or("")) {
+    //        return "The path uses a reserved name.".into();
+    //    }
+    //}
 
     let temp_file_path = parsed_path
         .parent()
