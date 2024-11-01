@@ -19,7 +19,7 @@ This project is in a very early stage of development and currently NOT ready for
 
 ### To-Do
 
-- MasterRick1337: Writing features
+- MasterRick1337: Writing features & Markdown Compiler
 - Toll25: Project Explorer & Miscellaneous Stuff
 - DotDo1: Statistic Window
 - Alllpacka: Markdown Compiler, Settings & CI/CD
@@ -30,7 +30,7 @@ Features that are either already finished, are in progress or are planned for fu
 
 #### Done
 
-- [x] Page-less layout
+- [x] Split-View
 - [x] Project Explorer
 - [x] Load Project
 - [x] Statistics
@@ -46,6 +46,7 @@ Features that are either already finished, are in progress or are planned for fu
 - [ ] Spellcheck
 - [ ] Saving files
 - [ ] Statistics Window
+- [ ] Single-View
 
 #### Future ideas
 
