@@ -21,6 +21,7 @@ use menu::generate as generate_menu;
 
 mod saving;
 use saving::create_project;
+use saving::rename_path;
 
 use shared::Project;
 
@@ -38,7 +39,8 @@ fn main() {
             can_create_path,
             create_project,
             get_data_dir,
-            get_documents_folder
+            get_documents_folder,
+            rename_path
         ])
         .menu(generate_menu())
         .run(tauri::generate_context!())
@@ -174,4 +176,3 @@ fn write_to_file(path: &str, content: &str) {
         Err(e) => eprintln!("Failed to write to file: {e:?}"),
     }
 }
-

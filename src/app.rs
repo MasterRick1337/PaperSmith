@@ -130,21 +130,19 @@ pub fn app() -> Html {
         let project = project;
         Callback::from(move |_: MouseEvent| {
             let project = project.clone();
-            {
-                spawn_local(async move {
-                    let project_jsvalue = invoke("get_project", JsValue::null()).await;
-                    let project_or_none: Option<Project> =
-                        serde_wasm_bindgen::from_value(project_jsvalue).unwrap();
-                    if project_or_none.is_some() {
-                        project.set(project_or_none);
-                    }
-                });
-            }
+            spawn_local(async move {
+                let project_jsvalue = invoke("get_project", JsValue::null()).await;
+                let project_or_none: Option<Project> =
+                    serde_wasm_bindgen::from_value(project_jsvalue).unwrap();
+                if project_or_none.is_some() {
+                    project.set(project_or_none);
+                }
+            });
         })
     };
 
     html! {
-        <>
+        <div>
             <div class="modal-wrapper">{ (*modal).clone() }</div>
             <style id="dynamic-style" />
             <div class="menubar">
@@ -234,13 +232,13 @@ pub fn app() -> Html {
             </div>
             <div class="bottombar">
                 <div class="bottombar-left">
-                    <Statistics pages_ref={pages_ref.clone()}/>
+                    <Statistics pages_ref={pages_ref.clone()} />
                 </div>
                 <div class="bottombar-right">
                     <ZoomControls zoom_level={zoom_level.clone()} />
                 </div>
             </div>
-        </>
+        </div>
     }
 }
 

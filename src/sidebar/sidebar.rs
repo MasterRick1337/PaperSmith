@@ -1,3 +1,6 @@
+use std::path::PathBuf;
+
+use serde::Serialize;
 use shared::Chapter;
 use shared::Project;
 use yew::prelude::*;
@@ -14,12 +17,20 @@ pub struct SideBarProps {
     pub project: Project,
 }
 
+#[derive(Serialize)]
+struct AddChapterArgs {
+    path: String,
+    name: String,
+}
+
 #[function_component(SideBar)]
 pub fn sidebar(SideBarProps { project }: &SideBarProps) -> Html {
     let chapter_elements: Vec<Html> = project
         .chapters
         .iter()
-        .map(|chapter| html! { <ChapterComponent chapter={chapter.clone()} /> })
+        .map(|chapter| html! {
+            <ChapterComponent chapter={chapter.clone()} project_location={project.path.clone()} />
+        })
         .collect();
 
     html! {
@@ -46,10 +57,16 @@ pub fn sidebar(SideBarProps { project }: &SideBarProps) -> Html {
 #[derive(Properties, PartialEq)]
 struct ChapterProps {
     pub chapter: Chapter,
+    pub project_location: PathBuf,
 }
 
 #[function_component(ChapterComponent)]
-fn chapter(ChapterProps { chapter }: &ChapterProps) -> Html {
+fn chapter(
+    ChapterProps {
+        chapter,
+        project_location,
+    }: &ChapterProps,
+) -> Html {
     let note_elements: Vec<Html> = chapter
         .notes
         .iter()
@@ -63,11 +80,21 @@ fn chapter(ChapterProps { chapter }: &ChapterProps) -> Html {
         .collect();
 
     html! {
-        <Dropdown title={chapter.name.clone()} open=false dropdown_type={Type::Chapter}>
-            <Dropdown title="Notes" open=false dropdown_type={Type::Notes}>
+        <Dropdown
+            title={chapter.name.clone()}
+            open=false
+            dropdown_type={Type::Chapter}
+            project_location={Some((*project_location).clone())}
+        >
+            <Dropdown title="Notes" open=false dropdown_type={Type::Notes} project_location={None}>
                 { for note_elements }
             </Dropdown>
-            <Dropdown title="Extras" open=false dropdown_type={Type::Extras}>
+            <Dropdown
+                title="Extras"
+                open=false
+                dropdown_type={Type::Extras}
+                project_location={None}
+            >
                 { for extra_elements }
             </Dropdown>
         </Dropdown>
