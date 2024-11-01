@@ -120,7 +120,6 @@ jobs:
           done
       - name: get version
         id: get_version
-        # uses: battila7/get-version-action@v2
         run: |
           version=$(curl "https://api.github.com/repos/MasterRick1337/PaperSmith/tags" | jq -r '.[1].name')
           echo "version=$version" >> $GITHUB_OUTPUT
