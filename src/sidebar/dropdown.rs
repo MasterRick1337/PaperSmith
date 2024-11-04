@@ -1,12 +1,6 @@
-use std::path::PathBuf;
-
 use gloo_timers::callback::Timeout;
-use serde::Serialize;
-use serde_wasm_bindgen::to_value;
-use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen::JsValue;
-use wasm_bindgen_futures::spawn_local;
-use web_sys::{HtmlElement, HtmlInputElement};
+use shared::Project;
+use web_sys::HtmlElement;
 use yew::prelude::*;
 use yew_icons::{Icon, IconId};
 
@@ -14,11 +8,7 @@ use yew_icons::{Icon, IconId};
 mod chevron;
 use chevron::Chevron;
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
-    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
-}
+use crate::app::sidebar::renaming::{get_rename_callback, RenameKind};
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -26,7 +16,7 @@ pub struct Props {
     pub open: bool,
     pub children: Html,
     pub dropdown_type: Type,
-    pub project_location: Option<PathBuf>,
+    pub project: Option<UseStateHandle<Option<Project>>>,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone)]
@@ -36,18 +26,6 @@ pub enum Type {
     Extras,
 }
 
-#[derive(Serialize)]
-struct RenameArgs {
-    path: PathBuf,
-    old: String,
-    new: String,
-}
-
-#[derive(Serialize)]
-struct PathArgs {
-    path: String,
-}
-
 #[function_component(Dropdown)]
 pub fn dropdown(
     Props {
@@ -55,7 +33,7 @@ pub fn dropdown(
         open,
         dropdown_type,
         children,
-        project_location,
+        project,
     }: &Props,
 ) -> Html {
     let transition_string = use_state(|| "max-height: 0px".to_string());
@@ -66,94 +44,14 @@ pub fn dropdown(
     let input_ref = use_node_ref();
     let title = use_state(|| title.clone());
 
-    let on_rename = {
-        let name_display = name_display.clone();
-        let title = title.clone();
-        let project_location = project_location.clone();
-        Callback::from(move |e: MouseEvent| {
-            e.stop_propagation();
-            let input_ref = input_ref.clone();
-            let name_display = name_display.clone();
-            let onblur = {
-                let name_display = name_display.clone();
-                let title = title.clone();
-                Callback::from(move |_| {
-                    let name_display = name_display.clone();
-                    let title = title.clone();
-                    name_display.set(html!(<>{ (*title).clone() }</>));
-                })
-            };
-            let onenter = {
-                let name_display = name_display.clone();
-                let input_ref = input_ref.clone();
-                let title = title.clone();
-                let project_location = project_location.clone();
-                Callback::from(move |e: KeyboardEvent| {
-                    let input_ref = input_ref.clone();
-                    let name_display = name_display.clone();
-                    let title = title.clone();
-                    let project_location = project_location.clone();
-                    if e.key() == "Enter" {
-                        //TODO: check if name valid
-                        // Modify in memory Project
-                        if let Some(input) = input_ref.cast::<HtmlInputElement>() {
-                            let value = input.value();
-
-                            spawn_local(async move {
-                                let mut chapters_path = project_location.clone().expect("ahhhh");
-                                chapters_path.push("Chapters");
-                                let check_path = chapters_path.clone().join(value.clone());
-
-                                let result = invoke(
-                                    "can_create_path",
-                                    to_value(&PathArgs {
-                                        path: check_path.to_str().unwrap().into(),
-                                    })
-                                    .unwrap(),
-                                )
-                                .await
-                                .as_string()
-                                .unwrap()
-                                .is_empty();
-
-                                if result {
-                                    let args = RenameArgs {
-                                        path: chapters_path,
-                                        old: (*title).clone(),
-                                        new: value.clone(),
-                                    };
-                                    let args = to_value(&args).unwrap();
-                                    invoke("rename_path", args).await;
-                                    title.set(value.clone());
-                                    name_display.set(html!(<>{ value }</>));
-                                }
-                            });
-                        }
-                    }
-                })
-            };
-            name_display.set(html!(
-                <input
-                    onblur={onblur}
-                    onkeypress={onenter}
-                    ref={input_ref.clone()}
-                    class="bg-inherit text-inherit"
-                />
-            ));
-
-            let _timeout = Timeout::new(1, {
-                let title = title.clone();
-                move || {
-                    if let Some(input) = input_ref.cast::<HtmlInputElement>() {
-                        input.set_value(&title.clone());
-                        let _ = input.focus();
-                        input.select();
-                    }
-                }
-            })
-            .forget();
-        })
-    };
+    let on_rename = get_rename_callback(
+        name_display.clone(),
+        title,
+        input_ref,
+        project.clone().unwrap(),
+        RenameKind::Chapter,
+        None,
+    );
 
     let onclick = {
         let transition_string = transition_string.clone();

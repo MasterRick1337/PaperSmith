@@ -1,10 +1,11 @@
-use std::path::PathBuf;
-
 use serde::Serialize;
 use shared::Chapter;
 use shared::Project;
 use yew::prelude::*;
 use yew_icons::{Icon, IconId};
+
+#[path = "renaming.rs"]
+mod renaming;
 
 #[path = "dropdown.rs"]
 mod dropdown;
@@ -12,9 +13,9 @@ mod dropdown;
 use dropdown::Dropdown;
 use dropdown::Type;
 
-#[derive(Properties, PartialEq, Eq)]
+#[derive(Properties, PartialEq)]
 pub struct SideBarProps {
-    pub project: Project,
+    pub project: UseStateHandle<Option<Project>>,
 }
 
 #[derive(Serialize)]
@@ -26,10 +27,12 @@ struct AddChapterArgs {
 #[function_component(SideBar)]
 pub fn sidebar(SideBarProps { project }: &SideBarProps) -> Html {
     let chapter_elements: Vec<Html> = project
+        .as_ref()
+        .unwrap()
         .chapters
         .iter()
-        .map(|chapter| html! {
-            <ChapterComponent chapter={chapter.clone()} project_location={project.path.clone()} />
+        .map(|chapter| {
+            html! { <ChapterComponent chapter={chapter.clone()} project={project.clone()} /> }
         })
         .collect();
 
@@ -37,7 +40,7 @@ pub fn sidebar(SideBarProps { project }: &SideBarProps) -> Html {
         <>
             <div id="file-explorer">
                 <div class="chapter-title text-ellipsis whitespace-nowrap overflow-hidden">
-                    { project.path.file_name().unwrap().to_string_lossy().into_owned() }
+                    { project.as_ref().unwrap().path.file_name().unwrap().to_string_lossy().into_owned() }
                     <div class="sidebar-dropdown-icon-container hide-parent-hover">
                         <div
                             class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text mx-1"
@@ -57,16 +60,11 @@ pub fn sidebar(SideBarProps { project }: &SideBarProps) -> Html {
 #[derive(Properties, PartialEq)]
 struct ChapterProps {
     pub chapter: Chapter,
-    pub project_location: PathBuf,
+    pub project: UseStateHandle<Option<Project>>,
 }
 
 #[function_component(ChapterComponent)]
-fn chapter(
-    ChapterProps {
-        chapter,
-        project_location,
-    }: &ChapterProps,
-) -> Html {
+fn chapter(ChapterProps { chapter, project }: &ChapterProps) -> Html {
     let note_elements: Vec<Html> = chapter
         .notes
         .iter()
@@ -84,17 +82,12 @@ fn chapter(
             title={chapter.name.clone()}
             open=false
             dropdown_type={Type::Chapter}
-            project_location={Some((*project_location).clone())}
+            project={project.clone()}
         >
-            <Dropdown title="Notes" open=false dropdown_type={Type::Notes} project_location={None}>
+            <Dropdown title="Notes" open=false dropdown_type={Type::Notes} project={None}>
                 { for note_elements }
             </Dropdown>
-            <Dropdown
-                title="Extras"
-                open=false
-                dropdown_type={Type::Extras}
-                project_location={None}
-            >
+            <Dropdown title="Extras" open=false dropdown_type={Type::Extras} project={None}>
                 { for extra_elements }
             </Dropdown>
         </Dropdown>
