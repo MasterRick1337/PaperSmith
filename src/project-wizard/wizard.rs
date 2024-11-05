@@ -27,8 +27,8 @@ struct TitleArgs {
 }
 
 #[derive(Serialize)]
-struct PathArgs {
-    path: String,
+pub struct PathArgs {
+    pub path: String,
 }
 
 #[function_component(ProjectWizard)]
@@ -251,13 +251,13 @@ pub fn project_wizard(
                 <button
                     ref={confirm_button_ref}
                     onclick={on_confirm}
-                    class={"rounded-lg text-lg px-2 py-1 ml-4 bg-mauve text-crust hover:scale-105"}
+                    class="rounded-lg text-lg px-2 py-1 ml-4 bg-mauve text-crust hover:scale-105"
                 >
                     { "Confirm" }
                 </button>
                 <button
                     onclick={on_close}
-                    class={"rounded-lg text-lg px-2 py-1 ml-4 bg-red text-crust hover:scale-105"}
+                    class="rounded-lg text-lg px-2 py-1 ml-4 bg-red text-crust hover:scale-105"
                 >
                     { "Close" }
                 </button>

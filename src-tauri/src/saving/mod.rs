@@ -46,10 +46,10 @@ fn move_dir_recursive(src: &PathBuf, dst: &PathBuf) -> io::Result<()> {
                 fs::rename(&src_path, &dst_path)?;
             }
         }
+        fs::remove_dir_all(src)?;
     } else {
         fs::rename(src, dst)?;
     }
-    fs::remove_dir_all(src)?;
     Ok(())
 }
 
@@ -69,11 +69,8 @@ pub fn rename_path(path: String, old: String, new: String) {
 }
 
 #[tauri::command]
-pub fn add_chapter(path: String, name: String) {
+pub fn add_chapter(path: String) {
     let mut path = PathBuf::from(path);
-    path.push("Chapters");
-
-    path.push(name);
     let _ = fs::create_dir(&path);
 
     path.push("Notes");

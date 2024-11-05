@@ -66,8 +66,11 @@ pub fn get_rename_callback(
                 if e.key() == "Enter" {
                     if let Some(input) = input_ref.cast::<HtmlInputElement>() {
                         let value = input.value();
-                        let mut note_value = value.clone();
-                        note_value.push_str(".md");
+                        let mut file_value = value.clone();
+
+                        if matches!(kind, RenameKind::Note) {
+                            file_value.push_str(".md");
+                        };
 
                         spawn_local(async move {
                             let mut path = project.as_ref().unwrap().clone().path;
@@ -94,23 +97,31 @@ pub fn get_rename_callback(
                                 check_path.set_extension("md");
                             };
 
-                            let result = invoke(
-                                "can_create_path",
-                                to_value(&PathArgs {
-                                    path: check_path.to_str().unwrap().into(),
-                                })
-                                .unwrap(),
-                            )
-                            .await
-                            .as_string()
-                            .unwrap()
-                            .is_empty();
+                            let result = if value == *title {
+                                true
+                            } else {
+                                invoke(
+                                    "can_create_path",
+                                    to_value(&PathArgs {
+                                        path: check_path.to_str().unwrap().into(),
+                                    })
+                                    .unwrap(),
+                                )
+                                .await
+                                .as_string()
+                                .unwrap()
+                                .is_empty()
+                            };
 
                             if result {
+                                let mut file_title = (*title).clone();
+                                if matches!(kind, RenameKind::Note) {
+                                    file_title += ".md";
+                                };
                                 let args = RenameArgs {
                                     path,
-                                    old: (*title).clone() + ".md",
-                                    new: note_value.clone(),
+                                    old: file_title,
+                                    new: file_value.clone(),
                                 };
                                 let args = to_value(&args).unwrap();
                                 invoke("rename_path", args).await;
@@ -150,7 +161,7 @@ pub fn get_rename_callback(
                 onblur={onblur}
                 onkeypress={onenter}
                 ref={input_ref.clone()}
-                class="bg-inherit text-inherit"
+                class="bg-teal text-mantle rounded-lg font-medium shadow-none focus:border-0 focus:decorations-none focus:outline-none"
             />
         ));
 

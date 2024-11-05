@@ -115,19 +115,17 @@ pub fn app() -> Html {
         let project = project.clone();
         use_effect_with(project.clone(), move |_| {
             if (*project).is_none() {
-                sidebar.set(html! { { "No Project Loaded" } });
+                sidebar.set(
+                    html! { <div class="cursor-default select-none">{ "No Project Loaded" }</div> },
+                );
             } else {
-                sidebar.set(html! {
-                    <SideBar
-                        project={<std::option::Option<shared::Project> as Clone>::clone(&(project)).unwrap()}
-                    />
-                });
+                sidebar.set(html! { <SideBar project={project.clone()} /> });
             }
         });
     };
 
     let on_load = {
-        let project = project;
+        let project = project.clone();
         Callback::from(move |_: MouseEvent| {
             let project = project.clone();
             spawn_local(async move {
@@ -141,11 +139,26 @@ pub fn app() -> Html {
         })
     };
 
+    let print_project = {
+        let project = project.clone();
+        Callback::from(move |_| {
+            let project = project.clone();
+            gloo_console::log!(format!("{}", project.as_ref().unwrap()));
+        })
+    };
+
     html! {
         <div>
             <div class="modal-wrapper">{ (*modal).clone() }</div>
             <style id="dynamic-style" />
             <div class="menubar">
+                <Icon
+                    onclick={print_project}
+                    icon_id={IconId::LucideUndo}
+                    width={"2em".to_owned()}
+                    height={"2em".to_owned()}
+                    class="menubar-icon"
+                />
                 <Icon
                     icon_id={IconId::LucideUndo}
                     width={"2em".to_owned()}

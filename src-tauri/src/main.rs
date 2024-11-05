@@ -4,6 +4,7 @@
 use chrono::{DateTime, Utc};
 use lazy_static::lazy_static;
 use rfd::FileDialog;
+use saving::add_chapter;
 use std::fs::File;
 use std::io::Write;
 use std::sync::Mutex;
@@ -40,7 +41,8 @@ fn main() {
             create_project,
             get_data_dir,
             get_documents_folder,
-            rename_path
+            rename_path,
+            add_chapter
         ])
         .menu(generate_menu())
         .run(tauri::generate_context!())
