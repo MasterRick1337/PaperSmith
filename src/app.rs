@@ -140,7 +140,6 @@ pub fn app() -> Html {
     };
 
     let print_project = {
-        let project = project.clone();
         Callback::from(move |_| {
             let project = project.clone();
             gloo_console::log!(format!("{}", project.as_ref().unwrap()));

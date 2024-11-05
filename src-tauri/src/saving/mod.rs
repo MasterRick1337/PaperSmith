@@ -1,5 +1,5 @@
-use std::fs::{self, rename, File};
-use std::path::{Path, PathBuf};
+use std::fs::{self, File};
+use std::path::PathBuf;
 
 use shared::Project;
 
@@ -54,9 +54,22 @@ fn move_dir_recursive(src: &PathBuf, dst: &PathBuf) -> io::Result<()> {
 }
 
 #[tauri::command]
-pub fn rename_path(path: String, old: String, new: String) {
-    let old_path = PathBuf::from(&path).join(&old);
-    let new_path = PathBuf::from(&path).join(&new);
+pub fn delete_path(path: String) {
+    let path = PathBuf::from(path);
+    if !path.exists() {
+        return;
+    }
+    if path.is_dir() {
+        let _ = fs::remove_dir_all(path);
+    } else {
+        let _ = fs::remove_file(path);
+    }
+}
+
+#[tauri::command]
+pub fn rename_path(path: &str, old: &str, new: &str) {
+    let old_path = PathBuf::from(&path).join(old);
+    let new_path = PathBuf::from(&path).join(new);
 
     println!("Old path: {}", old_path.display());
     println!("New path: {}", new_path.display());

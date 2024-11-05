@@ -1,8 +1,7 @@
-use std::path::PathBuf;
+use std::path::Path;
 
 use renaming::get_rename_callback;
 use renaming::RenameKind;
-use serde::Serialize;
 use serde_wasm_bindgen::to_value;
 use shared::Chapter;
 use shared::Project;
@@ -28,13 +27,7 @@ pub struct SideBarProps {
     pub project: UseStateHandle<Option<Project>>,
 }
 
-#[derive(Serialize)]
-struct AddChapterArgs {
-    path: String,
-    name: String,
-}
-
-fn get_file_name(path: PathBuf) -> String {
+fn get_file_name(path: &Path) -> String {
     path.to_str()
         .unwrap()
         .rsplit(['/', '\\'])
@@ -43,53 +36,30 @@ fn get_file_name(path: PathBuf) -> String {
         .to_string()
 }
 
-fn get_chapters(project: UseStateHandle<Option<Project>>) -> Vec<VNode> {
-    project
-        .as_ref()
-        .unwrap()
-        .chapters
-        .iter()
-        .enumerate()
-        .map(|(index, chapter)| {
-            gloo_console::log!(format!("Index: {}, Chapter name: {}", index, chapter.name));
-            html! {
-                <ChapterComponent
-                    chapter={chapter.clone()}
-                    index={index}
-                    project={project.clone()}
-                />
-            }
-        })
-        .collect()
-}
-
 #[function_component(SideBar)]
 pub fn sidebar(SideBarProps { project }: &SideBarProps) -> Html {
     let input_ref = use_node_ref();
-    let title = use_state(|| get_file_name((*project).as_ref().unwrap().path.clone()));
+    let title = use_state(|| get_file_name(&(*project).as_ref().unwrap().path));
     let name_display = use_state(|| html! { (*title).clone() });
-    let chapters = use_state(|| Vec::<VNode>::new());
+    let chapters = use_state(Vec::<VNode>::new);
 
     {
         let title = title.clone();
         let project = project.clone();
         let name_display = name_display.clone();
         use_effect_with(project.clone(), move |_| {
-            title.set(get_file_name((*project).as_ref().unwrap().path.clone()));
-            name_display.set(html! { get_file_name((*project).as_ref().unwrap().path.clone()) });
+            title.set(get_file_name(&(*project).as_ref().unwrap().path));
+            name_display.set(html! { get_file_name(&(*project).as_ref().unwrap().path) });
         });
     }
 
     {
-        // Cloning dependencies to move them into the `use_effect` closure
         let chapters = chapters.clone();
         let project = (*project).clone();
 
         use_effect_with((*project).clone(), move |_| {
-            // Clear the existing chapters vector by resetting it to a new vector
             chapters.set(Vec::new());
 
-            // Check if `project` is loaded and has chapters to display
             if let Some(project_data) = project.as_ref() {
                 let new_chapters = project_data
                     .chapters
@@ -110,7 +80,6 @@ pub fn sidebar(SideBarProps { project }: &SideBarProps) -> Html {
                     })
                     .collect::<Vec<VNode>>();
 
-                // Update the chapters state with the new chapters
                 chapters.set(new_chapters);
             }
         });

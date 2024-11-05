@@ -4,7 +4,6 @@
 use chrono::{DateTime, Utc};
 use lazy_static::lazy_static;
 use rfd::FileDialog;
-use saving::add_chapter;
 use std::fs::File;
 use std::io::Write;
 use std::sync::Mutex;
@@ -21,7 +20,9 @@ mod menu;
 use menu::generate as generate_menu;
 
 mod saving;
+use saving::add_chapter;
 use saving::create_project;
+use saving::delete_path;
 use saving::rename_path;
 
 use shared::Project;
@@ -42,7 +43,8 @@ fn main() {
             get_data_dir,
             get_documents_folder,
             rename_path,
-            add_chapter
+            add_chapter,
+            delete_path,
         ])
         .menu(generate_menu())
         .run(tauri::generate_context!())
