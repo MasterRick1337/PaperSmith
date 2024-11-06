@@ -54,9 +54,22 @@ fn move_dir_recursive(src: &PathBuf, dst: &PathBuf) -> io::Result<()> {
 }
 
 #[tauri::command]
+pub fn create_empty_file(path: String) {
+    let path = PathBuf::from(path);
+    println!("Creating: {}", path.to_str().unwrap());
+    //if !can_create_path(path).is_empty(){
+    //    println!("Path did not exist");
+    //    return;
+    //}
+    let _ = File::create(path);
+}
+
+#[tauri::command]
 pub fn delete_path(path: String) {
     let path = PathBuf::from(path);
+    println!("Deleting: {}", path.to_str().unwrap());
     if !path.exists() {
+        println!("Path did not exist");
         return;
     }
     if path.is_dir() {

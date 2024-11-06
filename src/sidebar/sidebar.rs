@@ -1,7 +1,6 @@
 use std::path::Path;
 
-use renaming::get_rename_callback;
-use renaming::RenameKind;
+use deleting::get_delete_callback;
 use serde_wasm_bindgen::to_value;
 use shared::Chapter;
 use shared::Project;
@@ -12,6 +11,11 @@ use yew_icons::{Icon, IconId};
 
 #[path = "renaming.rs"]
 mod renaming;
+use renaming::get_rename_callback;
+use renaming::RenameKind;
+
+#[path = "deleting.rs"]
+mod deleting;
 
 #[path = "dropdown.rs"]
 mod dropdown;
@@ -66,10 +70,6 @@ pub fn sidebar(SideBarProps { project }: &SideBarProps) -> Html {
                     .iter()
                     .enumerate()
                     .map(|(index, chapter)| {
-                        gloo_console::log!(format!(
-                            "Index: {}, Chapter name: {}",
-                            index, chapter.name
-                        ));
                         html! {
                             <ChapterComponent
                                 key={chapter.name.clone()}
@@ -190,8 +190,28 @@ fn chapter(
             }
         })
         .collect();
-
-    gloo_console::log!(format!("{}", chapter.name.clone()));
+    let on_extras = {
+        let project = project.clone();
+        let index = *index;
+        Callback::from(move |_| {
+            let project = project.clone();
+            spawn_local(async move {
+                let project_clone = project.as_ref().unwrap().clone();
+                let mut extras_path = project_clone.path.clone();
+                extras_path.push("Chapters");
+                extras_path.push(project_clone.chapters[index].name.clone());
+                extras_path.push("Extras");
+                invoke(
+                    "open_explorer",
+                    to_value(&PathArgs {
+                        path: extras_path.to_str().unwrap().to_string(),
+                    })
+                    .unwrap(),
+                )
+                .await;
+            });
+        })
+    };
 
     html! {
         <Dropdown
@@ -205,11 +225,18 @@ fn chapter(
             >
                 { "Contents" }
             </div>
-            <Dropdown title="Notes" open=false dropdown_type={Type::Notes} project={None}>
+            <Dropdown
+                title="Notes"
+                open=false
+                dropdown_type={Type::Notes}
+                project={Some(project.clone())}
+                chapter_index={index}
+            >
                 { for note_elements }
             </Dropdown>
             <div
                 class="chapter-title rounded-md my-[1px] pl-5 hover:bg-sapphire hover:text-mantle"
+                onclick={on_extras}
             >
                 { "Extras" }
             </div>
@@ -234,7 +261,7 @@ fn entry(
 ) -> Html {
     let input_ref = use_node_ref();
     let title = use_state(|| name.clone());
-    let name_display = use_state(|| html! { name });
+    let name_display = use_state(|| html! { name.clone() });
     html! {
         <div class="chapter-title rounded-md hover:bg-green pl-2 hover:text-mantle">
             { (*name_display).clone() }
@@ -244,6 +271,12 @@ fn entry(
                     onclick={get_rename_callback(name_display, title.clone(), input_ref,project.clone(), RenameKind::Note, Some(*chapter_index) )}
                 >
                     <Icon icon_id={IconId::LucideEdit3} width="16px" height="16px" />
+                </div>
+                <div
+                    class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text mx-1"
+                    onclick={get_delete_callback(project.clone(), name.clone(), Some(*chapter_index), RenameKind::Note)}
+                >
+                    <Icon icon_id={IconId::LucideTrash2} width="16px" height="16px" />
                 </div>
             </div>
         </div>
