@@ -63,7 +63,7 @@ pub fn dropdown(
         on_delete = {
             let title = title.clone();
             Callback::from(move |e: MouseEvent| {
-                e.prevent_default();
+                e.stop_propagation();
 
                 let mut temp_project = (*unwrapped_project.as_ref().unwrap()).clone();
                 temp_project
@@ -88,15 +88,6 @@ pub fn dropdown(
     } else {
         on_rename = Callback::from(move |_: MouseEvent| {});
         on_delete = Callback::from(move |_: MouseEvent| {});
-    }
-
-    {
-        let name_display = name_display.clone();
-        let origininal_title = origininal_title.clone();
-        use_effect_with(origininal_title.clone(), move |_| {
-            title.set(origininal_title.to_string());
-            name_display.set(html! { origininal_title.clone() });
-        });
     }
 
     let onclick = {

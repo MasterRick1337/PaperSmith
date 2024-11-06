@@ -72,6 +72,7 @@ pub fn sidebar(SideBarProps { project }: &SideBarProps) -> Html {
                         ));
                         html! {
                             <ChapterComponent
+                                key={chapter.name.clone()}
                                 chapter={chapter.clone()}
                                 index={index}
                                 project={project.clone()}
@@ -179,7 +180,12 @@ fn chapter(
         .iter()
         .map(|note| {
             html! {
-                <Entry name={note.clone()} project={project.clone()} chapter_index={index} // Use the index here
+                <Entry
+                    key={note.clone()}
+                    name={note.clone()}
+                    project={project.clone()}
+                    chapter_index={index}
+                // Use the index here
                 />
             }
         })
