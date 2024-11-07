@@ -23,6 +23,7 @@ use zoom_level_handlers::ZoomControls;
 #[path = "statistics/statistic.rs"]
 mod statistic;
 use statistic::Statistics;
+use statistic::StatisticProp;
 
 #[path = "text_alignment_handlers.rs"]
 mod text_alignment_handlers;
@@ -44,12 +45,6 @@ extern "C" {
     async fn invoke(cmd: &str, args: JsValue) -> JsValue;
 }
 
-#[derive(Serialize)]
-struct SaveFileArgs {
-    content: String,
-    filename: String,
-}
-
 #[derive(Properties, PartialEq)]
 pub struct WordCountProps {
     pub pages_ref: NodeRef,
@@ -61,8 +56,23 @@ pub struct FileWriteData {
     pub content: String
 }
 
+#[derive(Properties, PartialEq)]
+pub struct StatisticProps {
+    pub statistics: StatisticProp,
+}
+
+impl Default for StatisticProps {
+    fn default() -> Self {
+        StatisticProps {
+            statistics: StatisticProp {
+                char_count: 0.to_string(),
+            },
+        }
+    }
+}
+
 #[function_component(App)]
-pub fn app() -> Html {
+pub fn app(props: &StatisticProps) -> Html {
     let pages_ref: NodeRef = use_node_ref();
     let text_input_ref = use_node_ref();
     let lines = use_state(Vec::new);
@@ -87,15 +97,18 @@ pub fn app() -> Html {
     let save = {
         let text_input_ref = text_input_ref.clone();
         let project_path = project_path.clone();
+        let modal = modal.clone();
+    
         Callback::from(move |_| {
             let text_input_ref = text_input_ref.clone();
             let project_path = project_path.clone();
+            let modal = modal.clone();
+    
             spawn_local(async move {
                 if let Some(input_element) = text_input_ref.cast::<HtmlElement>() {
                     let text = input_element.inner_text();
-
+    
                     if let Some(mut path) = project_path.clone() {
-                        // Append the desired sub-path to the existing project path
                         path.push("Chapters");
                         path.push("Beginning");
                         path.push("Content.md");
@@ -104,8 +117,29 @@ pub fn app() -> Html {
                             path: path.to_string_lossy().to_string(),
                             content: text
                         };
-
+    
                         invoke("write_to_file", serde_wasm_bindgen::to_value(&write_data).unwrap()).await;
+    
+                        modal.set(html! {
+                            <Modal
+                                content={html! {
+                                    <div>{ "Successfully saved" }</div>
+                                }}
+                                button_configs={
+                                    vec![
+                                        ModalButtonProps {
+                                            text: "Close".to_string(),
+                                            text_color: "white".to_string(),
+                                            bg_color: "green".to_string(),
+                                            callback: {
+                                                let modal = modal.clone();
+                                                Callback::from(move |_| modal.set(html!()))
+                                            }
+                                        }
+                                    ]
+                                }
+                            />
+                        });
                     }
                 }
             });
@@ -276,7 +310,9 @@ pub fn app() -> Html {
             </div>
             <div class="bottombar">
                 <div class="bottombar-left">
-                    <Statistics pages_ref={pages_ref.clone()}/>
+                    //<Statistics pages_ref={pages_ref.clone()}/>
+                    //<div>{format!("{}, {} Words; Characters: {}, {} without spaces, {:.2} wpm", *session_time, *word_count, *char_count,*char_count_no_spaces, calculated_wpm)}</div>
+                    {format!("{}", props.statistics.char_count)}
                 </div>
                 <div class="bottombar-right">
                     <ZoomControls zoom_level={zoom_level.clone()} />
@@ -285,30 +321,6 @@ pub fn app() -> Html {
         </>
     }
 }
-
-/*let save = Callback::from(move |_: MouseEvent| {
-    let args = to_value(&()).unwrap();
-    let ahhh = invoke("show_save_dialog", args).await;
-});*/
-
-/*This one worked----------------------------------------------------------
-let save = {
-    Callback::from(move |_| {
-        spawn_local(async move {
-            let args = to_value(&()).unwrap();
-            let ahhh = invoke("show_save_dialog", args).await;
-        });
-    })
-};*/
-
-/*let save = {
-    Callback::from(move |_| {
-        spawn_local(async move {
-            let args = to_value(&()).unwrap();
-            invoke("saveTest", args).await.as_string();
-        });
-    })
-};*/
 
 fn text_input_handler(
     text_input_ref: NodeRef,

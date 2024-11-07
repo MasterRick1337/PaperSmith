@@ -30,6 +30,11 @@ pub struct FileWriteData {
     pub content: String
 }
 
+#[derive(Properties, PartialEq)]
+pub struct StatisticProp {
+    pub char_count: String,
+}
+
 #[function_component]
 pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
     let char_count = use_state(|| 0);
