@@ -48,6 +48,9 @@ yew_icons = { version = "0.8", features = [
   "LucideListChecks",
   "LucideFolder",
   "LucideFolderOpen",
+  "LucideSave",
+  "LucideFileDown",
+  "LucideFilePlus",
 ] }
 gloo-timers = "0.3.0"
 yew-hooks = "0.3.2"

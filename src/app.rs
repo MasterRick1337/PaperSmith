@@ -125,7 +125,7 @@ pub fn app() -> Html {
     };
 
     let on_load = {
-        let project = project.clone();
+        //let project = project.clone();
         Callback::from(move |_: MouseEvent| {
             let project = project.clone();
             spawn_local(async move {
@@ -139,12 +139,12 @@ pub fn app() -> Html {
         })
     };
 
-    let print_project = {
-        Callback::from(move |_| {
-            let project = project.clone();
-            gloo_console::log!(format!("{}", project.as_ref().unwrap()));
-        })
-    };
+    //let print_project = {
+    //    Callback::from(move |_| {
+    //        let project = project.clone();
+    //        gloo_console::log!(format!("{}", project.as_ref().unwrap()));
+    //    })
+    //};
 
     html! {
         <div>
@@ -152,12 +152,27 @@ pub fn app() -> Html {
             <style id="dynamic-style" />
             <div class="menubar">
                 <Icon
-                    onclick={print_project}
-                    icon_id={IconId::LucideUndo}
+                    icon_id={IconId::LucideFilePlus}
                     width={"2em".to_owned()}
                     height={"2em".to_owned()}
                     class="menubar-icon"
+                    onclick={open_modal}
                 />
+                <Icon
+                    icon_id={IconId::LucideFileDown}
+                    width={"2em".to_owned()}
+                    height={"2em".to_owned()}
+                    class="menubar-icon"
+                    onclick={on_load}
+                />
+                <Icon
+                    icon_id={IconId::LucideSave}
+                    width={"2em".to_owned()}
+                    height={"2em".to_owned()}
+                    class="menubar-icon"
+                    onclick={save}
+                />
+                <div class="separator" />
                 <Icon
                     icon_id={IconId::LucideUndo}
                     width={"2em".to_owned()}
@@ -219,9 +234,6 @@ pub fn app() -> Html {
                     class="menubar-icon"
                 />
                 //<Icon icon_id={IconId::LucideSpellCheck}/>
-                <button onclick={save}>{ "Save" }</button>
-                <button onclick={on_load}>{ "Load" }</button>
-                <button onclick={open_modal}>{ "Modal" }</button>
             </div>
             <div class="sidebar">{ (*sidebar).clone() }</div>
             <div class="notepad-outer-container" ref={pages_ref.clone()}>
