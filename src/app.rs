@@ -115,39 +115,49 @@ pub fn app() -> Html {
         let project = project.clone();
         use_effect_with(project.clone(), move |_| {
             if (*project).is_none() {
-                sidebar.set(html! { { "No Project Loaded" } });
+                sidebar.set(
+                    html! { <div class="cursor-default select-none">{ "No Project Loaded" }</div> },
+                );
             } else {
-                sidebar.set(html! {
-                    <SideBar
-                        project={<std::option::Option<shared::Project> as Clone>::clone(&(project)).unwrap()}
-                    />
-                });
+                sidebar.set(html! { <SideBar project={project.clone()} /> });
             }
         });
     };
 
     let on_load = {
-        let project = project;
+        let project = project.clone();
         Callback::from(move |_: MouseEvent| {
             let project = project.clone();
-            {
-                spawn_local(async move {
-                    let project_jsvalue = invoke("get_project", JsValue::null()).await;
-                    let project_or_none: Option<Project> =
-                        serde_wasm_bindgen::from_value(project_jsvalue).unwrap();
-                    if project_or_none.is_some() {
-                        project.set(project_or_none);
-                    }
-                });
-            }
+            spawn_local(async move {
+                let project_jsvalue = invoke("get_project", JsValue::null()).await;
+                let project_or_none: Option<Project> =
+                    serde_wasm_bindgen::from_value(project_jsvalue).unwrap();
+                if project_or_none.is_some() {
+                    project.set(project_or_none);
+                }
+            });
+        })
+    };
+
+    let print_project = {
+        Callback::from(move |_| {
+            let project = project.clone();
+            gloo_console::log!(format!("{}", project.as_ref().unwrap()));
         })
     };
 
     html! {
-        <>
+        <div>
             <div class="modal-wrapper">{ (*modal).clone() }</div>
             <style id="dynamic-style" />
             <div class="menubar">
+                <Icon
+                    onclick={print_project}
+                    icon_id={IconId::LucideUndo}
+                    width={"2em".to_owned()}
+                    height={"2em".to_owned()}
+                    class="menubar-icon"
+                />
                 <Icon
                     icon_id={IconId::LucideUndo}
                     width={"2em".to_owned()}
@@ -234,13 +244,13 @@ pub fn app() -> Html {
             </div>
             <div class="bottombar">
                 <div class="bottombar-left">
-                    <Statistics pages_ref={pages_ref.clone()}/>
+                    <Statistics pages_ref={pages_ref.clone()} />
                 </div>
                 <div class="bottombar-right">
                     <ZoomControls zoom_level={zoom_level.clone()} />
                 </div>
             </div>
-        </>
+        </div>
     }
 }
 

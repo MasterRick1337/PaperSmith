@@ -37,8 +37,10 @@ pub fn parse_project(path: PathBuf) -> Option<Project> {
             .filter(|x| x.as_ref().unwrap().file_type().unwrap().is_file())
         {
             let note = note.unwrap().path();
-            if note.extension().unwrap() == "md" {
-                notes.push(note.file_stem().unwrap().to_string_lossy().into_owned());
+            if let Some(extension) = note.extension() {
+                if extension == "md" {
+                    notes.push(note.file_stem().unwrap().to_string_lossy().into_owned());
+                }
             }
         }
 

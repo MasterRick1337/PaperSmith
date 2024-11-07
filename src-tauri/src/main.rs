@@ -4,8 +4,10 @@
 use chrono::{DateTime, Utc};
 use lazy_static::lazy_static;
 use rfd::FileDialog;
+use saving::create_empty_file;
 use std::fs::File;
 use std::io::Write;
+use std::process::Command;
 use std::sync::Mutex;
 
 mod loader;
@@ -20,7 +22,10 @@ mod menu;
 use menu::generate as generate_menu;
 
 mod saving;
+use saving::add_chapter;
 use saving::create_project;
+use saving::delete_path;
+use saving::rename_path;
 
 use shared::Project;
 
@@ -38,11 +43,35 @@ fn main() {
             can_create_path,
             create_project,
             get_data_dir,
-            get_documents_folder
+            get_documents_folder,
+            rename_path,
+            add_chapter,
+            delete_path,
+            open_explorer,
+            create_empty_file
         ])
         .menu(generate_menu())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[tauri::command]
+fn open_explorer(path: String) {
+    #[cfg(target_os = "windows")]
+    {
+        Command::new("explorer")
+            .arg(path.clone())
+            .spawn()
+            .expect("Failed to open directory in Explorer");
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        Command::new("xdg-open")
+            .arg(path)
+            .spawn()
+            .expect("Failed to open directory in file explorer");
+    }
 }
 
 #[tauri::command]
@@ -59,8 +88,7 @@ async fn show_save_dialog() -> Result<String, String> {
 
 #[tauri::command]
 fn get_project() -> Option<Project> {
-    let project_path = FileDialog::new().pick_folder().unwrap();
-    parse_project(project_path)
+    FileDialog::new().pick_folder().and_then(parse_project)
 }
 
 #[tauri::command]
@@ -174,4 +202,3 @@ fn write_to_file(path: &str, content: &str) {
         Err(e) => eprintln!("Failed to write to file: {e:?}"),
     }
 }
-

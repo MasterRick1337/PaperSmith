@@ -1,11 +1,23 @@
 use gloo_timers::callback::Timeout;
+use serde_wasm_bindgen::to_value;
+use shared::Project;
+use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 use yew_icons::{Icon, IconId};
+
 #[path = "chevron.rs"]
 mod chevron;
-
 use chevron::Chevron;
+
+use crate::app::{
+    invoke,
+    sidebar::{
+        deleting::get_delete_callback,
+        renaming::{get_rename_callback, RenameKind},
+    },
+    wizard::PathArgs,
+};
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -13,28 +25,120 @@ pub struct Props {
     pub open: bool,
     pub children: Html,
     pub dropdown_type: Type,
+    pub project: Option<UseStateHandle<Option<Project>>>,
+    #[prop_or(None)]
+    pub chapter_index: Option<usize>,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub enum Type {
     Chapter,
     Notes,
-    Extras,
 }
 
 #[function_component(Dropdown)]
 pub fn dropdown(
     Props {
-        title,
+        title: origininal_title,
         open,
         dropdown_type,
         children,
+        project,
+        chapter_index,
     }: &Props,
 ) -> Html {
     let transition_string = use_state(|| "max-height: 0px".to_string());
     let content_ref = use_node_ref();
     let chevron2_hidden = use_state(|| true);
     let chevron_rotated = use_state(|| *open);
+    let name_display = use_state(|| html!(origininal_title));
+    let input_ref = use_node_ref();
+    let title = use_state(|| origininal_title.clone());
+
+    let on_rename;
+    let on_delete;
+    let on_add_note;
+    if let Some(unwrapped_project) = project.clone() {
+        match dropdown_type {
+            Type::Chapter => {
+                on_rename = get_rename_callback(
+                    name_display.clone(),
+                    title.clone(),
+                    input_ref,
+                    unwrapped_project.clone(),
+                    RenameKind::Chapter,
+                    None,
+                );
+                on_delete = get_delete_callback(
+                    unwrapped_project,
+                    (*title).clone(),
+                    None,
+                    RenameKind::Chapter,
+                );
+                on_add_note = Callback::from(move |_: MouseEvent| {});
+            }
+            Type::Notes => {
+                on_rename = Callback::from(move |_: MouseEvent| {});
+                on_delete = Callback::from(move |_: MouseEvent| {});
+                on_add_note = {
+                    let chapter_index = *chapter_index;
+                    Callback::from(move |e: MouseEvent| {
+                        e.stop_propagation();
+                        let unwrapped_project = unwrapped_project.clone();
+                        spawn_local(async move {
+                            let mut check_path = unwrapped_project.as_ref().unwrap().path.clone();
+                            check_path.push("Chapters");
+                            check_path.push(
+                                unwrapped_project.as_ref().unwrap().chapters
+                                    [chapter_index.unwrap()]
+                                .name
+                                .clone(),
+                            );
+                            check_path.push("Notes");
+                            check_path.push("Untitled");
+                            check_path.set_extension("md");
+                            let mut index = 1;
+                            while !invoke(
+                                "can_create_path",
+                                to_value(&PathArgs {
+                                    path: check_path.to_str().unwrap().to_string().clone(),
+                                })
+                                .unwrap(),
+                            )
+                            .await
+                            .as_string()
+                            .unwrap()
+                            .is_empty()
+                            {
+                                check_path.pop();
+                                check_path.push("Untitled".to_string() + &index.to_string());
+                                check_path.set_extension("md");
+                                index += 1;
+                            }
+                            invoke(
+                                "create_empty_file",
+                                to_value(&PathArgs {
+                                    path: check_path.to_str().unwrap().to_string(),
+                                })
+                                .unwrap(),
+                            )
+                            .await;
+                            check_path.set_extension("");
+                            let mut temp_project = unwrapped_project.as_ref().unwrap().clone();
+                            temp_project.chapters[chapter_index.unwrap()]
+                                .notes
+                                .push(check_path.file_name().unwrap().to_string_lossy().into());
+                            unwrapped_project.set(Some(temp_project));
+                        });
+                    })
+                }
+            }
+        }
+    } else {
+        on_rename = Callback::from(move |_: MouseEvent| {});
+        on_delete = Callback::from(move |_: MouseEvent| {});
+        on_add_note = Callback::from(move |_: MouseEvent| {});
+    }
 
     let onclick = {
         let transition_string = transition_string.clone();
@@ -87,16 +191,16 @@ pub fn dropdown(
     };
 
     html! {
-        <div class="chapter">
+        <div class="chapter cursor-pointer">
             <div
                 class="chapter-title rounded-md my-[1px] hover:bg-mauve hover:text-mantle"
                 onclick={onclick}
             >
                 <Chevron rotated={*chevron_rotated} hidden=false />
                 <div class="inline-block pl-5 text-ellipsis whitespace-nowrap overflow-hidden">
-                    { title }
+                    { (*name_display).clone() }
                 </div>
-                { get_buttons(*dropdown_type) }
+                { get_buttons(*dropdown_type, on_rename, on_delete, on_add_note) }
             </div>
             <div
                 class="chapter-contents pl-2 ml-2 border-l-2 border-[#ccc] text-[#AAA] overflow-hidden"
@@ -109,16 +213,25 @@ pub fn dropdown(
     }
 }
 
-fn get_buttons(dropdown_type: Type) -> Html {
+fn get_buttons(
+    dropdown_type: Type,
+    on_rename: Callback<MouseEvent>,
+    on_delete: Callback<MouseEvent>,
+    on_add_note: Callback<MouseEvent>,
+) -> Html {
     match dropdown_type {
         Type::Chapter => {
             html! (
                 <div class="sidebar-dropdown-icon-container hide-parent-hover">
-                    <div class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text">
+                    <div
+                        class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text"
+                        onclick={on_rename}
+                    >
                         <Icon icon_id={IconId::LucideEdit3} width="16px" height="16px" />
                     </div>
                     <div
                         class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text mx-1"
+                        onclick={on_delete}
                     >
                         <Icon icon_id={IconId::LucideTrash2} width="16px" height="16px" />
                     </div>
@@ -130,17 +243,7 @@ fn get_buttons(dropdown_type: Type) -> Html {
                 <div class="sidebar-dropdown-icon-container hide-parent-hover">
                     <div
                         class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text mx-1"
-                    >
-                        <Icon icon_id={IconId::LucidePlus} width="16px" height="16px" />
-                    </div>
-                </div>
-            )
-        }
-        Type::Extras => {
-            html! (
-                <div class="sidebar-dropdown-icon-container hide-parent-hover">
-                    <div
-                        class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text mx-1"
+                        onclick={on_add_note}
                     >
                         <Icon icon_id={IconId::LucidePlus} width="16px" height="16px" />
                     </div>
