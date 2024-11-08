@@ -1,3 +1,6 @@
+use chrono::prelude::*;
+use chrono::TimeDelta;
+use pulldown_cmark::{html, Options, Parser};
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -7,23 +10,28 @@ use web_sys::HtmlElement;
 use yew::events::InputEvent;
 use yew::events::MouseEvent;
 use yew::prelude::*;
+use yew_hooks::prelude::*;
 use yew_icons::{Icon, IconId};
 
-#[path = "font_size_handlers.rs"]
-mod font_size_handlers;
-use font_size_handlers::FontSizeControls;
+#[path = "edit_container_zoom_handlers.rs"]
+mod zoom_edit_container_handlers;
+use zoom_edit_container_handlers::ZoomControlsEdit;
 
-#[path = "zoom_level_handlers.rs"]
-mod zoom_level_handlers;
-use zoom_level_handlers::ZoomControls;
+#[path = "compile_container_zoom_handlers.rs"]
+mod compile_container_handlers;
+use compile_container_handlers::ZoomControlsCompile;
+
+//#[path = "text_alignment_handlers.rs"]
+//mod text_alignment_handlers;
+//use text_alignment_handlers::TextAlignmentControls;
+
+#[path = "text_styling_handlers.rs"]
+mod text_styling_handlers;
+use text_styling_handlers::TextStylingControls;
 
 #[path = "statistics/statistic.rs"]
 mod statistic;
 use statistic::Statistics;
-
-#[path = "text_alignment_handlers.rs"]
-mod text_alignment_handlers;
-use text_alignment_handlers::TextAlignmentControls;
 
 #[path = "sidebar/sidebar.rs"]
 mod sidebar;
@@ -54,8 +62,8 @@ struct SaveFileArgs {
 pub fn app() -> Html {
     let pages_ref: NodeRef = use_node_ref();
     let text_input_ref = use_node_ref();
-    let lines = use_state(Vec::new);
-    let font_size = use_state(|| 16.0);
+    let font_size_edit = use_state(|| 16.0);
+    let font_size_compile = use_state(|| 16.0);
     let zoom_level = use_state(|| 100.0);
     let project: UseStateHandle<Option<Project>> = use_state(|| None);
     let text_alignment = use_state(|| "left".to_string());
@@ -64,7 +72,19 @@ pub fn app() -> Html {
     });
     let modal = use_state(|| html!());
 
-    let on_text_input = text_input_handler(text_input_ref.clone(), lines);
+    let render_ref = use_node_ref();
+
+    let start_time = use_state(|| None);
+    let word_count = use_state(|| 0);
+    let wpm = use_state(|| 0.0);
+
+    let on_text_input = text_input_handler(
+        text_input_ref.clone(),
+        start_time.clone(),
+        word_count.clone(),
+        wpm.clone(),
+        render_ref.clone(),
+    );
 
     let save = {
         let text_input_ref = text_input_ref.clone();
@@ -174,6 +194,13 @@ pub fn app() -> Html {
                 />
                 <div class="separator" />
                 <Icon
+                    icon_id={IconId::LucideSave}
+                    width={"2em".to_owned()}
+                    height={"2em".to_owned()}
+                    class="menubar-icon"
+                />
+                <div class="separator" />
+                <Icon
                     icon_id={IconId::LucideUndo}
                     width={"2em".to_owned()}
                     height={"2em".to_owned()}
@@ -186,81 +213,45 @@ pub fn app() -> Html {
                     class="menubar-icon"
                 />
                 <div class="separator" />
-                <FontSizeControls font_size={font_size.clone()} />
-                //<Icon icon_id={IconId::}/>
-                <div class="separator" />
-                <Icon
-                    icon_id={IconId::LucideBold}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <Icon
-                    icon_id={IconId::LucideItalic}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <Icon
-                    icon_id={IconId::LucideUnderline}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <Icon
-                    icon_id={IconId::LucideBaseline}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <Icon
-                    icon_id={IconId::LucideHighlighter}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <div class="separator" />
-                <TextAlignmentControls text_alignment={text_alignment.clone()} />
-                <Icon
-                    icon_id={IconId::LucideList}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <Icon
-                    icon_id={IconId::LucideListChecks}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                //<Icon icon_id={IconId::LucideSpellCheck}/>
+                <TextStylingControls />
             </div>
             <div class="sidebar">{ (*sidebar).clone() }</div>
             <div class="notepad-outer-container" ref={pages_ref.clone()}>
-                <div
-                    class="notepad-container"
-                    style={format!("transform: scale({});", *zoom_level / 100.0)}
-                >
-                    <a class="anchor" />
-                    <div class="notepad-wrapper">
+                <div class="notepad-container-edit">
+                    <div class="subbar-edit">
+                        <ZoomControlsEdit font_size_edit={font_size_edit.clone()} />
+                    </div>
+                    <div class="notepad-wrapper-edit">
                         <div
-                            class="notepad-textarea"
-                            id="notepad-textarea"
+                            class="notepad-textarea-edit"
+                            id="notepad-textarea-edit"
                             ref={text_input_ref}
-                            style={format!("text-align: {};", *text_alignment)}
+                            style={format!("font-size: {}px; text-align: {}; transform: scale({});", *font_size_edit, *text_alignment, *zoom_level / 100.0)}
                             contenteditable="true"
                             oninput={on_text_input}
                         />
                     </div>
+                </div>
+                <div
+                    class="notepad-container-compile"
+                    style={format!("font-size: {}px;", *font_size_compile)}
+                >
+                    <div class="subbar-compile">
+                        <ZoomControlsCompile font_size_compile={font_size_compile.clone()} />
+                    </div>
+                    <div
+                        class="notepad-textarea-compile"
+                        id="notepad-textarea-compile"
+                        style={format!("font-size: {}px;", *font_size_compile)}
+                        ref={render_ref}
+                    />
                 </div>
             </div>
             <div class="bottombar">
                 <div class="bottombar-left">
                     <Statistics pages_ref={pages_ref.clone()} />
                 </div>
-                <div class="bottombar-right">
-                    <ZoomControls zoom_level={zoom_level.clone()} />
-                </div>
+                <div class="bottombar-right" />
             </div>
         </div>
     }
@@ -292,13 +283,46 @@ let save = {
 
 fn text_input_handler(
     text_input_ref: NodeRef,
-    lines: UseStateHandle<Vec<String>>,
+    start_time: UseStateHandle<Option<DateTime<Local>>>,
+    word_count: UseStateHandle<usize>,
+    wpm: UseStateHandle<f64>,
+    render_ref: NodeRef,
 ) -> Callback<InputEvent> {
     Callback::from(move |_| {
         if let Some(input) = text_input_ref.cast::<HtmlElement>() {
             let inner_text = input.inner_text();
+            gloo_console::log!(&inner_text);
             let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
-            lines.set(new_lines);
+            //lines.set(new_lines);
+            rendering_handler(render_ref.clone(), new_lines.clone());
         }
     })
+}
+
+// ad br tag after end of each line (make it one string)
+fn rendering_handler(render_ref: NodeRef, new_lines: Vec<String>) {
+    let html_strings: Vec<String> = new_lines
+        .iter()
+        .map(|line| {
+            gloo_console::log!(line);
+            let mut options = Options::empty();
+            options.insert(Options::ENABLE_STRIKETHROUGH);
+            options.insert(Options::ENABLE_TABLES);
+
+            if line.trim().is_empty() {
+                "<br>".to_string()
+            } else {
+                let parser = Parser::new_ext(line.as_str(), options);
+                let mut html_output = String::new();
+                html::push_html(&mut html_output, parser);
+                html_output
+            }
+        })
+        .collect();
+
+    let html_string: String = html_strings.join("\n");
+
+    if let Some(rendered) = render_ref.cast::<HtmlElement>() {
+        rendered.set_inner_html(html_string.as_str());
+    }
 }
