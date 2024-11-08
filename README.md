@@ -34,14 +34,14 @@ Features that are either already finished, are in progress or are planned for fu
 - [x] Project Explorer
 - [x] Load Project
 - [x] Statistics
+- [x] Project creation wizard
+- [x] Markdown Formatting
 
 #### Planned
 
-- [ ] Project creation wizard
 - [ ] Autosaving
 - [ ] Automatic Backups
 - [ ] Settings menu
-- [ ] Markdown Formatting
 - [ ] Export options
 - [ ] Spellcheck
 - [ ] Saving files
