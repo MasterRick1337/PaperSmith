@@ -1,13 +1,14 @@
+use wasm_bindgen::JsCast;
 use web_sys::{window, Range};
 use yew::prelude::*;
 use yew_hooks::use_interval;
 use yew_icons::{Icon, IconId};
-use wasm_bindgen::JsCast;
 
 /*
-TODO: First line not working correctly when empty!
+TODO: First line is no div!
 TODO: Revise cursor handeling when applying text alignment?
-TODO: Text alignment not working properly when selecting multiple lines and there is a empty line between (or multiple). 
+TODO: Text alignment not working properly when selecting two or more lines
+TODO: Fixing that when you press alignment change multiple times without selecting something or beeing in an empty line, it does noting.
 */
 
 fn apply_alignment_on_range(range: &Range, alignment: &str) {
@@ -16,7 +17,9 @@ fn apply_alignment_on_range(range: &Range, alignment: &str) {
     let container = range.start_container().unwrap();
 
     // Navigate to parent div if necessary
-    let container = if container.node_type() != web_sys::Node::ELEMENT_NODE || container.node_name().to_lowercase() != "div" {
+    let container = if container.node_type() != web_sys::Node::ELEMENT_NODE
+        || container.node_name().to_lowercase() != "div"
+    {
         container.parent_node().unwrap()
     } else {
         container
@@ -24,16 +27,32 @@ fn apply_alignment_on_range(range: &Range, alignment: &str) {
 
     let container: web_sys::HtmlElement = container.unchecked_into();
 
-    container
+    let new_container = document.create_element("div").unwrap();
+    new_container
         .set_attribute("style", &format!("text-align: {alignment};"))
         .unwrap();
-    
+
+    // Put inner content of old div into new div
+    let content = container.inner_html();
+
+    if content.trim().is_empty() {
+        let placeholder = document.create_text_node("\u{00A0}");
+        new_container.append_child(&placeholder).unwrap();
+    } else {
+        new_container.set_inner_html(&content);
+    }
+
+    // Replace old container with new one
+    container.replace_with_with_node_1(&new_container).unwrap();
+
+    range.delete_contents().unwrap();
+    range.insert_node(&new_container).unwrap();
+
     let selection = window.get_selection().unwrap().unwrap();
     selection.remove_all_ranges().unwrap();
     selection.add_range(range).unwrap();
     range.collapse();
 }
-
 
 #[derive(Properties, PartialEq)]
 pub struct TextAlignmentProps {
@@ -76,7 +95,9 @@ pub fn alignment_button(align_props: &AlignmentButtonProps) -> Html {
 }
 
 #[function_component(TextAlignmentControls)]
-pub fn text_alignment_controls(TextAlignmentProps { text_alignment: _ }: &TextAlignmentProps) -> Html {
+pub fn text_alignment_controls(
+    TextAlignmentProps { text_alignment: _ }: &TextAlignmentProps,
+) -> Html {
     let range_state = use_state(|| None);
     let inner_range_state = range_state.clone();
     use_interval(
@@ -120,7 +141,7 @@ pub fn text_alignment_controls(TextAlignmentProps { text_alignment: _ }: &TextAl
     html! {
         <div class="text-alignment-changer">
             <AlignmentButton
-            class_name={"align-center-button".to_string()}
+                class_name={"align-center-button".to_string()}
                 range={range_state.clone()}
                 icon={IconId::LucideAlignCenter}
                 title="Align Center"
@@ -150,3 +171,4 @@ pub fn text_alignment_controls(TextAlignmentProps { text_alignment: _ }: &TextAl
         </div>
     }
 }
+

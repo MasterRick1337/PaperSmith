@@ -2,13 +2,13 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::path::PathBuf;
 
-#[derive(Serialize, Deserialize, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Project {
     pub path: PathBuf,
     pub chapters: Vec<Chapter>,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Chapter {
     pub name: String,
     pub notes: Vec<String>,
@@ -48,25 +48,25 @@ pub struct PaperSmithError {
 }
 
 impl PaperSmithError {
-    pub fn new(code: usize, message: String) -> Self {
-        PaperSmithError {
+    pub const fn new(code: usize, message: String) -> Self {
+        Self {
             code,
             message: Some(message),
         }
     }
 
-    pub fn new_only_code(code: usize) -> Self {
-        PaperSmithError {
+    pub const fn new_only_code(code: usize) -> Self {
+        Self {
             code,
             message: None,
         }
     }
 
-    pub fn code(&self) -> usize {
+    pub const fn code(&self) -> usize {
         self.code
     }
 
-    pub fn message(&self) -> Option<&String> {
+    pub const fn message(&self) -> Option<&String> {
         self.message.as_ref()
     }
 }
@@ -79,6 +79,6 @@ impl fmt::Display for PaperSmithError {
             _ => "Sorry, something is wrong! Please Try Again!",
         };
 
-        write!(f, "{}", err_msg)
+        write!(f, "{err_msg}")
     }
 }

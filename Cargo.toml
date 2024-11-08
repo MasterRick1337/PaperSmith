@@ -9,20 +9,59 @@ shared = { path = "shared" }
 yew = { version = "0.21", features = ["csr"] }
 wasm-bindgen = "0.2.92"
 wasm-bindgen-futures = "0.4"
-web-sys = { version = "0.3.69", features = ["HtmlElement", "HtmlInputElement", "HtmlDocument", "console", "Document", "Node", "Range", "Selection", "Window", "Element"] }
+web-sys = { version = "0.3.69", features = [
+  "HtmlElement",
+  "HtmlInputElement",
+  "HtmlButtonElement",
+  "CssStyleDeclaration",
+  "HtmlDocument",
+  "console",
+  "Document",
+  "Node",
+  "Range",
+  "Selection",
+  "Window",
+  "Element",
+] }
 js-sys = "0.3"
 serde = { version = "1", features = ["derive"] }
 serde-wasm-bindgen = "0.6"
 console_error_panic_hook = "0.1.7"
 # TODO: Find Spell-Check icon (It's not LucideSpellCheck for some reason)
-yew_icons = {version = "0.8", features = ["LucideQuote","LucideZoomIn","LucideZoomOut","LucidePlus","LucideTrash2","LucideEdit3", "LucidePlus", "LucideMinus", "LucideBold", "LucideItalic", "LucideUnderline", "LucideAlignCenter", "LucideAlignJustify", "LucideAlignLeft", "LucideAlignRight", "LucideHighlighter", "LucideUndo", "LucideRedo", "LucideBaseline", "LucideList", "LucideListChecks", "LucideSave"]}
+yew_icons = { version = "0.8", features = [
+  "LucideAlignCenter",
+  "LucideAlignJustify",
+  "LucideAlignLeft",
+  "LucideAlignRight",
+  "LucideBaseline",
+  "LucideBold",
+  "LucideEdit3",
+  "LucideFileDown",
+  "LucideFilePlus",
+  "LucideFolder",
+  "LucideFolderOpen",
+  "LucideHighlighter",
+  "LucideItalic",
+  "LucideList",
+  "LucideListChecks",
+  "LucideMinus",
+  "LucidePlus",
+  "LucideQuote",
+  "LucideRedo",
+  "LucideSave",
+  "LucideTrash2",
+  "LucideUnderline",
+  "LucideUndo",
+  "LucideZoomIn",
+  "LucideZoomOut",
+] }
 gloo-timers = "0.3.0"
 yew-hooks = "0.3.2"
 gloo-console = "0.3.0"
 chrono = "0.4.38"
 text_io = "0.1.12"
 pulldown-cmark = "0.12.2"
-
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
 
 [workspace]
-members = [ "shared","src-tauri"]
+members = ["shared", "src-tauri"]

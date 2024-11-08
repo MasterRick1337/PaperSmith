@@ -29,13 +29,22 @@ use compile_container_handlers::ZoomControlsCompile;
 mod text_styling_handlers;
 use text_styling_handlers::TextStylingControls;
 
-//TODO Toast System
-//TODO File Opening
+#[path = "statistics/statistic.rs"]
+mod statistic;
+use statistic::Statistics;
 
 #[path = "sidebar/sidebar.rs"]
 mod sidebar;
 use shared::Project;
 use sidebar::SideBar;
+
+#[path = "project-wizard/wizard.rs"]
+mod wizard;
+use wizard::ProjectWizard;
+
+#[path = "modal-system/modal.rs"]
+mod modal;
+use modal::Modal;
 
 #[wasm_bindgen]
 extern "C" {
@@ -56,13 +65,12 @@ pub fn app() -> Html {
     let font_size_edit = use_state(|| 16.0);
     let font_size_compile = use_state(|| 16.0);
     let zoom_level = use_state(|| 100.0);
-    let text_alignment = use_state(|| "left".to_string());
     let project: UseStateHandle<Option<Project>> = use_state(|| None);
+    let text_alignment = use_state(|| "left".to_string());
     let sidebar = use_state(|| {
-        html! {
-            <>{"No Project Loaded"}</>
-        }
+        html! { <>{ "No Project Loaded" }</> }
     });
+    let modal = use_state(|| html!());
 
     let render_ref = use_node_ref();
 
@@ -101,142 +109,117 @@ pub fn app() -> Html {
         })
     };
 
+    let open_modal = {
+        let modal = modal.clone();
+        let project = project.clone();
+        Callback::from(move |_| {
+            modal.set(html! {
+                <Modal
+                    content={html! {
+                    <ProjectWizard
+
+                        closing_callback={
+                            let modal = modal.clone();
+                            Callback::from(move |_| modal.set(html!()))
+                        }
+                        project_ref={project.clone()}
+                    />
+                    }}
+                />
+            });
+        })
+    };
+
     {
         let sidebar = sidebar.clone();
         let project = project.clone();
         use_effect_with(project.clone(), move |_| {
-            if (*project.clone()).is_none() {
-                sidebar.set(html! {
-                    {"No Project Loaded"}
-                });
+            if (*project).is_none() {
+                sidebar.set(
+                    html! { <div class="cursor-default select-none">{ "No Project Loaded" }</div> },
+                );
             } else {
-                sidebar.set(html! {
-                    <SideBar project={<std::option::Option<shared::Project> as Clone>::clone(&(project)).unwrap()}/>
-                });
+                sidebar.set(html! { <SideBar project={project.clone()} /> });
             }
-        })
+        });
     };
 
     let on_load = {
-        let project = project.clone();
+        //let project = project.clone();
         Callback::from(move |_: MouseEvent| {
             let project = project.clone();
-            {
-                spawn_local(async move {
-                    let project_jsvalue = invoke("get_project", JsValue::null()).await;
-                    let project_or_none: Option<Project> =
-                        serde_wasm_bindgen::from_value(project_jsvalue.clone()).unwrap();
-                    if project_or_none.is_some() {
-                        project.set(project_or_none.clone());
-                    } else {
-                        gloo_console::log!("bruh")
-                    }
-                });
-            }
+            spawn_local(async move {
+                let project_jsvalue = invoke("get_project", JsValue::null()).await;
+                let project_or_none: Option<Project> =
+                    serde_wasm_bindgen::from_value(project_jsvalue).unwrap();
+                if project_or_none.is_some() {
+                    project.set(project_or_none);
+                }
+            });
         })
     };
 
-    #[derive(Properties, PartialEq)]
-    pub struct WordCountProps {
-        pub pages_ref: NodeRef,
-    }
-
-    #[function_component]
-    fn WordCount(WordCountProps { pages_ref }: &WordCountProps) -> Html {
-        let word_count = use_state(|| 0);
-        {
-            let pages_ref = pages_ref.clone();
-            let word_count = word_count.clone();
-            use_interval(
-                {
-                    let pages_ref = pages_ref.clone();
-                    let word_count = word_count.clone();
-                    move || {
-                        if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
-                            let text = pages_element.inner_text();
-                            let count = text.split_whitespace().count();
-                            word_count.set(count);
-                        }
-                    }
-                },
-                1500,
-            )
-        }
-
-        html! {
-            <div>{format!("{} Words", *word_count)}</div>
-        }
-    }
-
-    #[derive(Properties, PartialEq)]
-    pub struct CharCountProps {
-        pub pages_ref: NodeRef,
-    }
-
-    #[function_component]
-    fn CharCount(CharCountProps { pages_ref }: &CharCountProps) -> Html {
-        let char_count = use_state(|| 0);
-        let char_count_no_spaces = use_state(|| 0);
-        {
-            let pages_ref = pages_ref.clone();
-            let char_count = char_count.clone();
-            let char_count_no_spaces = char_count_no_spaces.clone();
-            use_interval(
-                {
-                    let pages_ref = pages_ref.clone();
-                    let char_count = char_count.clone();
-                    let char_count_no_spaces = char_count_no_spaces.clone();
-                    move || {
-                        if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
-                            let text = pages_element.inner_text();
-                            let count = text.len();
-                            let count_no_spaces =
-                                text.chars().filter(|c| !c.is_whitespace()).count();
-                            //gloo_console::log!("Text: {}", text.to_string());
-                            //gloo_console::log!("Character count: {}", count);
-                            //gloo_console::log!("Character count (no spaces): {}", count_no_spaces);
-                            char_count.set(count);
-                            char_count_no_spaces.set(count_no_spaces);
-                        }
-                    }
-                },
-                1500,
-            )
-        }
-        html! {
-            <div>
-                <p>{format!("Characters: {}, {} without spaces", *char_count, *char_count_no_spaces)}</p>
-                </div>
-
-        }
-    }
+    //let print_project = {
+    //    Callback::from(move |_| {
+    //        let project = project.clone();
+    //        gloo_console::log!(format!("{}", project.as_ref().unwrap()));
+    //    })
+    //};
 
     html! {
-        <>
-            <style id="dynamic-style"></style>
+        <div>
+            <div class="modal-wrapper">{ (*modal).clone() }</div>
+            <style id="dynamic-style" />
             <div class="menubar">
-                <Icon icon_id={IconId::LucideSave} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
-                <div class="separator"></div>
-
-                <Icon icon_id={IconId::LucideUndo} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
-                <Icon icon_id={IconId::LucideRedo} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
-
-                <div class="separator"></div>
-                <TextStylingControls/>
-
-                <button style="visibility:hidden" onclick={save}>{"Save"} </button>
-                <button style="visibility:hidden" onclick={on_load}>{"Load"}</button>
-
+                <Icon
+                    icon_id={IconId::LucideFilePlus}
+                    width={"2em".to_owned()}
+                    height={"2em".to_owned()}
+                    class="menubar-icon"
+                    onclick={open_modal}
+                />
+                <Icon
+                    icon_id={IconId::LucideFileDown}
+                    width={"2em".to_owned()}
+                    height={"2em".to_owned()}
+                    class="menubar-icon"
+                    onclick={on_load}
+                />
+                <Icon
+                    icon_id={IconId::LucideSave}
+                    width={"2em".to_owned()}
+                    height={"2em".to_owned()}
+                    class="menubar-icon"
+                    onclick={save}
+                />
+                <div class="separator" />
+                <Icon
+                    icon_id={IconId::LucideSave}
+                    width={"2em".to_owned()}
+                    height={"2em".to_owned()}
+                    class="menubar-icon"
+                />
+                <div class="separator" />
+                <Icon
+                    icon_id={IconId::LucideUndo}
+                    width={"2em".to_owned()}
+                    height={"2em".to_owned()}
+                    class="menubar-icon"
+                />
+                <Icon
+                    icon_id={IconId::LucideRedo}
+                    width={"2em".to_owned()}
+                    height={"2em".to_owned()}
+                    class="menubar-icon"
+                />
+                <div class="separator" />
+                <TextStylingControls />
             </div>
-
-            <div class="sidebar">
-                {(*sidebar).clone()}
-            </div>
-
+            <div class="sidebar">{ (*sidebar).clone() }</div>
             <div class="notepad-outer-container" ref={pages_ref.clone()}>
                 <div class="notepad-container-edit">
                     <div class="subbar-edit">
-                        <ZoomControlsEdit font_size_edit={font_size_edit.clone()}/>
+                        <ZoomControlsEdit font_size_edit={font_size_edit.clone()} />
                     </div>
                     <div class="notepad-wrapper-edit">
                         <div
@@ -244,16 +227,19 @@ pub fn app() -> Html {
                             id="notepad-textarea-edit"
                             ref={text_input_ref}
                             style={format!("font-size: {}px; text-align: {}; transform: scale({});", *font_size_edit, *text_alignment, *zoom_level / 100.0)}
-                            contenteditable = "true"
+                            contenteditable="true"
                             oninput={on_text_input}
                         />
                     </div>
                 </div>
-                <div class="notepad-container-compile" style={format!("font-size: {}px;", *font_size_compile)}>
+                <div
+                    class="notepad-container-compile"
+                    style={format!("font-size: {}px;", *font_size_compile)}
+                >
                     <div class="subbar-compile">
-                        <ZoomControlsCompile font_size_compile={font_size_compile.clone()}/>
+                        <ZoomControlsCompile font_size_compile={font_size_compile.clone()} />
                     </div>
-                    <div 
+                    <div
                         class="notepad-textarea-compile"
                         id="notepad-textarea-compile"
                         style={format!("font-size: {}px;", *font_size_compile)}
@@ -261,19 +247,13 @@ pub fn app() -> Html {
                     />
                 </div>
             </div>
-
             <div class="bottombar">
                 <div class="bottombar-left">
-                    <SessionTime/>
-                    <WordCount pages_ref={pages_ref.clone()}/>
-                    <CharCount pages_ref={pages_ref.clone()}/>
-                    <p>{ format!("WPM: {:.2}", *wpm) }</p>
+                    <Statistics pages_ref={pages_ref.clone()} />
                 </div>
-
-                <div class="bottombar-right">
-                </div>
+                <div class="bottombar-right" />
             </div>
-        </>
+        </div>
     }
 }
 
@@ -301,46 +281,6 @@ let save = {
     })
 };*/
 
-#[function_component]
-fn SessionTime() -> Html {
-    let start_time = use_state(Local::now);
-    let session_time = use_state(|| TimeDelta::new(0, 0).unwrap());
-
-    use_interval(
-        {
-            let session_time = session_time.clone();
-            move || {
-                let current_time = Local::now();
-                session_time.set(current_time - *start_time);
-            }
-        },
-        1000,
-    );
-
-    let total_seconds = session_time.num_seconds();
-    let hours = total_seconds / 3600;
-    let minutes = (total_seconds % 3600) / 60;
-    let seconds = total_seconds % 60;
-
-    let formatted_time = format!("{:02}:{:02}:{:02}", hours, minutes, seconds);
-
-    html! {
-
-        <p>{formatted_time}</p>
-    }
-}
-
-fn calculate_wpm(word_count: usize, start_time: Option<DateTime<Local>>) -> f64 {
-    if let Some(start) = start_time {
-        let elapsed = Local::now() - start;
-        let elapsed_seconds = elapsed.num_seconds() as f64;
-        if elapsed_seconds > 0.0 {
-            return (word_count as f64 / elapsed_seconds) * 60.0;
-        }
-    }
-    0.0
-}
-
 fn text_input_handler(
     text_input_ref: NodeRef,
     start_time: UseStateHandle<Option<DateTime<Local>>>,
@@ -355,16 +295,6 @@ fn text_input_handler(
             let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
             //lines.set(new_lines);
             rendering_handler(render_ref.clone(), new_lines.clone());
-
-            let words = inner_text.split_whitespace().count();
-            word_count.set(words);
-
-            if start_time.is_none() {
-                start_time.set(Some(Local::now()));
-            }
-
-            let calculated_wpm = calculate_wpm(*word_count, *start_time);
-            wpm.set(calculated_wpm);
         }
     })
 }
