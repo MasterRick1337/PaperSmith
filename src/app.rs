@@ -13,13 +13,13 @@ use yew::prelude::*;
 use yew_hooks::prelude::*;
 use yew_icons::{Icon, IconId};
 
-#[path = "font_size_handlers.rs"]
-mod font_size_handlers;
-use font_size_handlers::FontSizeControls;
+#[path = "edit_container_zoom_handlers.rs"]
+mod zoom_edit_container_handlers;
+use zoom_edit_container_handlers::ZoomControlsEdit;
 
-//#[path = "zoom_level_handlers.rs"]
-//mod zoom_level_handlers;
-//use zoom_level_handlers::ZoomControls;
+#[path = "compile_container_zoom_handlers.rs"]
+mod compile_container_handlers;
+use compile_container_handlers::ZoomControlsCompile;
 
 //#[path = "text_alignment_handlers.rs"]
 //mod text_alignment_handlers;
@@ -53,7 +53,8 @@ struct SaveFileArgs {
 pub fn app() -> Html {
     let pages_ref: NodeRef = use_node_ref();
     let text_input_ref = use_node_ref();
-    let font_size = use_state(|| 16.0);
+    let font_size_edit = use_state(|| 16.0);
+    let font_size_compile = use_state(|| 16.0);
     let zoom_level = use_state(|| 100.0);
     let text_alignment = use_state(|| "left".to_string());
     let project: UseStateHandle<Option<Project>> = use_state(|| None);
@@ -219,23 +220,9 @@ pub fn app() -> Html {
 
                 <Icon icon_id={IconId::LucideUndo} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
                 <Icon icon_id={IconId::LucideRedo} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
-                <div class="separator"></div>
-
-                <FontSizeControls font_size={font_size.clone()}/>
 
                 <div class="separator"></div>
                 <TextStylingControls/>
-
-                <Icon icon_id={IconId::LucideBaseline} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
-                <div class="separator"></div>
-
-                //<TextAlignmentControls text_alignment={text_alignment.clone()}/>
-
-                <div class="separator"></div>
-                <Icon icon_id={IconId::LucideList} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
-                <Icon icon_id={IconId::LucideListChecks} width={"2em".to_owned()} height={"2em".to_owned()} class="menubar-icon"/>
-
-                //<Icon icon_id={IconId::LucideSpellCheck}/>
 
                 <button style="visibility:hidden" onclick={save}>{"Save"} </button>
                 <button style="visibility:hidden" onclick={on_load}>{"Load"}</button>
@@ -248,24 +235,30 @@ pub fn app() -> Html {
 
             <div class="notepad-outer-container" ref={pages_ref.clone()}>
                 <div class="notepad-container-edit">
-                    <a class="anchor"></a>
+                    <div class="subbar-edit">
+                        <ZoomControlsEdit font_size_edit={font_size_edit.clone()}/>
+                    </div>
                     <div class="notepad-wrapper-edit">
                         <div
                             class="notepad-textarea-edit"
                             id="notepad-textarea-edit"
                             ref={text_input_ref}
-                            style={format!("text-align: {}; transform: scale({});", *text_alignment, *zoom_level / 100.0)}
+                            style={format!("font-size: {}px; text-align: {}; transform: scale({});", *font_size_edit, *text_alignment, *zoom_level / 100.0)}
                             contenteditable = "true"
                             oninput={on_text_input}
                         />
                     </div>
                 </div>
-                <div class="notepad-container-compile">
-                        <div 
-                            class="notepad-textarea-compile"
-                            id="notepad-textarea-compile"
-                            ref={render_ref}
-                        />
+                <div class="notepad-container-compile" style={format!("font-size: {}px;", *font_size_compile)}>
+                    <div class="subbar-compile">
+                        <ZoomControlsCompile font_size_compile={font_size_compile.clone()}/>
+                    </div>
+                    <div 
+                        class="notepad-textarea-compile"
+                        id="notepad-textarea-compile"
+                        style={format!("font-size: {}px;", *font_size_compile)}
+                        ref={render_ref}
+                    />
                 </div>
             </div>
 
@@ -278,7 +271,6 @@ pub fn app() -> Html {
                 </div>
 
                 <div class="bottombar-right">
-                    //<ZoomControls zoom_level={zoom_level.clone()} />
                 </div>
             </div>
         </>
@@ -359,6 +351,7 @@ fn text_input_handler(
     Callback::from(move |_| {
         if let Some(input) = text_input_ref.cast::<HtmlElement>() {
             let inner_text = input.inner_text();
+            gloo_console::log!(&inner_text);
             let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
             //lines.set(new_lines);
             rendering_handler(render_ref.clone(), new_lines.clone());
@@ -381,8 +374,10 @@ fn rendering_handler(render_ref: NodeRef, new_lines: Vec<String>) {
     let html_strings: Vec<String> = new_lines
         .iter()
         .map(|line| {
+            gloo_console::log!(line);
             let mut options = Options::empty();
             options.insert(Options::ENABLE_STRIKETHROUGH);
+            options.insert(Options::ENABLE_TABLES);
 
             if line.trim().is_empty() {
                 "<br>".to_string()

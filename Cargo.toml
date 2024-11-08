@@ -15,7 +15,7 @@ serde = { version = "1", features = ["derive"] }
 serde-wasm-bindgen = "0.6"
 console_error_panic_hook = "0.1.7"
 # TODO: Find Spell-Check icon (It's not LucideSpellCheck for some reason)
-yew_icons = {version = "0.8", features = ["LucidePlus","LucideTrash2","LucideEdit3", "LucidePlus", "LucideMinus", "LucideBold", "LucideItalic", "LucideUnderline", "LucideAlignCenter", "LucideAlignJustify", "LucideAlignLeft", "LucideAlignRight", "LucideHighlighter", "LucideUndo", "LucideRedo", "LucideBaseline", "LucideList", "LucideListChecks", "LucideSave"]}
+yew_icons = {version = "0.8", features = ["LucideQuote","LucideZoomIn","LucideZoomOut","LucidePlus","LucideTrash2","LucideEdit3", "LucidePlus", "LucideMinus", "LucideBold", "LucideItalic", "LucideUnderline", "LucideAlignCenter", "LucideAlignJustify", "LucideAlignLeft", "LucideAlignRight", "LucideHighlighter", "LucideUndo", "LucideRedo", "LucideBaseline", "LucideList", "LucideListChecks", "LucideSave"]}
 gloo-timers = "0.3.0"
 yew-hooks = "0.3.2"
 gloo-console = "0.3.0"
