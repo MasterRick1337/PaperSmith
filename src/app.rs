@@ -3,6 +3,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
+use web_sys::Node;
 use yew::events::InputEvent;
 use yew::events::MouseEvent;
 use yew::prelude::*;
@@ -23,7 +24,6 @@ use zoom_level_handlers::ZoomControls;
 #[path = "statistics/statistic.rs"]
 mod statistic;
 use statistic::Statistics;
-use statistic::StatisticProp;
 
 #[path = "text_alignment_handlers.rs"]
 mod text_alignment_handlers;
@@ -56,23 +56,13 @@ pub struct FileWriteData {
     pub content: String
 }
 
-#[derive(Properties, PartialEq)]
-pub struct StatisticProps {
-    pub statistics: StatisticProp,
-}
-
-impl Default for StatisticProps {
-    fn default() -> Self {
-        StatisticProps {
-            statistics: StatisticProp {
-                char_count: 0.to_string(),
-            },
-        }
-    }
-}
+// #[derive(Properties, PartialEq)]
+// pub struct StatisticProps {
+//     pub statistics: StatisticProp,
+// }
 
 #[function_component(App)]
-pub fn app(props: &StatisticProps) -> Html {
+pub fn app() -> Html {
     let pages_ref: NodeRef = use_node_ref();
     let text_input_ref = use_node_ref();
     let lines = use_state(Vec::new);
@@ -310,9 +300,9 @@ pub fn app(props: &StatisticProps) -> Html {
             </div>
             <div class="bottombar">
                 <div class="bottombar-left">
-                    //<Statistics pages_ref={pages_ref.clone()}/>
+                    <Statistics pages_ref={pages_ref.clone()}/>
                     //<div>{format!("{}, {} Words; Characters: {}, {} without spaces, {:.2} wpm", *session_time, *word_count, *char_count,*char_count_no_spaces, calculated_wpm)}</div>
-                    {format!("{}", props.statistics.char_count)}
+                    //{format!("{}", props.statistics.char_count)}
                 </div>
                 <div class="bottombar-right">
                     <ZoomControls zoom_level={zoom_level.clone()} />
