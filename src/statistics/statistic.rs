@@ -140,7 +140,7 @@ pub fn StatisticWindow(CharCountProps { pages_ref }: &CharCountProps) -> Html {
     let start_time = use_state(Local::now);
     let calculated_wpm = calculate_wpm(*word_count, Some(*start_time));
 
-    html! {
-        
+    html! { 
+
     }
 }
