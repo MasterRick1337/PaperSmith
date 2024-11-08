@@ -25,10 +25,11 @@ pub struct FileWriteData {
     pub content: String,
 }
 
-#[derive(Properties, PartialEq)]
-pub struct StatisticProp {
-    pub char_count: String,
-}
+// #[derive(Properties, PartialEq)]
+// pub struct StatisticProp {
+//     pub char_count: usize,
+//     pub pages_ref: NodeRef,
+// }
 
 #[function_component]
 pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
@@ -121,5 +122,19 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
         <div>
             { format!("{}, {} Words; Characters: {}, {} without spaces, {:.2} wpm", *session_time, *word_count, *char_count,*char_count_no_spaces, calculated_wpm) }
         </div>
+    }
+}
+
+#[function_component]
+pub fn StatisticWindow(CharCountProps { pages_ref }: &CharCountProps) -> Html {
+    let char_count = use_state(|| 0);
+    let char_count_no_spaces = use_state(|| 0);
+    let word_count = use_state(|| 0);
+    let session_time = use_state(|| String::from("00:00:00"));
+    let start_time = use_state(Local::now);
+    let calculated_wpm = calculate_wpm(*word_count, Some(*start_time));
+
+    html! {
+        
     }
 }
