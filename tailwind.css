@@ -45,7 +45,7 @@ body {
 }*/
 
 
-/* Menubar ------------------------------------------------------------------- */
+/* Menubar ----------------------------------------------------------------- */
 .menubar {
     height: 45px;
     background-color: rgba(var(--surface0), 1);
@@ -83,7 +83,7 @@ body {
 
 
 
-/* Text Alignment --------------------------------------------------------- */
+/* Text Alignment ---------------------------------------------------------- */
 /*
 text-alignment-changer {
     display: flex;
@@ -146,7 +146,11 @@ text-alignment-changer {
 */
 
 
-
+.add-file-button,
+.load-project-button,
+.save-file-button,
+.undo-button,
+.redo-button,
 .bold-button,
 .italic-button,
 .underline-button,
@@ -166,7 +170,80 @@ text-alignment-changer {
 
 
 
-/* Text Styling ------------------------------------------------------------- */
+/* Loading, Saving and Adding Files ---------------------------------------- */
+.add-file-button {
+    background-color: transparent;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+    user-select: none;
+}
+
+.add-file-button:hover {
+    background-color: rgba(var(--overlay0), 1);
+    color: rgba(209, 213, 219, 1);
+    padding: 1px;
+    border-radius: 5px;
+}
+
+.load-project-button {
+    background-color: transparent;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+    user-select: none;
+}
+
+.load-project-button:hover {
+    background-color: rgba(var(--overlay0), 1);
+    color: rgba(209, 213, 219, 1);
+    padding: 1px;
+    border-radius: 5px;
+}
+
+.save-file-button {
+    background-color: transparent;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+    user-select: none;
+}
+
+.save-file-button:hover {
+    background-color: rgba(var(--overlay0), 1);
+    color: rgba(209, 213, 219, 1);
+    padding: 1px;
+    border-radius: 5px;
+}
+
+
+/* Undo and Redo Changes --------------------------------------------------- */
+.undo-button {
+    background-color: transparent;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+    user-select: none;
+}
+
+.undo-button:hover {
+    background-color: rgba(var(--overlay0), 1);
+    color: rgba(209, 213, 219, 1);
+    padding: 1px;
+    border-radius: 5px;
+}
+
+.redo-button {
+    background-color: transparent;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+    user-select: none;
+}
+
+.redo-button:hover {
+    background-color: rgba(var(--overlay0), 1);
+    color: rgba(209, 213, 219, 1);
+    padding: 1px;
+    border-radius: 5px;
+}
+
+/* Text Styling ------------------------------------------------------------ */
 .text-styling-changer {
     display: flex;
     margin-left: 10px;
@@ -232,7 +309,7 @@ text-alignment-changer {
 
 
 
-/* Sidebar ------------------------------------------------------------------ */
+/* Sidebar ----------------------------------------------------------------- */
 .sidebar {
     width: 300px;
     background-color: rgba(var(--surface0), 1);
@@ -248,7 +325,7 @@ text-alignment-changer {
 
 
 
-/* Bottombar ---------------------------------------------------------------- */
+/* Bottombar --------------------------------------------------------------- */
 .bottombar {
     height: 30px;
     background-color: rgba(var(--surface0), 1);
@@ -286,7 +363,7 @@ text-alignment-changer {
 
 
 
-/* Chevron ------------------------------------------------------------------ */
+/* Chevron ----------------------------------------------------------------- */
 .chevron {
     /*margin-inline-start: calc(-1* var(--size-4-5));*/
     position: absolute;
@@ -415,7 +492,7 @@ p {
 
 
 
-/* Subbar --------------------------------------------------------------------- */
+/* Subbar ------------------------------------------------------------------ */
 .subbar-edit {
     display: flex;
     align-items: center;
@@ -530,7 +607,7 @@ p {
 
 
 
-/* Scrollbar ---------------------------------------------------------------- */
+/* Scrollbar --------------------------------------------------------------- */
 ::-webkit-scrollbar {
     width: 8px;
 }
