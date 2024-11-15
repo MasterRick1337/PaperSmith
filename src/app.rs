@@ -38,6 +38,10 @@ use wizard::ProjectWizard;
 mod modal;
 use modal::Modal;
 
+#[path = "settings-menu/settings.rs"]
+mod settings;
+use settings::Settings;
+
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
@@ -110,6 +114,24 @@ pub fn app() -> Html {
         })
     };
 
+    let open_settings = {
+        let modal = modal.clone();
+        Callback::from(move |_| {
+            modal.set(html! {
+                <Modal
+                    content={html! {
+                    <Settings
+                        closing_callback={
+                            let modal = modal.clone();
+                            Callback::from(move |_| modal.set(html!()))
+                        }
+                    />
+                    }}
+                />
+            });
+        })
+    };
+
     {
         let sidebar = sidebar.clone();
         let project = project.clone();
@@ -151,6 +173,14 @@ pub fn app() -> Html {
             <div class="modal-wrapper">{ (*modal).clone() }</div>
             <style id="dynamic-style" />
             <div class="menubar">
+                <Icon
+                    icon_id={IconId::LucideSettings}
+                    width={"2em".to_owned()}
+                    height={"2em".to_owned()}
+                    class="menubar-icon"
+                    onclick={open_settings}
+                />
+
                 <Icon
                     icon_id={IconId::LucideFilePlus}
                     width={"2em".to_owned()}
