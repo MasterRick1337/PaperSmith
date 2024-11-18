@@ -10,8 +10,10 @@ use web_sys::HtmlElement;
 use yew::events::InputEvent;
 use yew::events::MouseEvent;
 use yew::prelude::*;
-use yew_hooks::prelude::*;
 use yew_icons::{Icon, IconId};
+use web_sys::HtmlDocument;
+use gloo::utils::document;
+use wasm_bindgen::JsCast;
 
 #[path = "edit_container_zoom_handlers.rs"]
 mod zoom_edit_container_handlers;
@@ -159,6 +161,16 @@ pub fn app() -> Html {
         })
     };
 
+    let on_undo = Callback::from(move |_: MouseEvent | {
+        let html_doc: HtmlDocument = document().dyn_into().unwrap();
+        html_doc.exec_command("undo").unwrap();
+    });
+
+    let on_redo = Callback::from(move |_: MouseEvent | {
+        let html_doc: HtmlDocument = document().dyn_into().unwrap();
+        html_doc.exec_command("redo").unwrap();
+    });
+
     //let print_project = {
     //    Callback::from(move |_| {
     //        let project = project.clone();
@@ -202,6 +214,7 @@ pub fn app() -> Html {
                     height={"2em".to_owned()}
                     class="menubar-icon undo-button"
                     title="Undo Changes"
+                    onclick={on_undo}
                 />
                 <Icon
                     icon_id={IconId::LucideRedo}
@@ -209,6 +222,7 @@ pub fn app() -> Html {
                     height={"2em".to_owned()}
                     class="menubar-icon redo-button"
                     title="Redo Changes"
+                    onclick={on_redo}
                 />
                 <div class="separator" />
                 <TextStylingControls />
