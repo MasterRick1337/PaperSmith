@@ -9,6 +9,9 @@ use yew::events::InputEvent;
 use yew::events::MouseEvent;
 use yew::prelude::*;
 use yew_icons::{Icon, IconId};
+use web_sys::HtmlDocument;
+use gloo::utils::document;
+use wasm_bindgen::JsCast;
 
 #[path = "edit_container_zoom_handlers.rs"]
 mod zoom_edit_container_handlers;
@@ -146,6 +149,16 @@ pub fn app() -> Html {
         })
     };
 
+    let on_undo = Callback::from(move |_: MouseEvent | {
+        let html_doc: HtmlDocument = document().dyn_into().unwrap();
+        html_doc.exec_command("undo").unwrap();
+    });
+
+    let on_redo = Callback::from(move |_: MouseEvent | {
+        let html_doc: HtmlDocument = document().dyn_into().unwrap();
+        html_doc.exec_command("redo").unwrap();
+    });
+
     //let print_project = {
     //    Callback::from(move |_| {
     //        let project = project.clone();
@@ -162,21 +175,24 @@ pub fn app() -> Html {
                     icon_id={IconId::LucideFilePlus}
                     width={"2em".to_owned()}
                     height={"2em".to_owned()}
-                    class="menubar-icon"
+                    class="menubar-icon add-file-button"
+                    title="Add File"
                     onclick={open_modal}
                 />
                 <Icon
                     icon_id={IconId::LucideFolderOpen}
                     width={"2em".to_owned()}
                     height={"2em".to_owned()}
-                    class="menubar-icon"
+                    class="menubar-icon load-project-button"
+                    title="Load Project"
                     onclick={on_load}
                 />
                 <Icon
                     icon_id={IconId::LucideSave}
                     width={"2em".to_owned()}
                     height={"2em".to_owned()}
-                    class="menubar-icon"
+                    class="menubar-icon save-file-button"
+                    title="Save File"
                     onclick={save}
                 />
                 <div class="separator" />
@@ -184,13 +200,17 @@ pub fn app() -> Html {
                     icon_id={IconId::LucideUndo}
                     width={"2em".to_owned()}
                     height={"2em".to_owned()}
-                    class="menubar-icon"
+                    class="menubar-icon undo-button"
+                    title="Undo Changes"
+                    onclick={on_undo}
                 />
                 <Icon
                     icon_id={IconId::LucideRedo}
                     width={"2em".to_owned()}
                     height={"2em".to_owned()}
-                    class="menubar-icon"
+                    class="menubar-icon redo-button"
+                    title="Redo Changes"
+                    onclick={on_redo}
                 />
                 <div class="separator" />
                 <TextStylingControls />
