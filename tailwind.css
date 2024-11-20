@@ -373,39 +373,6 @@ text-alignment-changer {
   margin-left: auto;
 }
 
-/* Chevron ----------------------------------------------------------------- */
-
-.chevron {
-  /*margin-inline-start: calc(-1* var(--size-4-5));*/
-  position: absolute;
-  width: 1.125rem;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-}
-
-.chevron:before {
-  content: "\200B";
-}
-
-.chapter-title {
-  align-items: baseline;
-  display: flex;
-  position: relative;
-}
-
-.chapter-title::before {
-  content: "\200B";
-}
-
-svg.svg-icon {
-  stroke-width: 4px;
-  width: 10px;
-  height: 10px;
-  transition: transform 100ms ease-in-out;
-}
-
 /* Writing Area ------------------------------------------------------------ */
 
 .notepad-outer-container {
@@ -640,21 +607,4 @@ p {
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(var(--overlay0), 1) rgba(var(--surface0), 1);
-}
-
-.chapter-title:hover .hide-parent-hover {
-  display: flex;
-}
-
-.hide-parent-hover {
-  display: none;
-}
-
-.sidebar-dropdown-icon {
-  margin-top: auto;
-  margin-bottom: auto;
-  border: solid 1px;
-  border-radius: 0.375rem;
-  padding: 1px;
-  cursor: pointer;
 }

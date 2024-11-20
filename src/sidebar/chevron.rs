@@ -1,4 +1,5 @@
 use yew::prelude::*;
+use yew_icons::{Icon, IconId};
 
 #[derive(Properties, PartialEq, Eq)]
 pub struct Props {
@@ -33,23 +34,15 @@ pub fn chevron(Props { rotated, hidden }: &Props) -> Html {
 
     html! {
         <div
-            class="chevron transition-transform"
+            class="absolute w-5 h-4 content-center items-center flex transition-transform"
             style={format!("display: {}; transform: rotate({}deg)", *display, *rotation)}
         >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="svg-icon"
-            >
-                <path d="M3 8L12 17L21 8" />
-            </svg>
+            <Icon
+                icon_id={IconId::LucideChevronDown}
+                width={"2em".to_owned()}
+                height={"2em".to_owned()}
+                class=""
+            />
         </div>
     }
 }

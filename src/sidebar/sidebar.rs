@@ -156,13 +156,13 @@ pub fn sidebar(SideBarProps { project }: &SideBarProps) -> Html {
         <>
             <div id="file-explorer" class="select-none outline-none">
                 <div
-                    class="chapter-title text-text text-ellipsis whitespace-nowrap overflow-hidden cursor-default text-xl"
+                    class="group items-center flex relative transition text-ellipsis whitespace-nowrap overflow-hidden cursor-default text-xl"
                 >
-                    <div ref={input_ref.clone()} class="mb-1">{ (*name_display).clone() }</div>
+                    <div ref={input_ref.clone()} class="pl-2 mb-1">{ (*name_display).clone() }</div>
                     <ButtonContainer button_props={button_props} />
                 </div>
                 <div
-                    class="chapter-list text-lg border-l-2 border-r-0 border-y-0 border-solid border-overlay2 pl-2 ml-2"
+                    class="text-lg border-l-2 border-r-0 border-y-0 border-solid border-overlay2 pl-2 ml-2"
                 >
                     { for (*chapters).clone() }
                 </div>
@@ -230,11 +230,9 @@ fn chapter(
             dropdown_type={Type::Chapter}
             project={project.clone()}
         >
-            <div
-                class="chapter-title transition rounded-md my-[1px] pl-5 hover:bg-sapphire hover:text-mantle"
-            >
-                { "Contents" }
-            </div>
+            <Title>
+                <div class="pl-5">{ "Contents" }</div>
+            </Title>
             <Dropdown
                 title="Notes"
                 open=false
@@ -244,12 +242,9 @@ fn chapter(
             >
                 { for note_elements }
             </Dropdown>
-            <div
-                class="chapter-title transition rounded-md my-[1px] pl-5 hover:bg-sapphire hover:text-mantle"
-                onclick={on_extras}
-            >
-                { "Extras" }
-            </div>
+            <Title onclick={on_extras}>
+                <div class="pl-5">{ "Extras" }</div>
+            </Title>
         </Dropdown>
     }
 }
@@ -296,9 +291,41 @@ fn entry(
         },
     ];
     html! {
-        <div class="chapter-title transition rounded-md hover:bg-green pl-2 hover:text-mantle">
-            { (*name_display).clone() }
-            <ButtonContainer button_props={button_props} />
+        <Title button_props={button_props}>
+            <div class="pl-2">{ (*name_display).clone() }</div>
+        </Title>
+    }
+}
+
+#[derive(Properties, PartialEq)]
+pub struct TitleProps {
+    pub children: Html,
+    #[prop_or_default]
+    pub button_props: Vec<ButtonProps>,
+    #[prop_or_default]
+    pub onclick: Callback<MouseEvent>,
+}
+
+#[function_component(Title)]
+fn title(
+    TitleProps {
+        children,
+        button_props,
+        onclick,
+    }: &TitleProps,
+) -> Html {
+    html! {
+        <div
+            class="group items-center flex relative transition rounded-md my-[1px] hover:bg-sapphire hover:text-mantle"
+            onclick={onclick}
+        >
+            { children.clone() }
+            <ButtonContainer button_props={(*button_props).clone()} />
         </div>
     }
 }
+//rounded-md hover:bg-green pl-2 hover:text-mantle">
+//text-text text-ellipsis whitespace-nowrap overflow-hidden cursor-default text-xl"
+//rounded-md my-[1px] pl-5 hover:bg-sapphire hover:text-mantle"
+//rounded-md my-[1px] content-center transition text-subtext1 hover:bg-mauve hover:text-mantle"
+//rounded-md my-[1px] pl-5 hover:bg-sapphire hover:text-mantle"

@@ -13,9 +13,10 @@ use chevron::Chevron;
 use crate::app::{
     invoke,
     sidebar::{
-        buttons::{ButtonContainer, Props as ButtonProps},
+        buttons::Props as ButtonProps,
         deleting::get_delete_callback,
         renaming::{get_rename_callback, RenameKind},
+        Title,
     },
     wizard::PathArgs,
 };
@@ -199,19 +200,18 @@ pub fn dropdown(
     }
 
     html! {
-        <div class="chapter cursor-pointer">
-            <div
-                class="chapter-title rounded-md my-[1px] content-center transition text-subtext1 hover:bg-mauve hover:text-mantle"
+        <div class="cursor-pointer">
+            <Title
+                button_props={get_buttons(*dropdown_type, on_rename, on_delete, on_add_note)}
                 onclick={onclick}
             >
                 <Chevron rotated={*chevron_rotated} hidden=false />
                 <div class="inline-block pl-5 text-ellipsis whitespace-nowrap overflow-hidden">
                     { (*name_display).clone() }
                 </div>
-                { get_buttons(*dropdown_type, on_rename, on_delete, on_add_note) }
-            </div>
+            </Title>
             <div
-                class="chapter-contents pl-2 ml-2 border-solid border-l-2 border-r-0 border-y-0 border-overlay1 text-subtext2 overflow-hidden"
+                class="pl-2 ml-2 border-solid border-l-2 border-r-0 border-y-0 border-overlay1 text-subtext2 overflow-hidden"
                 style={(*transition_string).clone()}
                 ref={content_ref}
             >
@@ -226,10 +226,10 @@ fn get_buttons(
     on_rename: Callback<MouseEvent>,
     on_delete: Callback<MouseEvent>,
     on_add_note: Callback<MouseEvent>,
-) -> Html {
+) -> Vec<ButtonProps> {
     match dropdown_type {
         Type::Chapter => {
-            let button_props = vec![
+            vec![
                 ButtonProps {
                     callback: on_rename,
                     icon: IconId::LucideEdit3,
@@ -238,15 +238,13 @@ fn get_buttons(
                     callback: on_delete,
                     icon: IconId::LucideTrash2,
                 },
-            ];
-            html! (<ButtonContainer button_props={button_props} />)
+            ]
         }
         Type::Notes => {
-            let button_props = vec![ButtonProps {
+            vec![ButtonProps {
                 callback: on_add_note,
                 icon: IconId::LucidePlus,
-            }];
-            html! (<ButtonContainer button_props={button_props} />)
+            }]
         }
     }
 }

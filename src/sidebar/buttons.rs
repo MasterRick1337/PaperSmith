@@ -1,7 +1,7 @@
 use yew::prelude::*;
 use yew_icons::{Icon, IconId};
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, PartialEq, Clone)]
 pub struct Props {
     pub callback: Callback<MouseEvent>,
     pub icon: IconId,
@@ -16,7 +16,7 @@ pub struct ContainerProps {
 pub fn button(Props { callback, icon }: &Props) -> Html {
     html! {
         <div
-            class="sidebar-dropdown-icon bg-mantle border-overlay0 text-text mx-1 items-center content-center flex"
+            class="flex bg-mantle border-overlay0 text-text mx-1 my-auto border-solid border-[1px] rounded-md p-[1px] cursor-pointer items-center content-center"
             onclick={callback}
         >
             <Icon icon_id={*icon} width="1em" height="1em" />
@@ -26,7 +26,7 @@ pub fn button(Props { callback, icon }: &Props) -> Html {
 #[function_component(ButtonContainer)]
 pub fn button_container(ContainerProps { button_props }: &ContainerProps) -> Html {
     html!(
-        <div class="items-center ml-auto my-auto hide-parent-hover">
+        <div class="hidden group-hover:flex items-center ml-auto my-auto">
             { button_props
             .iter()
             .map(|props| {
