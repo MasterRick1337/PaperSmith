@@ -1,19 +1,13 @@
+use crate::app::invoke;
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
 use shared::Project;
 use std::path::PathBuf;
-use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{HtmlButtonElement, HtmlInputElement};
 use yew::prelude::*;
 use yew_icons::{Icon, IconId};
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
-    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
-}
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -220,26 +214,30 @@ pub fn project_wizard(
             <div class="text-xl font-bold">{ "Create Project" }</div>
             <br />
             <div class="font-semibold">{ "Name:" }</div>
-            <div class="flex rounded-lg border-2 my-2 border-transparent hover:border-mauve">
+            <div
+                class="flex rounded-lg border-2 my-2 border-transparent hover:border-mauve border-solid"
+            >
                 <input
                     oninput={on_title_input}
                     ref={title_ref}
-                    class="outline-none w-full bg-crust text-text p-2 rounded-lg"
+                    class="outline-none w-full bg-crust text-text p-2 rounded-lg border-0 font-standard text-base"
                 />
             </div>
             <br />
             <div class="font-semibold">{ "Location:" }</div>
-            <div class="flex rounded-lg border-2 my-2 border-transparent hover:border-mauve">
+            <div
+                class="flex rounded-lg border-2 my-2 border-transparent hover:border-mauve border-solid"
+            >
                 <input
                     oninput={on_location_input}
                     ref={location_ref}
-                    class="outline-none w-full bg-crust text-text p-2 rounded-tl-lg rounded-bl-lg"
+                    class="outline-none w-full bg-crust text-text p-2 rounded-tl-lg rounded-bl-lg border-0 font-standard text-base"
                 />
                 <div
                     onmouseover={on_mouse_over}
                     onmouseout={on_mouse_out}
                     onclick={on_choose_folder}
-                    class="content-center hover:text-mauve rounded-tr-lg border-l-2 border-overlay0 rounded-br-lg bg-crust p-2"
+                    class="content-center hover:text-mauve rounded-tr-lg border-l-2 border-overlay0 border-solid border-r-0 border-y-0 rounded-br-lg bg-crust p-2 items-center flex"
                 >
                     { icon }
                 </div>
@@ -251,13 +249,13 @@ pub fn project_wizard(
                 <button
                     ref={confirm_button_ref}
                     onclick={on_confirm}
-                    class="rounded-lg text-lg px-2 py-1 ml-4 bg-mauve text-crust hover:scale-105"
+                    class="rounded-lg text-lg px-2 py-1 ml-4 bg-mauve text-crust hover:scale-105 border-0"
                 >
                     { "Confirm" }
                 </button>
                 <button
                     onclick={on_close}
-                    class="rounded-lg text-lg px-2 py-1 ml-4 bg-red text-crust hover:scale-105"
+                    class="rounded-lg text-lg px-2 py-1 ml-4 bg-red text-crust hover:scale-105 border-0"
                 >
                     { "Close" }
                 </button>
