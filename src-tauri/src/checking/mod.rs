@@ -4,11 +4,6 @@ use std::io::ErrorKind;
 use std::path::Path;
 
 #[tauri::command]
-pub fn check_if_folder_exists(path: &str) -> bool {
-    Path::new(&path).exists()
-}
-
-#[tauri::command]
 pub fn choose_folder(title: String) -> String {
     let path = FileDialog::new().set_title(title).pick_folder();
 

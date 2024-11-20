@@ -15,7 +15,6 @@ use loader::parse_project;
 
 mod checking;
 use checking::can_create_path;
-use checking::check_if_folder_exists;
 use checking::choose_folder;
 
 mod menu;
@@ -34,12 +33,10 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             show_save_dialog,
-            extract_div_contents,
             get_project,
             write_to_file,
             write_to_json,
             choose_folder,
-            check_if_folder_exists,
             can_create_path,
             create_project,
             get_data_dir,
@@ -111,31 +108,6 @@ async fn show_save_dialog() {
             _ => {}
         });
 }*/
-
-#[tauri::command]
-fn extract_div_contents(input: &str) -> Vec<String> {
-    // Initialize an empty vector to store the extracted contents
-    let mut result = Vec::new();
-
-    // Define the start and end tag strings
-    let start_tag = "<div>";
-    let end_tag = "</div>";
-
-    // Split the input string by the start tag
-    let parts: Vec<&str> = input.split(start_tag).collect();
-
-    // Iterate over the parts and extract the contents between the start and end tags
-    for part in parts {
-        if let Some(end_index) = part.find(end_tag) {
-            if part.contains("<br>") {
-            } else {
-                let content = &part[..end_index];
-                result.push(content.to_string());
-            }
-        }
-    }
-    result
-}
 
 // Definiere eine globale Variable für die Startzeit
 lazy_static! {

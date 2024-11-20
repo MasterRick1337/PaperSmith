@@ -1,5 +1,3 @@
-use chrono::prelude::*;
-use chrono::TimeDelta;
 use pulldown_cmark::{html, Options, Parser};
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
@@ -10,7 +8,6 @@ use web_sys::HtmlElement;
 use yew::events::InputEvent;
 use yew::events::MouseEvent;
 use yew::prelude::*;
-use yew_hooks::prelude::*;
 use yew_icons::{Icon, IconId};
 
 #[path = "edit_container_zoom_handlers.rs"]
@@ -74,17 +71,7 @@ pub fn app() -> Html {
 
     let render_ref = use_node_ref();
 
-    let start_time = use_state(|| None);
-    let word_count = use_state(|| 0);
-    let wpm = use_state(|| 0.0);
-
-    let on_text_input = text_input_handler(
-        text_input_ref.clone(),
-        start_time.clone(),
-        word_count.clone(),
-        wpm.clone(),
-        render_ref.clone(),
-    );
+    let on_text_input = text_input_handler(text_input_ref.clone(), render_ref.clone());
 
     let save = {
         let text_input_ref = text_input_ref.clone();
@@ -179,7 +166,7 @@ pub fn app() -> Html {
                     onclick={open_modal}
                 />
                 <Icon
-                    icon_id={IconId::LucideFileDown}
+                    icon_id={IconId::LucideFolderOpen}
                     width={"2em".to_owned()}
                     height={"2em".to_owned()}
                     class="menubar-icon"
@@ -191,13 +178,6 @@ pub fn app() -> Html {
                     height={"2em".to_owned()}
                     class="menubar-icon"
                     onclick={save}
-                />
-                <div class="separator" />
-                <Icon
-                    icon_id={IconId::LucideSave}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
                 />
                 <div class="separator" />
                 <Icon
@@ -281,26 +261,20 @@ let save = {
     })
 };*/
 
-fn text_input_handler(
-    text_input_ref: NodeRef,
-    start_time: UseStateHandle<Option<DateTime<Local>>>,
-    word_count: UseStateHandle<usize>,
-    wpm: UseStateHandle<f64>,
-    render_ref: NodeRef,
-) -> Callback<InputEvent> {
+fn text_input_handler(text_input_ref: NodeRef, render_ref: NodeRef) -> Callback<InputEvent> {
     Callback::from(move |_| {
         if let Some(input) = text_input_ref.cast::<HtmlElement>() {
             let inner_text = input.inner_text();
             gloo_console::log!(&inner_text);
             let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
             //lines.set(new_lines);
-            rendering_handler(render_ref.clone(), new_lines.clone());
+            rendering_handler(&render_ref, &new_lines);
         }
     })
 }
 
 // ad br tag after end of each line (make it one string)
-fn rendering_handler(render_ref: NodeRef, new_lines: Vec<String>) {
+fn rendering_handler(render_ref: &NodeRef, new_lines: &[String]) {
     let html_strings: Vec<String> = new_lines
         .iter()
         .map(|line| {
