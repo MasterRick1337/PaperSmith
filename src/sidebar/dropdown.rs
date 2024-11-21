@@ -4,7 +4,7 @@ use shared::Project;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
 use yew::prelude::*;
-use yew_icons::{Icon, IconId};
+use yew_icons::IconId;
 
 #[path = "chevron.rs"]
 mod chevron;
@@ -13,8 +13,10 @@ use chevron::Chevron;
 use crate::app::{
     invoke,
     sidebar::{
+        buttons::Props as ButtonProps,
         deleting::get_delete_callback,
         renaming::{get_rename_callback, RenameKind},
+        Title,
     },
     wizard::PathArgs,
 };
@@ -54,91 +56,6 @@ pub fn dropdown(
     let name_display = use_state(|| html!(origininal_title));
     let input_ref = use_node_ref();
     let title = use_state(|| origininal_title.clone());
-
-    let on_rename;
-    let on_delete;
-    let on_add_note;
-    if let Some(unwrapped_project) = project.clone() {
-        match dropdown_type {
-            Type::Chapter => {
-                on_rename = get_rename_callback(
-                    name_display.clone(),
-                    title.clone(),
-                    input_ref,
-                    unwrapped_project.clone(),
-                    RenameKind::Chapter,
-                    None,
-                );
-                on_delete = get_delete_callback(
-                    unwrapped_project,
-                    (*title).clone(),
-                    None,
-                    RenameKind::Chapter,
-                );
-                on_add_note = Callback::from(move |_: MouseEvent| {});
-            }
-            Type::Notes => {
-                on_rename = Callback::from(move |_: MouseEvent| {});
-                on_delete = Callback::from(move |_: MouseEvent| {});
-                on_add_note = {
-                    let chapter_index = *chapter_index;
-                    Callback::from(move |e: MouseEvent| {
-                        e.stop_propagation();
-                        let unwrapped_project = unwrapped_project.clone();
-                        spawn_local(async move {
-                            let mut check_path = unwrapped_project.as_ref().unwrap().path.clone();
-                            check_path.push("Chapters");
-                            check_path.push(
-                                unwrapped_project.as_ref().unwrap().chapters
-                                    [chapter_index.unwrap()]
-                                .name
-                                .clone(),
-                            );
-                            check_path.push("Notes");
-                            check_path.push("Untitled");
-                            check_path.set_extension("md");
-                            let mut index = 1;
-                            while !invoke(
-                                "can_create_path",
-                                to_value(&PathArgs {
-                                    path: check_path.to_str().unwrap().to_string().clone(),
-                                })
-                                .unwrap(),
-                            )
-                            .await
-                            .as_string()
-                            .unwrap()
-                            .is_empty()
-                            {
-                                check_path.pop();
-                                check_path.push("Untitled".to_string() + &index.to_string());
-                                check_path.set_extension("md");
-                                index += 1;
-                            }
-                            invoke(
-                                "create_empty_file",
-                                to_value(&PathArgs {
-                                    path: check_path.to_str().unwrap().to_string(),
-                                })
-                                .unwrap(),
-                            )
-                            .await;
-                            check_path.set_extension("");
-                            let mut temp_project = unwrapped_project.as_ref().unwrap().clone();
-                            temp_project.chapters[chapter_index.unwrap()]
-                                .notes
-                                .push(check_path.file_name().unwrap().to_string_lossy().into());
-                            unwrapped_project.set(Some(temp_project));
-                        });
-                    })
-                }
-            }
-        }
-    } else {
-        on_rename = Callback::from(move |_: MouseEvent| {});
-        on_delete = Callback::from(move |_: MouseEvent| {});
-        on_add_note = Callback::from(move |_: MouseEvent| {});
-    }
 
     let onclick = {
         let transition_string = transition_string.clone();
@@ -190,21 +107,112 @@ pub fn dropdown(
         })
     };
 
+    let on_rename;
+    let on_delete;
+    let on_add_note;
+    if let Some(unwrapped_project) = project.clone() {
+        match dropdown_type {
+            Type::Chapter => {
+                on_rename = get_rename_callback(
+                    name_display.clone(),
+                    title.clone(),
+                    input_ref,
+                    unwrapped_project.clone(),
+                    RenameKind::Chapter,
+                    None,
+                );
+                on_delete = get_delete_callback(
+                    unwrapped_project,
+                    (*title).clone(),
+                    None,
+                    RenameKind::Chapter,
+                );
+                on_add_note = Callback::from(move |_: MouseEvent| {});
+            }
+            Type::Notes => {
+                on_rename = Callback::from(move |_: MouseEvent| {});
+                on_delete = Callback::from(move |_: MouseEvent| {});
+                on_add_note = {
+                    let chapter_index = *chapter_index;
+                    let chevron_rotated = chevron_rotated.clone();
+                    let onclick = onclick.clone();
+                    Callback::from(move |e: MouseEvent| {
+                        e.stop_propagation();
+                        let unwrapped_project = unwrapped_project.clone();
+                        let chevron_rotated = chevron_rotated.clone();
+                        let onclick = onclick.clone();
+                        spawn_local(async move {
+                            let mut check_path = unwrapped_project.as_ref().unwrap().path.clone();
+                            check_path.push("Chapters");
+                            check_path.push(
+                                unwrapped_project.as_ref().unwrap().chapters
+                                    [chapter_index.unwrap()]
+                                .name
+                                .clone(),
+                            );
+                            check_path.push("Notes");
+                            check_path.push("Untitled");
+                            check_path.set_extension("md");
+                            let mut index = 1;
+                            while !invoke(
+                                "can_create_path",
+                                to_value(&PathArgs {
+                                    path: check_path.to_str().unwrap().to_string().clone(),
+                                })
+                                .unwrap(),
+                            )
+                            .await
+                            .as_string()
+                            .unwrap()
+                            .is_empty()
+                            {
+                                check_path.pop();
+                                check_path.push("Untitled".to_string() + &index.to_string());
+                                check_path.set_extension("md");
+                                index += 1;
+                            }
+                            invoke(
+                                "create_empty_file",
+                                to_value(&PathArgs {
+                                    path: check_path.to_str().unwrap().to_string(),
+                                })
+                                .unwrap(),
+                            )
+                            .await;
+                            check_path.set_extension("");
+                            let mut temp_project = unwrapped_project.as_ref().unwrap().clone();
+                            temp_project.chapters[chapter_index.unwrap()]
+                                .notes
+                                .push(check_path.file_name().unwrap().to_string_lossy().into());
+                            unwrapped_project.set(Some(temp_project));
+                            if !*chevron_rotated {
+                                onclick.emit(e);
+                            }
+                        });
+                    })
+                }
+            }
+        }
+    } else {
+        on_rename = Callback::from(move |_: MouseEvent| {});
+        on_delete = Callback::from(move |_: MouseEvent| {});
+        on_add_note = Callback::from(move |_: MouseEvent| {});
+    }
+
     html! {
-        <div class="chapter cursor-pointer">
-            <div
-                class="chapter-title rounded-md my-[1px] hover:bg-mauve hover:text-mantle"
+        <div class="cursor-pointer">
+            <Title
+                button_props={get_buttons(*dropdown_type, on_rename, on_delete, on_add_note)}
                 onclick={onclick}
             >
                 <Chevron rotated={*chevron_rotated} hidden=false />
                 <div class="inline-block pl-5 text-ellipsis whitespace-nowrap overflow-hidden">
                     { (*name_display).clone() }
                 </div>
-                { get_buttons(*dropdown_type, on_rename, on_delete, on_add_note) }
-            </div>
+            </Title>
             <div
-                class="chapter-contents pl-2 ml-2 border-l-2 border-[#ccc] text-[#AAA] overflow-hidden"
-                style={<std::string::String as Clone>::clone(&*transition_string)}
+                class="pl-2 ml-2 border-solid border-l-2 border-r-0 border-y-0 border-overlay1 text-subtext2 overflow-hidden"
+                style={(*transition_string).clone()}
                 ref={content_ref}
             >
                 { children.clone() }
@@ -218,37 +226,25 @@ fn get_buttons(
     on_rename: Callback<MouseEvent>,
     on_delete: Callback<MouseEvent>,
     on_add_note: Callback<MouseEvent>,
-) -> Html {
+) -> Vec<ButtonProps> {
     match dropdown_type {
         Type::Chapter => {
-            html! (
-                <div class="sidebar-dropdown-icon-container hide-parent-hover">
-                    <div
-                        class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text"
-                        onclick={on_rename}
-                    >
-                        <Icon icon_id={IconId::LucideEdit3} width="16px" height="16px" />
-                    </div>
-                    <div
-                        class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text mx-1"
-                        onclick={on_delete}
-                    >
-                        <Icon icon_id={IconId::LucideTrash2} width="16px" height="16px" />
-                    </div>
-                </div>
-            )
+            vec![
+                ButtonProps {
+                    callback: on_rename,
+                    icon: IconId::LucideEdit3,
+                },
+                ButtonProps {
+                    callback: on_delete,
+                    icon: IconId::LucideTrash2,
+                },
+            ]
         }
         Type::Notes => {
-            html! (
-                <div class="sidebar-dropdown-icon-container hide-parent-hover">
-                    <div
-                        class="sidebar-dropdown-icon bg-mantle border-overlay0 hover: text-text mx-1"
-                        onclick={on_add_note}
-                    >
-                        <Icon icon_id={IconId::LucidePlus} width="16px" height="16px" />
-                    </div>
-                </div>
-            )
+            vec![ButtonProps {
+                callback: on_add_note,
+                icon: IconId::LucidePlus,
+            }]
         }
     }
 }

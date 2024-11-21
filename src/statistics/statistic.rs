@@ -1,6 +1,5 @@
 use chrono::prelude::*;
 use serde_json::json;
-use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
@@ -13,11 +12,7 @@ use serde::{Deserialize, Serialize};
 mod wpm;
 use wpm::calculate as calculate_wpm;
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
-    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
-}
+use crate::app::invoke;
 
 #[derive(Properties, PartialEq)]
 pub struct CharCountProps {
@@ -80,12 +75,13 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
                             session_time.set(format!("{hours:02}:{minutes:02}:{seconds:02}"));
 
                             let json = json!({
-                                "session_time": <std::string::String as Clone>::clone(&*session_time.clone()),
+                                "session_time": (*session_time).clone(),
                                 "word_count": word_count_value,
                                 "char_count": count,
                                 "char_count_with_no_spaces": *char_count_no_spaces.clone(),
                                 "wpm": calculated_wpm
-                            }).to_string();
+                            })
+                            .to_string();
 
                             let path_jsvalue = invoke("get_data_dir", JsValue::null()).await;
 
@@ -112,6 +108,8 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
     }
 
     html! {
-        <div>{format!("{}, {} Words; Characters: {}, {} without spaces, {:.2} wpm", *session_time, *word_count, *char_count,*char_count_no_spaces, calculated_wpm)}</div>
+        <div>
+            { format!("{}, {} Words; Characters: {}, {} without spaces, {:.2} wpm", *session_time, *word_count, *char_count,*char_count_no_spaces, calculated_wpm) }
+        </div>
     }
 }

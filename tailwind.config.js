@@ -1,14 +1,18 @@
 module.exports = {
   content: [
-          "./src/**/*.rs",
-          "./index.html",
-          "./src/**/*.html",
-          "./tailwind.css",
-      ],
+    "./src/**/*.rs",
+    "./index.html",
+    "./src/**/*.html",
+    "./tailwind.css",
+  ],
   theme: {
+    fontFamily: {
+      inherit: ['"inherit"'],
+      standard: ['"Arial"', '"sans-serif"'],
+    },
     extend: {
       transitionProperty: {
-        'max-height': 'max-height'
+        "max-height": "max-height",
       },
       colors: {
         rosewater: "rgba(245, 224, 220)",
@@ -30,15 +34,15 @@ module.exports = {
         subtext0: "rgba(166, 173, 200)",
         overlay2: "rgba(147, 153, 178)",
         overlay1: "rgba(127, 132, 156)",
-        overlay0: 'rgba(var(--overlay0))',
-        surface2: 'rgba(88, 91, 112)',
-        surface1: 'rgba(var(--surface1))',
-        surface0: 'rgba(var(--surface0))',
-        base: 'rgba(var(--base))',
+        overlay0: "rgba(var(--overlay0))",
+        surface2: "rgba(88, 91, 112)",
+        surface1: "rgba(var(--surface1))",
+        surface0: "rgba(var(--surface0))",
+        base: "rgba(var(--base))",
         mantle: "rgba(24, 24, 37)",
-        crust: "rgba(17, 17, 27)"
+        crust: "rgba(17, 17, 27)",
       },
-    }
+    },
   },
   corePlugins: {
     preflight: false,
