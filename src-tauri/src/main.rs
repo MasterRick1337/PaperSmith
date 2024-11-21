@@ -18,9 +18,6 @@ use checking::can_create_path;
 use checking::check_if_folder_exists;
 use checking::choose_folder;
 
-mod menu;
-use menu::generate as generate_menu;
-
 mod saving;
 use saving::add_chapter;
 use saving::create_project;
@@ -50,7 +47,6 @@ fn main() {
             open_explorer,
             create_empty_file
         ])
-        .menu(generate_menu())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

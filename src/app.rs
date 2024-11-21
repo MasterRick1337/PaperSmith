@@ -23,6 +23,10 @@ use zoom_edit_container_handlers::ZoomControlsEdit;
 mod compile_container_handlers;
 use compile_container_handlers::ZoomControlsCompile;
 
+#[path = "toolbar.rs"]
+mod toolbar;
+use toolbar::Toolbar;
+
 //#[path = "text_alignment_handlers.rs"]
 //mod text_alignment_handlers;
 //use text_alignment_handlers::TextAlignmentControls;
@@ -182,6 +186,7 @@ pub fn app() -> Html {
         <div>
             <div class="modal-wrapper">{ (*modal).clone() }</div>
             <style id="dynamic-style" />
+            <Toolbar />
             <div class="menubar">
                 <Icon
                     icon_id={IconId::LucideFilePlus}

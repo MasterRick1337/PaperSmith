@@ -7,6 +7,7 @@
     --border: 44, 44, 56;
     --surface0: 35, 35, 45;
     --surface1: 42, 42, 55;
+    --surface2: 17, 17, 27;
     --overlay0: 69, 69, 82;
     --text: 209, 213, 219;
     --font-size: 16px;
@@ -28,10 +29,10 @@ body {
 }
 
 
-
-/*.toolbar {
+/* Toolbar ----------------------------------------------------------------- */
+.toolbar {
     height: 25px;
-    background-color: rgba(var(--surface0), 1);
+    background-color: rgba(var(--surface2), 1);
     color: rgba(var(--text), 1);
     display: flex;
     align-items: center;
@@ -42,8 +43,78 @@ body {
     right: 0;
     padding: 0 10px;
     border-bottom: 1px solid rgba(var(--border), 1);
-}*/
+    z-index: 10;
+}
 
+.toolbar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+.toolbar-menu > .toolbar-submenu {
+    position: relative;
+}
+
+.toolbar-item {
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s, color 0.3s;
+    user-select: none;
+    border-radius: 5px;
+}
+
+.toolbar-submenu > span {
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    margin: 0;
+    display: inline-block;
+    transition: background-color 0.3s, color 0.3s;
+    user-select: none;
+    border-radius: 5px;
+}
+
+.toolbar-item:hover,
+.toolbar-submenu > span:hover {
+    background-color: rgba(var(--overlay0), 1);
+    color: rgba(209, 213, 219, 1);
+    border-radius: 5px;
+}
+
+.toolbar-submenu-items {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: rgba(var(--surface1), 1);
+    border: 1px solid rgba(var(--border), 1);
+    list-style: none;
+    padding: 0.5rem;
+    margin: 0;
+    z-index: 10;
+    min-width: 200px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.toolbar-submenu:hover .toolbar-submenu-items {
+    display: block;
+}
+
+.toolbar-submenu-items > li {
+    margin-bottom: 1px;
+}
+
+.toolbar-shortcut {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: gray;
+}
 
 /* Menubar ----------------------------------------------------------------- */
 .menubar {
@@ -55,7 +126,7 @@ body {
     align-items: center;
     width: 100%;
     position: fixed;
-    top: 0px;
+    top: 26px;
     left: 0;
     right: 0;
     padding: 0 20px;
@@ -317,10 +388,11 @@ text-alignment-changer {
     overflow-y: auto;
     position: fixed;
     left: 0;
-    top: 45px;
+    top: 70px;
     bottom: 20px;
     padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 4px 0 6px rgba(0, 0, 0, 0.2);
+    z-index: -1;
 }
 
 
@@ -401,9 +473,9 @@ svg.svg-icon {
 .notepad-outer-container {
     margin-top: 0px;
     margin-left: 340px;
-    padding-top: 20px;
+    padding-top: 46px;
     padding-bottom: 20px;
-    height: calc(100vh - 100px);
+    height: calc(100vh - 126px);
     width: calc(100vw - 360px);
     overflow: auto;
     background-color: rgba(var(--base), 1);
