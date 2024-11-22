@@ -38,7 +38,10 @@ pub fn switcher() -> Html {
                         });
 
                         html! {
-                            <div onclick={switch_theme_callback}>{theme}</div>
+                            <div 
+                            class="cursor-pointer p-2 hover:bg-mantle hover:text-subtext rounded-md" 
+                            onclick={switch_theme_callback}>{theme}
+                            </div>
                         }
                     }).collect::<Html>() }
                 </div>
