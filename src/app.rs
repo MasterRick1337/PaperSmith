@@ -13,15 +13,15 @@ use web_sys::HtmlDocument;
 use gloo::utils::document;
 use wasm_bindgen::JsCast;
 
-#[path = "edit_container_zoom_handlers.rs"]
+#[path = "menubar/zoom/edit_container_zoom_handlers.rs"]
 mod zoom_edit_container_handlers;
 use zoom_edit_container_handlers::ZoomControlsEdit;
 
-#[path = "compile_container_zoom_handlers.rs"]
+#[path = "menubar/zoom/compile_container_zoom_handlers.rs"]
 mod compile_container_handlers;
 use compile_container_handlers::ZoomControlsCompile;
 
-#[path = "toolbar.rs"]
+#[path = "toolbar/toolbar.rs"]
 mod toolbar;
 use toolbar::Toolbar;
 
@@ -29,7 +29,7 @@ use toolbar::Toolbar;
 //mod text_alignment_handlers;
 //use text_alignment_handlers::TextAlignmentControls;
 
-#[path = "text_styling_handlers.rs"]
+#[path = "menubar/text/text_styling_handlers.rs"]
 mod text_styling_handlers;
 use text_styling_handlers::TextStylingControls;
 
