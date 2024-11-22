@@ -54,7 +54,7 @@ pub fn zoom_controls(
 
     // Render the controls with two buttons
     html! {
-        <div class="subbar-icon">
+        <div class="subbar-icon flex items-center m-1">
             // Button to decrease zoom
             <Icon
                 class="zoom-out-button-edit"

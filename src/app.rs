@@ -14,15 +14,23 @@ use yew::events::MouseEvent;
 use yew::prelude::*;
 use yew_icons::IconId;
 
-#[path = "zoom_handlers.rs"]
+#[path = "menubar/zoom/zoom_handlers.rs"]
 mod zoom_edit_container_handlers;
 use zoom_edit_container_handlers::ZoomControls;
+
+#[path = "toolbar/toolbar.rs"]
+mod toolbar;
+use toolbar::Toolbar;
+
+#[path = "theme-switcher/switcher.rs"]
+mod switcher;
+use switcher::ThemeSwitcher;
 
 //#[path = "text_alignment_handlers.rs"]
 //mod text_alignment_handlers;
 //use text_alignment_handlers::TextAlignmentControls;
 
-#[path = "text_styling_handlers.rs"]
+#[path = "menubar/text/text_styling_handlers.rs"]
 mod text_styling_handlers;
 use text_styling_handlers::TextStylingControls;
 
@@ -169,7 +177,10 @@ pub fn app() -> Html {
         <div>
             <div class="modal-wrapper">{ (*modal).clone() }</div>
             <style id="dynamic-style" />
-            <div class="menubar bg-crust">
+            <Toolbar />
+            <div
+                class="menubar bg-crust border-solid border-t-[2px] border-x-0 border-b-0 border-text"
+            >
                 <Button callback={open_modal} icon={IconId::LucideFilePlus} size=1.5 />
                 <Button callback={on_load} icon={IconId::LucideFolderOpen} size=1.5 />
                 <Button callback={save} icon={IconId::LucideSave} size=1.5 />
@@ -179,10 +190,17 @@ pub fn app() -> Html {
                 <div class="w-[1px] h-[20px] bg-subtext my-0 mx-1 " />
                 <TextStylingControls />
             </div>
-            <div class="sidebar bg-crust">{ (*sidebar).clone() }{ "Theme Switcher" }</div>
-            <div class="notepad-outer-container bg-mantle" ref={pages_ref.clone()}>
+            <div class="sidebar bg-crust">
+                { (*sidebar).clone() }
+                <div class="absolute bottom-5">
+                    <ThemeSwitcher />
+                </div>
+            </div>
+            <div class="notepad-outer-container bg-crust" ref={pages_ref.clone()}>
                 <div class="notepad-container-container bg-base">
-                    <div class="subbar border-b-[2px] border-t-0 border-x-0 border-solid">
+                    <div
+                        class="subbar border-b-[2px] border-t-0 border-x-0 border-solid flex items-center"
+                    >
                         <ZoomControls font_size={font_size_edit.clone()} container={zoom_edit_ref} />
                     </div>
                     <div class="notepad-wrapper-edit">
@@ -214,7 +232,9 @@ pub fn app() -> Html {
                     />
                 </div>
             </div>
-            <div class="bottombar bg-crust">
+            <div
+                class="bottombar bg-crust border-solid border-t-[2px] border-x-0 border-b-0 border-text"
+            >
                 <div class="bottombar-left">
                     <Statistics pages_ref={pages_ref.clone()} />
                 </div>
