@@ -1,9 +1,11 @@
 use web_sys::{window, Range};
 use yew::prelude::*;
 use yew_hooks::use_interval;
-use yew_icons::{Icon, IconId};
+use yew_icons::IconId;
 
-fn apply_style(range: &Range, opening_style: &str, closing_style: &str) {
+use crate::app::sidebar::buttons::Button;
+
+fn apply_style(range: &Range, opening_style: &String, closing_style: &String) {
     let document = window().unwrap().document().unwrap();
 
     let selected_text = range.to_string();
@@ -29,12 +31,11 @@ pub struct TextStylingProps {
 
 #[derive(Properties, PartialEq)]
 pub struct StyleButtonProps {
-    pub range: UseStateHandle<Option<Range>>,
     pub icon: IconId,
     pub title: String,
+    pub range: UseStateHandle<Option<Range>>,
     pub opening_style: String,
     pub closing_style: String,
-    pub class_name: String,
 }
 
 #[function_component(StyleButton)]
@@ -49,16 +50,12 @@ pub fn style_button(style_props: &StyleButtonProps) -> Html {
         }
     });
 
-    let combined_class = classes!("menubar-icon", style_props.class_name.clone());
-
     html! {
-        <Icon
-            icon_id={style_props.icon}
-            width={"2em".to_owned()}
-            height={"2em".to_owned()}
-            class={combined_class}
+        <Button
+            callback={onclick}
+            icon={style_props.icon}
             title={style_props.title.clone()}
-            onclick={onclick}
+            size=1.5
         />
     }
 }
@@ -98,40 +95,48 @@ pub fn text_styling_controls() -> Html {
         10,
     );
 
+    let stylebutton_props = vec![
+        StyleButtonProps {
+            icon: IconId::LucideBold,
+            title: "Bold".to_string(),
+            range: range_state.clone(),
+            opening_style: "**".to_string(),
+            closing_style: "**".to_string(),
+        },
+        StyleButtonProps {
+            icon: IconId::LucideItalic,
+            title: "Italic".to_string(),
+            range: range_state.clone(),
+            opening_style: "_".to_string(),
+            closing_style: "_".to_string(),
+        },
+        StyleButtonProps {
+            icon: IconId::LucideUnderline,
+            title: "Underline".to_string(),
+            range: range_state.clone(),
+            opening_style: "<u>".to_string(),
+            closing_style: "</u>".to_string(),
+        },
+        StyleButtonProps {
+            icon: IconId::LucideHighlighter,
+            title: "Highlighter".to_string(),
+            range: range_state,
+            opening_style: "<mark>".to_string(),
+            closing_style: "</mark>".to_string(),
+        },
+    ];
+
     html! {
-        <div class="text-styling-changer">
-            <StyleButton
-                class_name={"bold-button".to_string()}
-                range={range_state.clone()}
-                icon={IconId::LucideBold}
-                title="Bold"
-                opening_style="**"
-                closing_style="**"
-            />
-            <StyleButton
-                class_name={"italic-button".to_string()}
-                range={range_state.clone()}
-                icon={IconId::LucideItalic}
-                title="Italic"
-                opening_style="_"
-                closing_style="_"
-            />
-            <StyleButton
-                class_name={"underline-button".to_string()}
-                range={range_state.clone()}
-                icon={IconId::LucideUnderline}
-                title="Underline"
-                opening_style="<u>"
-                    closing_style="</u>"
-            />
-            <StyleButton
-                class_name={"highlight-button".to_string()}
-                range={range_state.clone()}
-                icon={IconId::LucideHighlighter}
-                title="Highlighter"
-                opening_style="<mark>"
-                closing_style="</mark>"
-            />
+        <div class="flex">
+            { stylebutton_props
+            .iter()
+            .map(|props| {
+                html! { <>
+                    <StyleButton icon={props.icon} title={props.title.clone()} range={props.range.clone()} opening_style={props.opening_style.clone()} closing_style={props.closing_style.clone()}/>
+                    </>
+                }
+            })
+            .collect::<Html>() }
         </div>
     }
 }

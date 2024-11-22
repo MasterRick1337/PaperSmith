@@ -5,6 +5,10 @@ use yew_icons::{Icon, IconId};
 pub struct Props {
     pub callback: Callback<MouseEvent>,
     pub icon: IconId,
+    #[prop_or_default]
+    pub title: String,
+    #[prop_or(1.)]
+    pub size: f64,
 }
 
 #[derive(Properties, PartialEq)]
@@ -13,13 +17,26 @@ pub struct ContainerProps {
 }
 
 #[function_component(Button)]
-pub fn button(Props { callback, icon }: &Props) -> Html {
+pub fn button(
+    Props {
+        callback,
+        icon,
+        title,
+        size,
+    }: &Props,
+) -> Html {
     html! {
         <div
-            class="flex bg-mantle border-overlay0 text-text mx-1 my-auto border-solid border-[1px] rounded-md p-[1px] cursor-pointer items-center content-center"
+            class="group/button flex bg-mantle text-text mx-1 my-auto rounded-md p-[2px] cursor-pointer items-center content-center"
             onclick={callback}
         >
-            <Icon icon_id={*icon} width="1em" height="1em" />
+            <Icon
+                icon_id={*icon}
+                width={format!("{size}em")}
+                height={format!("{size}em")}
+                title={title.clone()}
+                class="group-hover/button:scale-90"
+            />
         </div>
     }
 }

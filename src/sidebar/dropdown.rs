@@ -211,7 +211,7 @@ pub fn dropdown(
                 </div>
             </Title>
             <div
-                class="pl-2 ml-2 border-solid border-l-2 border-r-0 border-y-0 border-overlay1 text-subtext2 overflow-hidden cursor-default"
+                class="pl-2 ml-2 border-solid border-l-2 border-r-0 border-y-0 border-text text-subtext2 overflow-hidden cursor-default"
                 style={(*transition_string).clone()}
                 ref={content_ref}
             >
@@ -233,10 +233,14 @@ fn get_buttons(
                 ButtonProps {
                     callback: on_rename,
                     icon: IconId::LucideEdit3,
+                    title: String::new(),
+                    size: 1.,
                 },
                 ButtonProps {
                     callback: on_delete,
                     icon: IconId::LucideTrash2,
+                    title: String::new(),
+                    size: 1.,
                 },
             ]
         }
@@ -244,6 +248,8 @@ fn get_buttons(
             vec![ButtonProps {
                 callback: on_add_note,
                 icon: IconId::LucidePlus,
+                title: String::new(),
+                size: 1.,
             }]
         }
     }

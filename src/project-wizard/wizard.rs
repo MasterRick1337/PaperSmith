@@ -215,7 +215,7 @@ pub fn project_wizard(
             <br />
             <div class="font-semibold">{ "Name:" }</div>
             <div
-                class="flex rounded-lg border-2 my-2 border-transparent hover:border-mauve border-solid"
+                class="flex rounded-lg border-2 my-2 border-transparent hover:border-primary border-solid"
             >
                 <input
                     oninput={on_title_input}
@@ -226,7 +226,7 @@ pub fn project_wizard(
             <br />
             <div class="font-semibold">{ "Location:" }</div>
             <div
-                class="flex rounded-lg border-2 my-2 border-transparent hover:border-mauve border-solid"
+                class="flex rounded-lg border-2 my-2 border-transparent hover:border-primary border-solid"
             >
                 <input
                     oninput={on_location_input}
@@ -237,25 +237,25 @@ pub fn project_wizard(
                     onmouseover={on_mouse_over}
                     onmouseout={on_mouse_out}
                     onclick={on_choose_folder}
-                    class="content-center hover:text-mauve rounded-tr-lg border-l-2 border-overlay0 border-solid border-r-0 border-y-0 rounded-br-lg bg-crust p-2 items-center flex"
+                    class="content-center hover:text-primary  bg-crust rounded-tr-lg border-l-2 border-mantle border-solid border-r-0 border-y-0 rounded-br-lg p-2 items-center flex"
                 >
                     { icon }
                 </div>
             </div>
             <div id="footer" class="flex justify-end w-full pt-8">
-                <div class="text-text underline decoration-red break-words mr-auto">
+                <div class="text-text underline decoration-primary break-words mr-auto">
                     { (*error_message).clone() }
                 </div>
                 <button
                     ref={confirm_button_ref}
                     onclick={on_confirm}
-                    class="rounded-lg text-lg px-2 py-1 ml-4 bg-mauve text-crust hover:scale-105 border-0"
+                    class="rounded-lg text-lg px-2 py-1 ml-4 bg-primary text-crust hover:scale-105 border-0"
                 >
                     { "Confirm" }
                 </button>
                 <button
                     onclick={on_close}
-                    class="rounded-lg text-lg px-2 py-1 ml-4 bg-red text-crust hover:scale-105 border-0"
+                    class="rounded-lg text-lg px-2 py-1 ml-4 bg-secondary text-crust hover:scale-105 border-0"
                 >
                     { "Close" }
                 </button>

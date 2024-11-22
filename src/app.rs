@@ -1,25 +1,22 @@
+use gloo::utils::document;
 use pulldown_cmark::{html, Options, Parser};
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
+use sidebar::buttons::Button;
 use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
+use web_sys::HtmlDocument;
 use web_sys::HtmlElement;
 use yew::events::InputEvent;
 use yew::events::MouseEvent;
 use yew::prelude::*;
-use yew_icons::{Icon, IconId};
-use web_sys::HtmlDocument;
-use gloo::utils::document;
-use wasm_bindgen::JsCast;
+use yew_icons::IconId;
 
-#[path = "edit_container_zoom_handlers.rs"]
+#[path = "zoom_handlers.rs"]
 mod zoom_edit_container_handlers;
-use zoom_edit_container_handlers::ZoomControlsEdit;
-
-#[path = "compile_container_zoom_handlers.rs"]
-mod compile_container_handlers;
-use compile_container_handlers::ZoomControlsCompile;
+use zoom_edit_container_handlers::ZoomControls;
 
 //#[path = "text_alignment_handlers.rs"]
 //mod text_alignment_handlers;
@@ -61,6 +58,8 @@ struct SaveFileArgs {
 #[function_component(App)]
 pub fn app() -> Html {
     let pages_ref: NodeRef = use_node_ref();
+    let zoom_compile_ref = use_node_ref();
+    let zoom_edit_ref = use_node_ref();
     let text_input_ref = use_node_ref();
     let font_size_edit = use_state(|| 16.0);
     let font_size_compile = use_state(|| 16.0);
@@ -149,12 +148,12 @@ pub fn app() -> Html {
         })
     };
 
-    let on_undo = Callback::from(move |_: MouseEvent | {
+    let on_undo = Callback::from(move |_: MouseEvent| {
         let html_doc: HtmlDocument = document().dyn_into().unwrap();
         html_doc.exec_command("undo").unwrap();
     });
 
-    let on_redo = Callback::from(move |_: MouseEvent | {
+    let on_redo = Callback::from(move |_: MouseEvent| {
         let html_doc: HtmlDocument = document().dyn_into().unwrap();
         html_doc.exec_command("redo").unwrap();
     });
@@ -170,56 +169,21 @@ pub fn app() -> Html {
         <div>
             <div class="modal-wrapper">{ (*modal).clone() }</div>
             <style id="dynamic-style" />
-            <div class="menubar">
-                <Icon
-                    icon_id={IconId::LucideFilePlus}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon add-file-button"
-                    title="Add File"
-                    onclick={open_modal}
-                />
-                <Icon
-                    icon_id={IconId::LucideFolderOpen}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon load-project-button"
-                    title="Load Project"
-                    onclick={on_load}
-                />
-                <Icon
-                    icon_id={IconId::LucideSave}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon save-file-button"
-                    title="Save File"
-                    onclick={save}
-                />
-                <div class="separator" />
-                <Icon
-                    icon_id={IconId::LucideUndo}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon undo-button"
-                    title="Undo Changes"
-                    onclick={on_undo}
-                />
-                <Icon
-                    icon_id={IconId::LucideRedo}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon redo-button"
-                    title="Redo Changes"
-                    onclick={on_redo}
-                />
-                <div class="separator" />
+            <div class="menubar bg-crust">
+                <Button callback={open_modal} icon={IconId::LucideFilePlus} size=1.5 />
+                <Button callback={on_load} icon={IconId::LucideFolderOpen} size=1.5 />
+                <Button callback={save} icon={IconId::LucideSave} size=1.5 />
+                <div class="w-[1px] h-[20px] bg-subtext my-0 mx-1 " />
+                <Button callback={on_undo} icon={IconId::LucideUndo} size=1.5 />
+                <Button callback={on_redo} icon={IconId::LucideRedo} size=1.5 />
+                <div class="w-[1px] h-[20px] bg-subtext my-0 mx-1 " />
                 <TextStylingControls />
             </div>
-            <div class="sidebar">{ (*sidebar).clone() }</div>
-            <div class="notepad-outer-container" ref={pages_ref.clone()}>
-                <div class="notepad-container-edit">
-                    <div class="subbar-edit">
-                        <ZoomControlsEdit font_size_edit={font_size_edit.clone()} />
+            <div class="sidebar bg-crust">{ (*sidebar).clone() }{ "Theme Switcher" }</div>
+            <div class="notepad-outer-container bg-mantle" ref={pages_ref.clone()}>
+                <div class="notepad-container-container bg-base">
+                    <div class="subbar border-b-[2px] border-t-0 border-x-0 border-solid">
+                        <ZoomControls font_size={font_size_edit.clone()} container={zoom_edit_ref} />
                     </div>
                     <div class="notepad-wrapper-edit">
                         <div
@@ -233,11 +197,14 @@ pub fn app() -> Html {
                     </div>
                 </div>
                 <div
-                    class="notepad-container-compile"
+                    class="notepad-container-container bg-base"
                     style={format!("font-size: {}px;", *font_size_compile)}
                 >
-                    <div class="subbar-compile">
-                        <ZoomControlsCompile font_size_compile={font_size_compile.clone()} />
+                    <div class="subbar border-b-[2px] border-t-0 border-x-0 border-solid">
+                        <ZoomControls
+                            font_size={font_size_compile.clone()}
+                            container={zoom_compile_ref}
+                        />
                     </div>
                     <div
                         class="notepad-textarea-compile"
@@ -247,7 +214,7 @@ pub fn app() -> Html {
                     />
                 </div>
             </div>
-            <div class="bottombar">
+            <div class="bottombar bg-crust">
                 <div class="bottombar-left">
                     <Statistics pages_ref={pages_ref.clone()} />
                 </div>

@@ -24,8 +24,8 @@ use dropdown::Dropdown;
 use dropdown::Type;
 
 #[path = "buttons.rs"]
-mod buttons;
-use buttons::{ButtonContainer, Props as ButtonProps};
+pub mod buttons;
+pub use buttons::{ButtonContainer, Props as ButtonProps};
 
 use crate::app::invoke;
 use crate::app::wizard::PathArgs;
@@ -145,10 +145,14 @@ pub fn sidebar(SideBarProps { project }: &SideBarProps) -> Html {
                 None,
             ),
             icon: IconId::LucideEdit3,
+            title: String::new(),
+            size: 1.,
         },
         ButtonProps {
             callback: on_add_chapter,
             icon: IconId::LucidePlus,
+            title: String::new(),
+            size: 1.,
         },
     ];
 
@@ -162,7 +166,7 @@ pub fn sidebar(SideBarProps { project }: &SideBarProps) -> Html {
                     <ButtonContainer button_props={button_props} />
                 </div>
                 <div
-                    class="text-lg border-l-2 border-r-0 border-y-0 border-solid border-overlay2 pl-2 ml-2"
+                    class="text-lg border-l-2 border-r-0 border-y-0 border-solid border-text pl-2 ml-2"
                 >
                     { for (*chapters).clone() }
                 </div>
@@ -279,6 +283,8 @@ fn entry(
                 Some(*chapter_index),
             ),
             icon: IconId::LucideEdit3,
+            title: String::new(),
+            size: 1.,
         },
         ButtonProps {
             callback: get_delete_callback(
@@ -288,6 +294,8 @@ fn entry(
                 RenameKind::Note,
             ),
             icon: IconId::LucideTrash2,
+            title: String::new(),
+            size: 1.,
         },
     ];
     html! {
@@ -316,7 +324,7 @@ fn title(
 ) -> Html {
     html! {
         <div
-            class="group items-center flex relative transition rounded-md my-[1px] hover:bg-sapphire hover:text-mantle cursor-pointer"
+            class="group items-center flex relative transition rounded-md my-[1px] hover:bg-secondary hover:text-mantle cursor-pointer"
             onclick={onclick}
         >
             { children.clone() }
