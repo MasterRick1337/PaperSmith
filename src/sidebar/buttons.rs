@@ -27,7 +27,7 @@ pub fn button(
 ) -> Html {
     html! {
         <div
-            class="group/button flex bg-mantle text-text mx-1 my-auto rounded-md p-[2px] cursor-pointer items-center content-center"
+            class="group/button flex bg-base text-text mx-1 my-auto rounded-md p-[2px] cursor-pointer items-center content-center"
             onclick={callback}
         >
             <Icon

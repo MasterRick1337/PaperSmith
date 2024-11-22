@@ -39,7 +39,7 @@ module.exports = {
       },
       themes: [
         {
-          name: "latte",
+          name: "light",
           extend: {
             colors: {
               primary: "#8839ef",
@@ -54,7 +54,7 @@ module.exports = {
           },
         },
         {
-          name: "frappe",
+          name: "lightdark",
           extend: {
             colors: {
               primary: "#ca9ee6",
@@ -69,7 +69,7 @@ module.exports = {
           },
         },
         {
-          name: "macchiato",
+          name: "medium",
           extend: {
             colors: {
               primary: "#c6a0f6",
@@ -84,7 +84,7 @@ module.exports = {
           },
         },
         {
-          name: "mocha",
+          name: "dark",
           extend: {
             colors: {
               primary: "#cba6f7",
@@ -99,7 +99,7 @@ module.exports = {
           },
         },
         {
-          name: "spotify",
+          name: "verydark",
           extend: {
             colors: {
               primary: "#1DD65F",

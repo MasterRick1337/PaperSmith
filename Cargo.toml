@@ -55,6 +55,7 @@ yew_icons = { version = "0.8", features = [
   "LucideUndo",
   "LucideZoomIn",
   "LucideZoomOut",
+  "FontAwesomeSolidSwatchbook",
 ] }
 gloo-timers = "0.3.0"
 yew-hooks = "0.3.2"

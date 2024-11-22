@@ -75,7 +75,11 @@ pub fn app() -> Html {
     let project: UseStateHandle<Option<Project>> = use_state(|| None);
     let text_alignment = use_state(|| "left".to_string());
     let sidebar = use_state(|| {
-        html! { <>{ "No Project Loaded" }</> }
+        html! {
+            <>
+                <div class="text-lg">{ "No Project Loaded" }</div>
+            </>
+        }
     });
     let modal = use_state(|| html!());
 
@@ -133,7 +137,11 @@ pub fn app() -> Html {
         use_effect_with(project.clone(), move |_| {
             if (*project).is_none() {
                 sidebar.set(
-                    html! { <div class="cursor-default select-none">{ "No Project Loaded" }</div> },
+                    html! {
+                        <div class="cursor-default select-none text-lg">
+                            { "No Project Loaded" }
+                        </div>
+                    },
                 );
             } else {
                 sidebar.set(html! { <SideBar project={project.clone()} /> });
@@ -175,6 +183,7 @@ pub fn app() -> Html {
 
     html! {
         <div>
+            <div class="light lightdark medium dark verydark" />
             <div class="modal-wrapper">{ (*modal).clone() }</div>
             <style id="dynamic-style" />
             <Toolbar />
@@ -192,7 +201,7 @@ pub fn app() -> Html {
             </div>
             <div class="sidebar bg-crust">
                 { (*sidebar).clone() }
-                <div class="absolute bottom-5">
+                <div class="absolute bottom-5 left-2 right-2">
                     <ThemeSwitcher />
                 </div>
             </div>
