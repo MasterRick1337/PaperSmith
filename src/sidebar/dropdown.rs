@@ -200,7 +200,7 @@ pub fn dropdown(
     }
 
     html! {
-        <div class="cursor-pointer">
+        <div>
             <Title
                 button_props={get_buttons(*dropdown_type, on_rename, on_delete, on_add_note)}
                 onclick={onclick}
@@ -211,7 +211,7 @@ pub fn dropdown(
                 </div>
             </Title>
             <div
-                class="pl-2 ml-2 border-solid border-l-2 border-r-0 border-y-0 border-overlay1 text-subtext2 overflow-hidden"
+                class="pl-2 ml-2 border-solid border-l-2 border-r-0 border-y-0 border-overlay1 text-subtext2 overflow-hidden cursor-default"
                 style={(*transition_string).clone()}
                 ref={content_ref}
             >

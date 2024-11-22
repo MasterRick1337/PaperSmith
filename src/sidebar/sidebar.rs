@@ -316,7 +316,7 @@ fn title(
 ) -> Html {
     html! {
         <div
-            class="group items-center flex relative transition rounded-md my-[1px] hover:bg-sapphire hover:text-mantle"
+            class="group items-center flex relative transition rounded-md my-[1px] hover:bg-sapphire hover:text-mantle cursor-pointer"
             onclick={onclick}
         >
             { children.clone() }
