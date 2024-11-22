@@ -5,8 +5,10 @@ use chrono::{DateTime, Utc};
 use lazy_static::lazy_static;
 use rfd::FileDialog;
 use saving::create_empty_file;
+use std::fs;
 use std::fs::File;
 use std::io::Write;
+use std::path::PathBuf;
 use std::process::Command;
 use std::sync::Mutex;
 
@@ -42,10 +44,21 @@ fn main() {
             add_chapter,
             delete_path,
             open_explorer,
-            create_empty_file
+            create_empty_file,
+            get_file_content,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+#[tauri::command]
+fn get_file_content(path: String) -> String {
+    let pathbuf = PathBuf::from(path.clone());
+    println!("{}", path.clone());
+    if pathbuf.exists() & pathbuf.is_file() {
+        fs::read_to_string(path).expect("Should have been able to read the file")
+    } else {
+        String::new()
+    }
 }
 
 #[tauri::command]

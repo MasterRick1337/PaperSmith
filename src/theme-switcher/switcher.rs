@@ -4,8 +4,6 @@ use web_sys::HtmlDocument;
 use yew::prelude::*;
 use yew_icons::{Icon, IconId};
 
-use crate::app::sidebar::buttons::Button;
-
 #[function_component(ThemeSwitcher)]
 pub fn switcher() -> Html {
     let dropdown_content = use_state(|| html!());

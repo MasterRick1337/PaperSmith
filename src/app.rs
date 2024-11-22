@@ -134,17 +134,16 @@ pub fn app() -> Html {
     {
         let sidebar = sidebar.clone();
         let project = project.clone();
+        let text_input_ref = text_input_ref.clone();
         use_effect_with(project.clone(), move |_| {
             if (*project).is_none() {
-                sidebar.set(
-                    html! {
-                        <div class="cursor-default select-none text-lg">
-                            { "No Project Loaded" }
-                        </div>
-                    },
-                );
+                sidebar.set(html! {
+                    <div class="cursor-default select-none text-lg">{ "No Project Loaded" }</div>
+                });
             } else {
-                sidebar.set(html! { <SideBar project={project.clone()} /> });
+                sidebar.set(
+                    html! { <SideBar project={project.clone()} input_ref={text_input_ref} /> },
+                );
             }
         });
     };
