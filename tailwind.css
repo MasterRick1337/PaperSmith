@@ -43,7 +43,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    padding: 0 10px;
+    padding: 0 5px;
     border-bottom: 1px solid rgba(var(--border), 1);
     z-index: 10;
 }
@@ -53,6 +53,7 @@ body {
     padding: 0;
     margin: 0;
     display: flex;
+    font-size: 12px;
 }
 
 .toolbar-menu > .toolbar-submenu {
@@ -114,7 +115,7 @@ body {
 
 .toolbar-shortcut {
     margin-left: auto;
-    font-size: 0.8rem;
+    font-size: 12px;
     color: gray;
 }
 
