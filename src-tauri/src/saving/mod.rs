@@ -112,6 +112,6 @@ pub fn add_chapter(path: String) {
 
     path.push("Content");
     path.set_extension("md");
-    let _ = fs::create_dir(&path);
+    let _ = File::create(&path);
     path.pop();
 }
