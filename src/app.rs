@@ -1,5 +1,4 @@
 use gloo::utils::document;
-use pulldown_cmark::{html, Options, Parser};
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
 use sidebar::buttons::Button;
@@ -9,14 +8,13 @@ use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlDocument;
 use web_sys::HtmlElement;
-use yew::events::InputEvent;
 use yew::events::MouseEvent;
 use yew::prelude::*;
 use yew_icons::IconId;
 
-#[path = "menubar/zoom/zoom_handlers.rs"]
-mod zoom_edit_container_handlers;
-use zoom_edit_container_handlers::ZoomControls;
+#[path = "notepad/notepad.rs"]
+mod notepad;
+use notepad::Notepads;
 
 #[path = "toolbar/toolbar.rs"]
 mod toolbar;
@@ -65,15 +63,7 @@ struct SaveFileArgs {
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let pages_ref: NodeRef = use_node_ref();
-    let zoom_compile_ref = use_node_ref();
-    let zoom_edit_ref = use_node_ref();
-    let text_input_ref = use_node_ref();
-    let font_size_edit = use_state(|| 16.0);
-    let font_size_compile = use_state(|| 16.0);
-    let zoom_level = use_state(|| 100.0);
     let project: UseStateHandle<Option<Project>> = use_state(|| None);
-    let text_alignment = use_state(|| "left".to_string());
     let sidebar = use_state(|| {
         html! {
             <>
@@ -82,10 +72,8 @@ pub fn app() -> Html {
         }
     });
     let modal = use_state(|| html!());
-
-    let render_ref = use_node_ref();
-
-    let on_text_input = text_input_handler(text_input_ref.clone(), render_ref.clone());
+    let text_input_ref = use_node_ref();
+    let pages_ref = use_node_ref();
 
     let save = {
         let text_input_ref = text_input_ref.clone();
@@ -181,14 +169,12 @@ pub fn app() -> Html {
     //};
 
     html! {
-        <div>
+        <div class="h-screen w-screen flex flex-col">
             <div class="light lightdark medium dark verydark" />
             <div class="modal-wrapper">{ (*modal).clone() }</div>
             <style id="dynamic-style" />
             <Toolbar />
-            <div
-                class="menubar bg-crust border-solid border-t-[2px] border-x-0 border-b-0 border-text"
-            >
+            <div class="h-12 flex justify-left items-center p-2 bg-crust">
                 <Button callback={open_modal} icon={IconId::LucideFilePlus} size=1.5 />
                 <Button callback={on_load} icon={IconId::LucideFolderOpen} size=1.5 />
                 <Button callback={save} icon={IconId::LucideSave} size=1.5 />
@@ -198,50 +184,17 @@ pub fn app() -> Html {
                 <div class="w-[1px] h-[20px] bg-subtext my-0 mx-1 " />
                 <TextStylingControls />
             </div>
-            <div class="sidebar bg-crust">
-                { (*sidebar).clone() }
-                <div class="absolute bottom-5 left-2 right-2">
-                    <ThemeSwitcher />
-                </div>
-            </div>
-            <div class="notepad-outer-container bg-crust" ref={pages_ref.clone()}>
-                <div class="notepad-container-container bg-base">
-                    <div
-                        class="subbar border-b-[2px] border-t-0 border-x-0 border-solid flex items-center"
-                    >
-                        <ZoomControls font_size={font_size_edit.clone()} container={zoom_edit_ref} />
-                    </div>
-                    <div class="notepad-wrapper-edit">
-                        <div
-                            class="notepad-textarea-edit"
-                            id="notepad-textarea-edit"
-                            ref={text_input_ref}
-                            style={format!("font-size: {}px; text-align: {}; transform: scale({});", *font_size_edit, *text_alignment, *zoom_level / 100.0)}
-                            contenteditable="true"
-                            oninput={on_text_input}
-                        />
+            <div id="main_content" class="flex flex-grow m-3">
+                <div class="flex flex-col min-w-[18rem] overflow-y-auto bg-crust">
+                    <div class="flex-grow">{ (*sidebar).clone() }</div>
+                    <div class="bottom-5 left-2 right-2">
+                        <ThemeSwitcher />
                     </div>
                 </div>
-                <div
-                    class="notepad-container-container bg-base"
-                    style={format!("font-size: {}px;", *font_size_compile)}
-                >
-                    <div class="subbar border-b-[2px] border-t-0 border-x-0 border-solid">
-                        <ZoomControls
-                            font_size={font_size_compile.clone()}
-                            container={zoom_compile_ref}
-                        />
-                    </div>
-                    <div
-                        class="notepad-textarea-compile"
-                        id="notepad-textarea-compile"
-                        style={format!("font-size: {}px;", *font_size_compile)}
-                        ref={render_ref}
-                    />
-                </div>
+                <Notepads pages_ref={pages_ref.clone()} text_input_ref={text_input_ref} />
             </div>
             <div
-                class="bottombar bg-crust border-solid border-t-[2px] border-x-0 border-b-0 border-text"
+                class="h-10 justify-between items-center flex p-2 bg-crust border-solid border-t-[2px] border-x-0 border-b-0 border-text"
             >
                 <div class="bottombar-left">
                     <Statistics pages_ref={pages_ref.clone()} />
@@ -275,43 +228,3 @@ let save = {
         });
     })
 };*/
-
-fn text_input_handler(text_input_ref: NodeRef, render_ref: NodeRef) -> Callback<InputEvent> {
-    Callback::from(move |_| {
-        if let Some(input) = text_input_ref.cast::<HtmlElement>() {
-            let inner_text = input.inner_text();
-            gloo_console::log!(&inner_text);
-            let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
-            //lines.set(new_lines);
-            rendering_handler(&render_ref, &new_lines);
-        }
-    })
-}
-
-// ad br tag after end of each line (make it one string)
-fn rendering_handler(render_ref: &NodeRef, new_lines: &[String]) {
-    let html_strings: Vec<String> = new_lines
-        .iter()
-        .map(|line| {
-            gloo_console::log!(line);
-            let mut options = Options::empty();
-            options.insert(Options::ENABLE_STRIKETHROUGH);
-            options.insert(Options::ENABLE_TABLES);
-
-            if line.trim().is_empty() {
-                "<br>".to_string()
-            } else {
-                let parser = Parser::new_ext(line.as_str(), options);
-                let mut html_output = String::new();
-                html::push_html(&mut html_output, parser);
-                html_output
-            }
-        })
-        .collect();
-
-    let html_string: String = html_strings.join("\n");
-
-    if let Some(rendered) = render_ref.cast::<HtmlElement>() {
-        rendered.set_inner_html(html_string.as_str());
-    }
-}

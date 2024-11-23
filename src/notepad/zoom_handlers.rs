@@ -1,6 +1,8 @@
 use web_sys::HtmlElement;
 use yew::prelude::*;
-use yew_icons::{Icon, IconId};
+use yew_icons::IconId;
+
+use crate::app::sidebar::buttons::Button;
 
 pub fn zoom_increase_handler(
     font_size: UseStateHandle<f64>,
@@ -55,20 +57,8 @@ pub fn zoom_controls(
     // Render the controls with two buttons
     html! {
         <div class="subbar-icon flex items-center m-1">
-            // Button to decrease zoom
-            <Icon
-                class="zoom-out-button-edit"
-                icon_id={IconId::LucideZoomOut}
-                title="Zoom Out"
-                onclick={on_zoom_decrease}
-            />
-            // Button to increase zoom
-            <Icon
-                class="zoom-in-button-edit"
-                icon_id={IconId::LucideZoomIn}
-                title="Zoom In"
-                onclick={on_zoom_increase}
-            />
+            <Button callback={on_zoom_decrease} icon={IconId::LucideZoomOut} size=2.5 />
+            <Button callback={on_zoom_increase} icon={IconId::LucideZoomIn} size=2.5 />
         </div>
     }
 }

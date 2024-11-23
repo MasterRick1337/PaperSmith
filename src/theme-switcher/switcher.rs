@@ -36,8 +36,8 @@ pub fn switcher() -> Html {
                         });
 
                         html! {
-                            <div 
-                            class="cursor-pointer p-2 hover:bg-mantle hover:text-subtext rounded-md" 
+                            <div
+                            class="cursor-pointer p-2 hover:bg-mantle hover:text-subtext rounded-md"
                             onclick={switch_theme_callback}>{theme}
                             </div>
                         }
@@ -52,18 +52,16 @@ pub fn switcher() -> Html {
         <div>
             { (*dropdown_content).clone() }
             <div
-                class="group text-xl p-2 bg-base rounded-md select-none cursor-pointer hover:text-subtext hover:bg-mantle flex items-center"
+                class="group text-xl p-2 bg-base rounded-md select-none cursor-pointer hover:text-subtext hover:bg-mantle flex items-center flex-row"
                 onclick={on_click_open.clone()}
             >
-                <div class="flex items-center">
-                    { "Theme switcher" }
-                    <Icon
-                        icon_id={IconId::FontAwesomeSolidSwatchbook}
-                        width="1em"
-                        height="1em"
-                        class="absolute right-2"
-                    />
-                </div>
+                <div class="flex-grow pl-2">{ "Theme switcher" }</div>
+                <Icon
+                    icon_id={IconId::FontAwesomeSolidSwatchbook}
+                    width="1em"
+                    height="1em"
+                    class="pr-2"
+                />
             </div>
         </div>
     }

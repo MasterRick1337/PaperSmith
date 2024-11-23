@@ -3,7 +3,9 @@ use yew::prelude::*;
 #[function_component(Toolbar)]
 pub fn toolbar() -> Html {
     html! {
-        <div class="toolbar border-b-[2px] border-solid border-x-0 border-t-0 border-text">
+        <div
+            class="h-6 flex items-center px-1 z-20 border-b-[2px] border-solid border-x-0 border-t-0 border-text"
+        >
             { render_toolbar() }
         </div>
     }
