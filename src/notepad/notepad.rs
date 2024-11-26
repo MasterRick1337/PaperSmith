@@ -27,9 +27,9 @@ pub fn notepads(
     let on_text_input = text_input_handler(text_input_ref.clone(), render_ref.clone());
 
     html!(
-        <div class="h-[85vh] flex flex-grow bg-crust justify-evenly gap-2 px-3" ref={pages_ref.clone()}>
+        <div class="flex flex-grow h-notepad bg-crust justify-evenly gap-5 px-3" ref={pages_ref.clone()}>
             <div
-                class="bg-base max-h-full flex flex-1 flex-col overflow-hidden mx-2 rounded-md max-w-[33vw]"
+                class="bg-base max-h-full flex flex-1 flex-col overflow-hidden mx-2 rounded-md max-w-[45vw]"
             >
                 <div
                     class="border-b-[2px] border-t-0 border-x-0 border-solid flex items-center px-2"
@@ -46,10 +46,10 @@ pub fn notepads(
                 />
             </div>
             <div
-                class="bg-base max-h-full flex flex-1 flex-col overflow-hidden mx-2 rounded-md max-w-[33vw]"
+                class="bg-base max-h-full flex flex-1 flex-col overflow-hidden mx-2 rounded-md max-w-[45vw]"
             >
                 <div
-                    class="border-b-[2px] border-t-0 border-x-0 border-solid flex items-center px-2 "
+                    class="border-b-[2px] border-t-0 border-x-0 border-solid flex items-center px-2"
                 >
                     <ZoomControls
                         font_size={font_size_compile.clone()}
@@ -57,9 +57,9 @@ pub fn notepads(
                     />
                 </div>
                 <div
-                    class="flex-grow p-4 overflow-x-hidden break-words  space-y-0"
+                    class="flex-grow p-4 overflow-x-hidden break-words space-y-0"
                     id="notepad-textarea-compile"
-                    style={format!("font-size: {}px;", *font_size_compile)}
+                    style={format!("font-size: {}px; word-break: break-word;", *font_size_compile)}
                     ref={render_ref}
                 />
             </div>
@@ -79,6 +79,8 @@ fn text_input_handler(text_input_ref: NodeRef, render_ref: NodeRef) -> Callback<
 }
 // ad br tag after end of each line (make it one string)
 fn rendering_handler(render_ref: &NodeRef, new_lines: &[String]) {
+    let mut last_was_empty = false;
+
     let html_strings: Vec<String> = new_lines
         .iter()
         .map(|line| {
@@ -88,8 +90,14 @@ fn rendering_handler(render_ref: &NodeRef, new_lines: &[String]) {
             options.insert(Options::ENABLE_TABLES);
 
             if line.trim().is_empty() {
-                "<br>".to_string()
+                if last_was_empty {
+                    "".to_string()
+                } else {
+                    last_was_empty = true;
+                    "<br>".to_string()
+                }
             } else {
+                last_was_empty = false;
                 let parser = Parser::new_ext(line.as_str(), options);
                 let mut html_output = String::new();
                 push_html(&mut html_output, parser);

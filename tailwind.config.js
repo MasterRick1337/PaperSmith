@@ -15,6 +15,9 @@ module.exports = {
       transitionProperty: {
         "max-height": "max-height",
       },
+      height: {
+        'notepad': 'calc(100vh - 125px)',
+      },
     },
   },
   corePlugins: {
