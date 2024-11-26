@@ -196,3 +196,19 @@ body {
   scrollbar-width: thin;
   /*scrollbar-color: rgba(var(--overlay0), 1) rgba(var(--surface0), 1);*/
 }
+
+p {
+  margin-block-start: 0;
+  margin-block-end: 0;
+}
+
+.notepad-textarea-compile p {
+  margin: 0;
+  padding: 0;
+}
+
+.notepad-textarea-compile br {
+  display: block;
+  content: "";
+  margin-bottom: 1em;
+}

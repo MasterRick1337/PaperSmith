@@ -175,12 +175,12 @@ pub fn app() -> Html {
             <style id="dynamic-style" />
             <Toolbar />
             <div class="h-12 flex justify-left items-center p-2 bg-crust">
-                <Button callback={open_modal} icon={IconId::LucideFilePlus} size=1.5 />
-                <Button callback={on_load} icon={IconId::LucideFolderOpen} size=1.5 />
-                <Button callback={save} icon={IconId::LucideSave} size=1.5 />
+                <Button callback={open_modal} icon={IconId::LucideFilePlus} title="Create Project" size=1.5 />
+                <Button callback={on_load} icon={IconId::LucideFolderOpen} title="Load Project" size=1.5 />
+                <Button callback={save} icon={IconId::LucideSave} title="Save" size=1.5 />
                 <div class="w-[1px] h-[20px] bg-subtext my-0 mx-1 " />
-                <Button callback={on_undo} icon={IconId::LucideUndo} size=1.5 />
-                <Button callback={on_redo} icon={IconId::LucideRedo} size=1.5 />
+                <Button callback={on_undo} icon={IconId::LucideUndo} title="Undo" size=1.5 />
+                <Button callback={on_redo} icon={IconId::LucideRedo} title="Redo" size=1.5 />
                 <div class="w-[1px] h-[20px] bg-subtext my-0 mx-1 " />
                 <TextStylingControls />
             </div>
@@ -194,7 +194,7 @@ pub fn app() -> Html {
                 <Notepads pages_ref={pages_ref.clone()} text_input_ref={text_input_ref} />
             </div>
             <div
-                class="h-10 justify-between items-center flex p-2 bg-crust border-solid border-t-[2px] border-x-0 border-b-0 border-text"
+                class="h-3 justify-between items-center flex p-2 bg-crust border-solid border-t-[2px] border-x-0 border-b-0 border-text"
             >
                 <div class="bottombar-left">
                     <Statistics pages_ref={pages_ref.clone()} />

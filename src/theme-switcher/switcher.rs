@@ -52,7 +52,7 @@ pub fn switcher() -> Html {
         <div>
             { (*dropdown_content).clone() }
             <div
-                class="group text-xl p-2 bg-base rounded-md select-none cursor-pointer hover:text-subtext hover:bg-mantle flex items-center flex-row"
+                class="group/buttoncontainer text-xl p-2 bg-base rounded-md select-none cursor-pointer hover:text-subtext hover:bg-mantle flex items-center flex-row"
                 onclick={on_click_open.clone()}
             >
                 <div class="flex-grow pl-2">{ "Theme switcher" }</div>

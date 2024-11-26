@@ -57,8 +57,8 @@ pub fn zoom_controls(
     // Render the controls with two buttons
     html! {
         <div class="subbar-icon flex items-center m-1">
-            <Button callback={on_zoom_decrease} icon={IconId::LucideZoomOut} size=2.5 />
-            <Button callback={on_zoom_increase} icon={IconId::LucideZoomIn} size=2.5 />
+            <Button callback={on_zoom_decrease} icon={IconId::LucideZoomOut} title="Zoom Out" size=2.5 />
+            <Button callback={on_zoom_increase} icon={IconId::LucideZoomIn}  title="Zoom In" size=2.5 />
         </div>
     }
 }

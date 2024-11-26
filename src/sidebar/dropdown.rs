@@ -233,13 +233,13 @@ fn get_buttons(
                 ButtonProps {
                     callback: on_rename,
                     icon: IconId::LucideEdit3,
-                    title: String::new(),
+                    title: "Rename Chapter".to_string(),
                     size: 1.,
                 },
                 ButtonProps {
                     callback: on_delete,
                     icon: IconId::LucideTrash2,
-                    title: String::new(),
+                    title: "Delete Chapter".to_string(),
                     size: 1.,
                 },
             ]
@@ -248,7 +248,7 @@ fn get_buttons(
             vec![ButtonProps {
                 callback: on_add_note,
                 icon: IconId::LucidePlus,
-                title: String::new(),
+                title: "Create Note".to_string(),
                 size: 1.,
             }]
         }
