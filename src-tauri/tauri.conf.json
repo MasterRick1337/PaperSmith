@@ -29,8 +29,8 @@
     "windows": [
       {
         "title": "PaperSmith",
-        "width": 800,
-        "height": 600
+        "width": 1280,
+        "height": 768
       }
     ],
     "security": {
@@ -38,7 +38,7 @@
     },
     "bundle": {
       "active": true,
-      "targets": ["deb", "nsis", "msi", "app", "dmg", "updater"],      
+      "targets": ["deb", "appimage", "nsis", "msi", "app", "dmg", "updater"],      
       "identifier": "com.tauri.papersmith",
       "icon": [
         "icons/32x32.png",

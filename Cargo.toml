@@ -12,6 +12,8 @@ wasm-bindgen-futures = "0.4"
 web-sys = { version = "0.3.69", features = [
   "HtmlElement",
   "HtmlInputElement",
+  "HtmlButtonElement",
+  "CssStyleDeclaration",
   "HtmlDocument",
   "console",
   "Document",
@@ -27,31 +29,42 @@ serde-wasm-bindgen = "0.6"
 console_error_panic_hook = "0.1.7"
 # TODO: Find Spell-Check icon (It's not LucideSpellCheck for some reason)
 yew_icons = { version = "0.8", features = [
-  "LucideTrash2",
-  "LucideEdit3",
-  "LucidePlus",
-  "LucideMinus",
-  "LucideBold",
-  "LucideItalic",
-  "LucideUnderline",
+  "LucideChevronDown",
   "LucideAlignCenter",
   "LucideAlignJustify",
   "LucideAlignLeft",
   "LucideAlignRight",
-  "LucideHighlighter",
-  "LucideUndo",
-  "LucideRedo",
   "LucideBaseline",
+  "LucideBold",
+  "LucideEdit3",
+  "LucideFileDown",
+  "LucideFilePlus",
+  "LucideFolder",
+  "LucideFolderOpen",
+  "LucideHighlighter",
+  "LucideItalic",
   "LucideList",
   "LucideListChecks",
+  "LucideMinus",
+  "LucidePlus",
+  "LucideQuote",
+  "LucideRedo",
+  "LucideSave",
+  "LucideTrash2",
+  "LucideUnderline",
+  "LucideUndo",
+  "LucideZoomIn",
+  "LucideZoomOut",
+  "FontAwesomeSolidSwatchbook",
 ] }
 gloo-timers = "0.3.0"
 yew-hooks = "0.3.2"
 gloo-console = "0.3.0"
 chrono = "0.4.38"
 text_io = "0.1.12"
+pulldown-cmark = "0.12.2"
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
-log = "0.4"
+gloo = "0.11.0"
 
 [workspace]
 members = ["shared", "src-tauri"]

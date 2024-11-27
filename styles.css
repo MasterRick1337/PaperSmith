@@ -114,7 +114,7 @@ button {
 body {
   margin: 0;
   padding: 0;
-  background-color: #ffffff;
+  /*background-color: #ffffff;*/
   display: flex;
   justify-content: center;
   align-items: center;
@@ -124,8 +124,8 @@ body {
 .notepad-container {
   width: calc(min(90vw, 440px)); /* Approximately 14.8cm + 2*20px padding */
   height: calc(min(90vh, 615px)); /* Approximately 21cm + 2*20px padding */
-  background-color: #ffffff;
-  border: 1px solid #ccc;
+  /*background-color: #ffffff;*/
+  /*border: 1px solid #ccc;*/
   padding: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
