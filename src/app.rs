@@ -1,8 +1,10 @@
 use gloo::utils::document;
 use pulldown_cmark::{html, Options, Parser};
 use serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 use serde_wasm_bindgen::to_value;
 use sidebar::buttons::Button;
+use statistic::_CharCountProps::closing_callback;
 use statistic::_CharCountProps::closing_callback;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsCast;
@@ -10,6 +12,7 @@ use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlDocument;
 use web_sys::HtmlElement;
+use web_sys::Node;
 use web_sys::Node;
 use yew::events::InputEvent;
 use yew::events::MouseEvent;
@@ -25,6 +28,8 @@ use zoom_edit_container_handlers::ZoomControls;
 #[path = "toolbar/toolbar.rs"]
 mod toolbar;
 use toolbar::Toolbar;
+use yew_hooks::use_interval;
+use std::path::PathBuf;
 use yew_hooks::use_interval;
 use std::path::PathBuf;
 
@@ -82,6 +87,21 @@ pub struct FileWriteData {
 // pub struct StatisticProps {
 //     pub statistics: StatisticProp,
 // }
+#[derive(Properties, PartialEq)]
+pub struct WordCountProps {
+    pub pages_ref: NodeRef,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct FileWriteData {
+    pub path: String,
+    pub content: String
+}
+
+// #[derive(Properties, PartialEq)]
+// pub struct StatisticProps {
+//     pub statistics: StatisticProp,
+// }
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -115,14 +135,54 @@ pub fn app() -> Html {
         let project_path = project_path.clone();
         let modal = modal.clone();
     
+        let project_path = project_path.clone();
+        let modal = modal.clone();
+    
         Callback::from(move |_| {
             let text_input_ref = text_input_ref.clone();
+            let project_path = project_path.clone();
+            let modal = modal.clone();
+    
             let project_path = project_path.clone();
             let modal = modal.clone();
     
             spawn_local(async move {
                 if let Some(input_element) = text_input_ref.cast::<HtmlElement>() {
                     let text = input_element.inner_text();
+    
+                    if let Some(mut path) = project_path.clone() {
+                        path.push("Chapters");
+                        path.push("Beginning");
+                        path.push("Content.md");
+    
+                        let write_data = FileWriteData {
+                            path: path.to_string_lossy().to_string(),
+                            content: text
+                        };
+    
+                        invoke("write_to_file", serde_wasm_bindgen::to_value(&write_data).unwrap()).await;
+    
+                        modal.set(html! {
+                            // <Modal
+                            //     content={html! {
+                            //         <div>{ "Successfully saved" }</div>
+                            //     }}
+                            //     /*
+                            //     button_configs={
+                            //         vec![
+                            //             ModalButtonProps {
+                            //                 text: "Close".to_string(),
+                            //                 text_color: "white".to_string(),
+                            //                 bg_color: "green".to_string(),
+                            //                 callback: {
+                            //                     let modal = modal.clone();
+                            //                     Callback::from(move |_| modal.set(html!()))
+                            //                 }
+                            //             }
+                            //         ]
+                            //     }*/
+                            // />
+                        });
     
                     if let Some(mut path) = project_path.clone() {
                         path.push("Chapters");
