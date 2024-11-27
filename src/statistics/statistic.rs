@@ -16,6 +16,7 @@ use crate::app::invoke;
 
 #[derive(Properties, PartialEq)]
 pub struct CharCountProps {
+    pub closing_callback: Callback<MouseEvent>,
     pub pages_ref: NodeRef,
 }
 
@@ -32,7 +33,7 @@ pub struct FileWriteData {
 // }
 
 #[function_component]
-pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
+pub fn Statistics(CharCountProps { closing_callback: on_close, pages_ref }: &CharCountProps) -> Html {
     let char_count = use_state(|| 0);
     let char_count_no_spaces = use_state(|| 0);
     let word_count = use_state(|| 0);
@@ -114,7 +115,7 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
                     });
                 }
             },
-            1500,
+            500,
         );
     }
 
@@ -126,7 +127,7 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
 }
 
 #[function_component]
-pub fn StatisticWindow(CharCountProps { pages_ref }: &CharCountProps) -> Html {
+pub fn StatisticWindow(CharCountProps { closing_callback: on_close , pages_ref }: &CharCountProps) -> Html {
     let char_count = use_state(|| 0);
     let char_count_no_spaces = use_state(|| 0);
     let word_count = use_state(|| 0);
@@ -134,7 +135,18 @@ pub fn StatisticWindow(CharCountProps { pages_ref }: &CharCountProps) -> Html {
     let start_time = use_state(Local::now);
     let calculated_wpm = calculate_wpm(*word_count, Some(*start_time));
 
-    html! { 
+    let closeing_button = use_node_ref();
 
+    html! { 
+        <>
+        <div id="footer" class="flex justify-end w-full pt-8">
+            <button
+                onclick={on_close}
+                class="rounded-lg text-lg px-2 py-1 ml-4 bg-secondary text-crust hover:scale-105 border-0"
+            >
+                { "Close" }
+            </button>
+        </div>
+        </>
     }
 }

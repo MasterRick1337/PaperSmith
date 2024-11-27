@@ -1,7 +1,9 @@
 use gloo::utils::document;
 use pulldown_cmark::{html, Options, Parser};
+use serde::{Serialize, Deserialize};
 use serde_wasm_bindgen::to_value;
 use sidebar::buttons::Button;
+use statistic::_CharCountProps::closing_callback;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
@@ -23,6 +25,8 @@ use zoom_edit_container_handlers::ZoomControls;
 #[path = "toolbar/toolbar.rs"]
 mod toolbar;
 use toolbar::Toolbar;
+use yew_hooks::use_interval;
+use std::path::PathBuf;
 
 #[path = "theme-switcher/switcher.rs"]
 mod switcher;
@@ -133,24 +137,25 @@ pub fn app() -> Html {
                         invoke("write_to_file", serde_wasm_bindgen::to_value(&write_data).unwrap()).await;
     
                         modal.set(html! {
-                            <Modal
-                                content={html! {
-                                    <div>{ "Successfully saved" }</div>
-                                }}
-                                button_configs={
-                                    vec![
-                                        ModalButtonProps {
-                                            text: "Close".to_string(),
-                                            text_color: "white".to_string(),
-                                            bg_color: "green".to_string(),
-                                            callback: {
-                                                let modal = modal.clone();
-                                                Callback::from(move |_| modal.set(html!()))
-                                            }
-                                        }
-                                    ]
-                                }
-                            />
+                            // <Modal
+                            //     content={html! {
+                            //         <div>{ "Successfully saved" }</div>
+                            //     }}
+                            //     /*
+                            //     button_configs={
+                            //         vec![
+                            //             ModalButtonProps {
+                            //                 text: "Close".to_string(),
+                            //                 text_color: "white".to_string(),
+                            //                 bg_color: "green".to_string(),
+                            //                 callback: {
+                            //                     let modal = modal.clone();
+                            //                     Callback::from(move |_| modal.set(html!()))
+                            //                 }
+                            //             }
+                            //         ]
+                            //     }*/
+                            // />
                         });
                     }
                 }
@@ -309,10 +314,22 @@ pub fn app() -> Html {
                 class="bottombar bg-crust border-solid border-t-[2px] border-x-0 border-b-0 border-text"
             >
                 <div class="bottombar-left">
-                    <Statistics pages_ref={pages_ref.clone()} />
-                    //<Statistics pages_ref={pages_ref.clone()}/>
+                    //<Statistics
+                    //closing_callback={
+                    //    let modal = modal.clone();
+                    //    Callback::from(move |_| modal.set(html!()))
+                    //}
+                    //pages_ref={pages_ref.clone()}
+                    // />
                     //<div>{format!("{}, {} Words; Characters: {}, {} without spaces, {:.2} wpm", *session_time, *word_count, *char_count,*char_count_no_spaces, calculated_wpm)}</div>
                     //{format!("{}", props.statistics.char_count)}
+                    <Statistics
+                        closing_callback={
+                            let modal = modal.clone();
+                            Callback::from(move |_| modal.set(html!()))
+                    }
+                    pages_ref={pages_ref.clone()}
+                    />
                 </div>
                 <div class="bottombar-right" />
             </div>
