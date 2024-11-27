@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use buttons::Button;
 use deleting::get_delete_callback;
 use serde_wasm_bindgen::to_value;
 use shared::Chapter;
@@ -138,7 +139,7 @@ pub fn sidebar(SideBarProps { project, input_ref }: &SideBarProps) -> Html {
         })
     };
 
-    let button_props = vec![
+    let button_props = [
         ButtonProps {
             callback: get_rename_callback(
                 name_display.clone(),
@@ -149,13 +150,13 @@ pub fn sidebar(SideBarProps { project, input_ref }: &SideBarProps) -> Html {
                 None,
             ),
             icon: IconId::LucideEdit3,
-            title: String::new(),
+            title: "Rename Book".to_string(),
             size: 1.,
         },
         ButtonProps {
             callback: on_add_chapter,
             icon: IconId::LucidePlus,
-            title: String::new(),
+            title: "Create Chapter".to_string(),
             size: 1.,
         },
     ];
@@ -164,15 +165,25 @@ pub fn sidebar(SideBarProps { project, input_ref }: &SideBarProps) -> Html {
         <>
             <div id="file-explorer" class="select-none outline-none">
                 <div
-                    class="group items-center flex relative transition text-ellipsis whitespace-nowrap overflow-hidden cursor-default text-xl"
+                    class="group/buttoncontainer items-center flex relative transition text-ellipsis whitespace-nowrap overflow-hidden cursor-default text-xl"
                 >
                     <div ref={rename_input_ref.clone()} class="pl-2 mb-1">
                         { (*name_display).clone() }
                     </div>
-                    <ButtonContainer button_props={button_props} />
+                    <div class="flex items-center ml-auto my-auto">
+                        { button_props
+                        .iter()
+                        .map(|props| {
+                            html! { <>
+                                <Button callback={props.callback.clone()} icon={props.icon} size={props.size} title={props.title.clone()}/>
+                            </>
+                            }
+                        })
+                        .collect::<Html>() }
+                    </div>
                 </div>
                 <div
-                    class="text-lg border-l-2 border-r-0 border-y-0 border-solid border-text pl-2 ml-2"
+                class="text-lg border-l-2 border-r-0 border-y-0 border-solid border-text pl-2 ml-2"
                 >
                     { for (*chapters).clone() }
                 </div>
@@ -323,7 +334,7 @@ fn entry(
                 Some(*chapter_index),
             ),
             icon: IconId::LucideEdit3,
-            title: String::new(),
+            title: "Rename Note".to_string(),
             size: 1.,
         },
         ButtonProps {
@@ -334,7 +345,7 @@ fn entry(
                 RenameKind::Note,
             ),
             icon: IconId::LucideTrash2,
-            title: String::new(),
+            title: "Delete Note".to_string(),
             size: 1.,
         },
     ];
@@ -364,7 +375,7 @@ fn title(
 ) -> Html {
     html! {
         <div
-            class="group items-center flex relative transition rounded-md my-[1px] hover:bg-secondary hover:text-mantle cursor-pointer"
+            class="group/buttoncontainer items-center flex relative transition rounded-md my-[1px] hover:bg-secondary hover:text-mantle cursor-pointer"
             onclick={onclick}
         >
             { children.clone() }

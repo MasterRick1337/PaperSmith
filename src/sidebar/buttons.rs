@@ -43,12 +43,12 @@ pub fn button(
 #[function_component(ButtonContainer)]
 pub fn button_container(ContainerProps { button_props }: &ContainerProps) -> Html {
     html!(
-        <div class="hidden group-hover:flex items-center ml-auto my-auto">
+        <div class="hidden group-hover/buttoncontainer:flex items-center ml-auto my-auto">
             { button_props
             .iter()
             .map(|props| {
                 html! { <>
-                    <Button callback={props.callback.clone()} icon={props.icon}/>
+                    <Button callback={props.callback.clone()} icon={props.icon} size={props.size} title={props.title.clone()}/>
                     </>
                 }
             })
