@@ -12,9 +12,17 @@ use yew::events::MouseEvent;
 use yew::prelude::*;
 use yew_icons::IconId;
 
-#[path = "notepad/notepad.rs"]
-mod notepad;
-use notepad::Notepads;
+// Views ----------------------------------------------------------------------
+
+#[path = "notepad/split_view.rs"]
+mod split_view;
+use split_view::SplitView;
+
+#[path = "notepad/single_view.rs"]
+mod single_view;
+use single_view::SingleView;
+
+// ----------------------------------------------------------------------------
 
 #[path = "toolbar/toolbar.rs"]
 mod toolbar;
@@ -61,6 +69,12 @@ struct SaveFileArgs {
     filename: String,
 }
 
+#[derive(PartialEq)]
+enum View {
+    SplitView,
+    SingleView,
+}
+
 #[function_component(App)]
 pub fn app() -> Html {
     let project: UseStateHandle<Option<Project>> = use_state(|| None);
@@ -74,6 +88,7 @@ pub fn app() -> Html {
     let modal = use_state(|| html!());
     let text_input_ref = use_node_ref();
     let pages_ref = use_node_ref();
+    let current_view = use_state(|| View::SplitView);
 
     let save = {
         let text_input_ref = text_input_ref.clone();
@@ -161,6 +176,17 @@ pub fn app() -> Html {
         html_doc.exec_command("redo").unwrap();
     });
 
+
+    let on_switch = {
+        let current_view = current_view.clone();
+        Callback::from(move |_| {
+            current_view.set(match *current_view {
+                View::SplitView => View::SingleView,
+                View::SingleView => View::SplitView,
+            });
+        })
+    };
+
     //let print_project = {
     //    Callback::from(move |_| {
     //        let project = project.clone();
@@ -183,6 +209,8 @@ pub fn app() -> Html {
                 <Button callback={on_redo} icon={IconId::LucideRedo} title="Redo" size=1.5 />
                 <div class="w-[1px] h-[20px] bg-subtext my-0 mx-1 " />
                 <TextStylingControls />
+                <div class="w-[1px] h-[20px] bg-subtext my-0 mx-1 " />
+                <Button callback={on_switch} icon={IconId::LucideMonitor} title="Switch View" size=1.5 />
             </div>
             <div id="main_content" class="flex flex-grow m-3">
                 <div class="flex flex-col min-w-[18rem] overflow-y-auto bg-crust">
@@ -191,7 +219,16 @@ pub fn app() -> Html {
                         <ThemeSwitcher />
                     </div>
                 </div>
-                <Notepads pages_ref={pages_ref.clone()} text_input_ref={text_input_ref} />
+                {
+                    match *current_view {
+                        View::SplitView => html! {
+                            <SplitView pages_ref={pages_ref.clone()} text_input_ref={text_input_ref.clone()} />
+                        },
+                        View::SingleView => html! {
+                            <SingleView pages_ref={pages_ref.clone()} text_input_ref={text_input_ref.clone()} />
+                        },
+                    }
+                }
             </div>
             <div
                 class="h-3 justify-between items-center flex p-2 bg-crust border-solid border-t-[2px] border-x-0 border-b-0 border-text"

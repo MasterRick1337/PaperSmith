@@ -12,8 +12,8 @@ pub struct Props {
     pub text_input_ref: NodeRef,
 }
 
-#[function_component(Notepads)]
-pub fn notepads(
+#[function_component(SplitView)]
+pub fn split_view(
     Props {
         pages_ref,
         text_input_ref,
