@@ -5,7 +5,6 @@ _A free and open-source writing application for authors_
 ### Table of contents
 
 - [Status](#status)
-- [To-Do](#to-do)
 - [Roadmap](#roadmap)
   - [Done](#done)
   - [Planned](#planned)
@@ -17,13 +16,6 @@ _A free and open-source writing application for authors_
 
 This project is in a very early stage of development and currently NOT ready for usage.
 
-### To-Do
-
-- MasterRick1337: Writing features & Markdown Compiler
-- Toll25: Project Explorer & Miscellaneous Stuff
-- DotDo1: Statistic Window
-- Alllpacka: Markdown Compiler, Settings & CI/CD
-
 ### Roadmap
 
 Features that are either already finished, are in progress or are planned for future development. It also includes ideas for later implementation.
@@ -33,18 +25,18 @@ Features that are either already finished, are in progress or are planned for fu
 - [x] Split-View
 - [x] Project Explorer
 - [x] Load Project
+- [x] Saving files
 - [x] Statistics
+- [x] Project creation wizard
+- [x] Markdown Formatting
 
 #### Planned
 
-- [ ] Project creation wizard
 - [ ] Autosaving
 - [ ] Automatic Backups
 - [ ] Settings menu
-- [ ] Markdown Formatting
 - [ ] Export options
 - [ ] Spellcheck
-- [ ] Saving files
 - [ ] Statistics Window
 - [ ] Single-View
 

@@ -34,6 +34,9 @@ pub fn create_project(path: String) -> Option<Project> {
 use std::io;
 
 fn move_dir_recursive(src: &PathBuf, dst: &PathBuf) -> io::Result<()> {
+    if src == dst {
+        return Ok(());
+    }
     if src.is_dir() {
         fs::create_dir_all(dst)?;
         for entry in src.read_dir()? {
@@ -109,6 +112,6 @@ pub fn add_chapter(path: String) {
 
     path.push("Content");
     path.set_extension("md");
-    let _ = fs::create_dir(&path);
+    let _ = File::create(&path);
     path.pop();
 }

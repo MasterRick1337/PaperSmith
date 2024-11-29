@@ -3,386 +3,214 @@
 @tailwind utilities;
 
 :root {
-    --base: 30, 30, 42;
-    --border: 44, 44, 56;
-    --surface0: 35, 35, 45;
-    --surface1: 42, 42, 55;
-    --overlay0: 69, 69, 82;
-    --text: 209, 213, 219;
-    --font-size: 16px;
-    --line-height: 1.5;
-    --aspect-ratio: 1.0;
+  --font-size: 16px;
+  --line-height: 1.5;
+  --aspect-ratio: 1;
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    background-color: rgba(var(--base), 1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-family: Arial, sans-serif;
-    padding-top: 20px;
-    padding-bottom: 20px;
+  margin: 0;
+  padding: 0;
+  border-width: 0;
+  border-style: solid;
+  /*background-color: rgba(var(--base), 1);*/
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
 }
 
+/* Toolbar ----------------------------------------------------------------- */
 
-
-.toolbar {
-    height: 25px;
-    background-color: rgba(var(--surface0), 1);
-    color: rgba(var(--text), 1);
-    display: flex;
-    align-items: center;
-    width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    padding: 0 10px;
-    border-bottom: 1px solid rgba(var(--border), 1);
+.toolbar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  font-size: 12px;
 }
 
-
-
-.menubar {
-    height: 45px;
-    background-color: rgba(var(--surface0), 1);
-    color: rgba(var(--text), 1);
-    display: flex;
-    justify-content: left;
-    align-items: center;
-    width: 100%;
-    position: fixed;
-    top: 0px;
-    left: 0;
-    right: 0;
-    padding: 0 20px;
-    border-bottom: 1px solid rgba(var(--border), 1);
+.toolbar-menu > .toolbar-submenu {
+  position: relative;
 }
+
+.toolbar-item {
+  cursor: pointer;
+  padding: 1px 0.5rem;
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+  user-select: none;
+  border-radius: 5px;
+}
+
+.toolbar-submenu > span {
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  margin: 0;
+  display: inline-block;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+  user-select: none;
+  border-radius: 5px;
+}
+
+.toolbar-item:hover,
+.toolbar-submenu > span:hover {
+  /*background-color: rgba(var(--overlay0), 1);*/
+  /*color: rgba(209, 213, 219, 1);*/
+  border-radius: 5px;
+}
+
+.toolbar-submenu-items {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  /*background-color: rgba(var(--surface1), 1);*/
+  /*border: 1px solid rgba(var(--border), 1);*/
+  list-style: none;
+  padding: 0.5rem;
+  margin: 0;
+  z-index: 10;
+  min-width: 200px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.toolbar-submenu:hover .toolbar-submenu-items {
+  display: block;
+}
+
+.toolbar-submenu-items > li {
+  margin-bottom: 1px;
+}
+
+.toolbar-shortcut {
+  margin-left: auto;
+  font-size: 12px;
+  /*color: gray;*/
+}
+
+/* Menubar ----------------------------------------------------------------- */
 
 /* TODO: Fix issue where icons get smaller when resizing window*/
 .menubar-icon {
-    margin-left: 10px;
-    cursor: pointer;
-    font-size: 10px;
+  margin-left: 10px;
+  cursor: pointer;
+  font-size: 10px;
 }
 
 .menubar-icon:first-child {
-    margin-left: 0;
+  margin-left: 0;
 }
 
-.separator {
-    width: 1px;
-    height: 20px;
-    background-color: rgba(var(--surface1), 1);
-    margin: 0 10px;
-    margin-right: 0;
-}
-
-.text-alignment-changer {
-    display: flex;
-    margin-left: 10px;
-    cursor: pointer;
-    font-size: 10px;
-}
-
-
-
-.sidebar {
-    width: 300px;
-    background-color: rgba(var(--surface0), 1);
-    color: rgba(var(--text), 1);
-    overflow-y: auto;
-    position: fixed;
-    left: 0;
-    top: 45px;
-    bottom: 20px;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-}
-
-
-
-.bottombar {
-    height: 30px;
-    background-color: rgba(var(--surface0), 1);
-    color: rgba(var(--text), 1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 0 20px;
-    border-top: 1px solid rgba(var(--border), 1);
-}
+/* Bottombar --------------------------------------------------------------- */
 
 .bottombar-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .bottombar-center {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .bottombar-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
 }
 
+/* Subbar ------------------------------------------------------------------ */
 
-
-#zoom {
-    display: flex;
-    align-items: center;
-    gap: 1px;
-    position: relative;
+.subbar-icon {
+  margin-left: auto;
+  cursor: pointer;
+  font-size: 10px;
+  align-items: center;
 }
 
-.zoom-slider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100px;
-    height: 2px;
-    background: rgba(var(--overlay0), 1);
-    outline: none;
-    opacity: 0.9;
-    transition: opacity 0.2s ease;
-    border-radius: 2px;
+.subbar-icon:nth-child(2) {
+  margin-right: 0;
 }
 
-.zoom-slider:hover {
-    opacity: 1;
+.zoom-out-button-edit {
+  background-color: transparent;
+  border-radius: 5px;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+  margin-right: 5px;
+  user-select: none;
 }
 
-.zoom-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 7px;
-    height: 12px;
-    background: rgba(var(--overlay0), 1);
-    cursor: default;
+.zoom-out-button-edit:hover {
+  /*background-color: rgba(var(--overlay0), 1);*/
+  /*color: rgba(209, 213, 219, 1);*/
+  padding: 1px;
+  border-radius: 5px;
 }
 
-.zoom-slider::-moz-range-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 7px;
-    height: 12px;
-    background: rgba(var(--overlay0), 1);
-    cursor: default;
+.zoom-in-button-edit {
+  background-color: transparent;
+  border-radius: 5px;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+  user-select: none;
 }
 
-#zoom-value {
-    color: rgba(var(--text), 1);
-    font-size: 12px;
+.zoom-in-button-edit:hover {
+  /*background-color: rgba(var(--overlay0), 1);*/
+  /*color: rgba(209, 213, 219, 1);*/
+  padding: 1px;
+  border-radius: 5px;
 }
 
-.zoom-text {
-    background: none;
-    margin-left: 5px;
-    cursor: default;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-    width: 25px;
-    height: 25px;
-}
-
-.zoom-button {
-    background: none;
-    padding: 5px;
-    cursor: default;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 25px;
-    height: 25px;
-    transition: background-color 0.3s, border-color 0.3s;
-}
-
-.zoom-button:hover {
-    background-color: rgba(var(--overlay0), 1);
-}
-
-
-
-.chevron {
-    /*margin-inline-start: calc(-1* var(--size-4-5));*/
-    position: absolute;
-    width: 1.125rem;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-}
-
-.chevron:before {
-    content: "\200B";
-}
-
-.chapter-title {
-    align-items: baseline;
-    display: flex;
-    position: relative;
-}
-
-.chapter-title::before {
-    content: "\200B";
-}
-
-svg.svg-icon {
-    stroke-width: 4px;
-    width: 10px;
-    height: 10px;
-    transition: transform 100ms ease-in-out;
-}
-
-
-
-.notepad-outer-container {
-    margin-top: 45px;
-    margin-left: 330px;
-    padding: 10px;
-    height: calc(100vh - 100px);
-    width: calc(100vw - 360px);
-    overflow: auto;
-    background-color: rgba(var(--base), 1);
-}
-
-.notepad-container {
-    width: 210mm;
-    height: 100%;
-    background-color: rgba(var(--base), 1);
-    border: none;
-    outline: none;
-    box-shadow: none;
-    padding: 20px;
-    position: relative;
-    margin: 0 auto;
-    transform-origin: top; /* TODO: Make Zoom work with transform-origin: center*/
-}
-
-.notepad-wrapper {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    white-space: pre-wrap;
-}
-
-.notepad-textarea {
-    width: 100%;
-    height: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border: none;
-    outline: none;
-    resize: none;
-    background-color: rgba(var(--base), 1);
-    color: rgba(var(--text), 1);
-    font-size: var(--font-size);
-    overflow-y: auto;
-    text-align: left;
-}
-
-.anchor {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    padding: 10px;
-}
-
-
+/* Scrollbar --------------------------------------------------------------- */
 
 ::-webkit-scrollbar {
-    width: 8px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: rgba(var(--surface0), 1);
+  /*background: rgba(var(--surface0), 1);*/
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: rgba(var(--overlay0), 1);
-    border-radius: 10px;
+  /*background-color: rgba(var(--overlay0), 1);*/
+  border-radius: 10px;
 }
 
 * {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(var(--overlay0), 1) rgba(var(--surface0), 1);
+  scrollbar-width: thin;
+  /*scrollbar-color: rgba(var(--overlay0), 1) rgba(var(--surface0), 1);*/
 }
 
+/* Compile Textarea -------------------------------------------------------- */
 
-
-.font-size-changer {
-    display: flex;
-    align-items: center;
-    margin-left: 10px;
+p {
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 
-.font-size-button {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
+.notepad-textarea-compile p {
+  margin: 0;
+  padding: 0;
 }
 
-.font-size-button:hover {
-    background-color: rgba(var(--overlay0), 1);
-}
-
-.font-size-input {
-    width: 50px;
-    text-align: center;
-    border: rgba(var(--overlay0), 1) solid 1px;
-    border-radius: 5px;
-    background-color: rgba(var(--surface1), 1);
-    height: 30px;
-    margin: 0 5px;
-    outline: none;
-}
-
-.font-size-changer input[type="number"]::-webkit-outer-spin-button,
-.font-size-changer input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-}
-
-
-
-.sidebar-dropdown-icon-container {
-    margin-left: auto;
-    margin-top: auto;
-    margin-bottom: auto;
-    order: 2;
-    align-items: center;
-}
-
-.chapter-title:hover .hide-parent-hover {
-    display: flex;
-}
-
-.hide-parent-hover {
-    display: none;
-}
-
-.sidebar-dropdown-icon {
-    margin-top: auto;
-    margin-bottom: auto;
-    border: solid 1px;
-    border-radius: 0.375rem;
-    padding: 1px;
-    cursor: pointer;
+.notepad-textarea-compile br {
+  display: block;
+  content: "";
+  margin-bottom: 1em;
 }

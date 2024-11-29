@@ -1,45 +1,122 @@
+import themer from "tailwindcss-themer";
 module.exports = {
   content: [
-          "./src/**/*.rs",
-          "./index.html",
-          "./src/**/*.html",
-          "./tailwind.css",
-      ],
+    "./src/**/*.rs",
+    "./index.html",
+    "./src/**/*.html",
+    "./tailwind.css",
+  ],
   theme: {
+    fontFamily: {
+      inherit: ['"inherit"'],
+      standard: ['"Arial"', '"sans-serif"'],
+    },
     extend: {
       transitionProperty: {
-        'max-height': 'max-height'
+        "max-height": "max-height",
       },
-      colors: {
-        rosewater: "rgba(245, 224, 220)",
-        flamingo: "rgba(242, 205, 205)",
-        pink: "rgba(245, 194, 231)",
-        mauve: "rgba(203, 166, 247)",
-        red: "rgba(243, 139, 168)",
-        maroon: "rgba(235, 160, 172)",
-        peach: "rgba(250, 179, 135)",
-        yellow: "rgba(249, 226, 175)",
-        green: "rgba(166, 227, 161)",
-        teal: "rgba(148, 226, 213)",
-        sky: "rgba(137, 220, 235)",
-        sapphire: "rgba(116, 199, 236)",
-        blue: "rgba(137, 180, 250)",
-        lavender: "rgba(180, 190, 254)",
-        text: "rgba(205, 214, 244)",
-        subtext1: "rgba(186, 194, 222)",
-        subtext0: "rgba(166, 173, 200)",
-        overlay2: "rgba(147, 153, 178)",
-        overlay1: "rgba(127, 132, 156)",
-        overlay0: 'rgba(var(--overlay0))',
-        surface2: 'rgba(88, 91, 112)',
-        surface1: 'rgba(var(--surface1))',
-        surface0: 'rgba(var(--surface0))',
-        base: 'rgba(var(--base))',
-        mantle: "rgba(24, 24, 37)",
-        crust: "rgba(17, 17, 27)"
+      height: {
+        'notepad': 'calc(100vh - 125px)',
       },
-    }
+    },
+  },
+  corePlugins: {
+    preflight: false,
   },
   variants: {},
-  plugins: [],
+  plugins: [
+    themer({
+      defaultTheme: {
+        extend: {
+          colors: {
+            primary: "#cba6f7",
+            secondary: "#74c7ec",
+            accent: "#94e2d5",
+            text: "#cdd6f4",
+            subtext: "#a6adc8",
+            base: "#1e1e2e",
+            mantle: "#181825",
+            crust: "#11111b",
+          },
+        },
+      },
+      themes: [
+        {
+          name: "light",
+          extend: {
+            colors: {
+              primary: "#8839ef",
+              secondary: "#209fb5",
+              accent: "#179299",
+              text: "#4c4f69",
+              subtext: "#6c6f85",
+              base: "#eff1f5",
+              mantle: "#e6e9ef",
+              crust: "#dce0e8",
+            },
+          },
+        },
+        {
+          name: "lightdark",
+          extend: {
+            colors: {
+              primary: "#ca9ee6",
+              secondary: "#85c1dc",
+              accent: "#81c8be",
+              text: "#c6d0f5",
+              subtext: "#a5adce",
+              base: "#303446",
+              mantle: "#292c3c",
+              crust: "#232634",
+            },
+          },
+        },
+        {
+          name: "medium",
+          extend: {
+            colors: {
+              primary: "#c6a0f6",
+              secondary: "#7dc4e4",
+              accent: "#8bd5ca",
+              text: "#cad3f5",
+              subtext: "#a5adcb",
+              base: "#24273a",
+              mantle: "#1e2030",
+              crust: "#181926",
+            },
+          },
+        },
+        {
+          name: "dark",
+          extend: {
+            colors: {
+              primary: "#cba6f7",
+              secondary: "#74c7ec",
+              accent: "#94e2d5",
+              text: "#cdd6f4",
+              subtext: "#a6adc8",
+              base: "#1e1e2e",
+              mantle: "#181825",
+              crust: "#11111b",
+            },
+          },
+        },
+        {
+          name: "verydark",
+          extend: {
+            colors: {
+              primary: "#1DD65F",
+              secondary: "#1DD65F",
+              accent: "#1DD65F",
+              text: "#ffffff",
+              subtext: "#B2B2B2",
+              base: "#1e1e1e",
+              mantle: "#111111",
+              crust: "#000000",
+            },
+          },
+        },
+      ],
+    }),
+  ],
 };

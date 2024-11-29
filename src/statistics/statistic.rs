@@ -1,6 +1,5 @@
 use chrono::prelude::*;
 use serde_json::json;
-use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
@@ -13,11 +12,7 @@ use serde::{Deserialize, Serialize};
 mod wpm;
 use wpm::calculate as calculate_wpm;
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
-    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
-}
+use crate::app::invoke;
 
 #[derive(Properties, PartialEq)]
 pub struct CharCountProps {
@@ -57,52 +52,58 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
                     let pages_ref = pages_ref.clone();
                     spawn_local(async move {
                         if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
-                            let text = pages_element.inner_text();
+                            if let Some(notepad_element) = pages_element
+                                .query_selector(".notepad-textarea-edit")
+                                .unwrap_or(None)
+                            {
+                                let text = notepad_element.text_content().unwrap_or_default();
 
-                            // Update character counts
-                            let count = text.len();
-                            let count_no_spaces =
-                                text.chars().filter(|c| !c.is_whitespace()).count();
-                            char_count.set(count);
-                            char_count_no_spaces.set(count_no_spaces);
+                                // Update character counts
+                                let count = text.len();
+                                let count_no_spaces =
+                                    text.chars().filter(|c| !c.is_whitespace()).count();
+                                char_count.set(count);
+                                char_count_no_spaces.set(count_no_spaces);
 
-                            // Update word count
-                            let word_count_value = text.split_whitespace().count();
-                            word_count.set(word_count_value);
+                                // Update word count
+                                let word_count_value = text.split_whitespace().count();
+                                word_count.set(word_count_value);
 
-                            // Update session time
-                            let current_time = Local::now();
-                            let session_duration = current_time - *start_time;
-                            let total_seconds = session_duration.num_seconds();
-                            let hours = total_seconds / 3600;
-                            let minutes = (total_seconds % 3600) / 60;
-                            let seconds = total_seconds % 60;
-                            session_time.set(format!("{hours:02}:{minutes:02}:{seconds:02}"));
+                                // Update session time
+                                let current_time = Local::now();
+                                let session_duration = current_time - *start_time;
+                                let total_seconds = session_duration.num_seconds();
+                                let hours = total_seconds / 3600;
+                                let minutes = (total_seconds % 3600) / 60;
+                                let seconds = total_seconds % 60;
+                                session_time.set(format!("{hours:02}:{minutes:02}:{seconds:02}"));
 
-                            let json = json!({
-                                "session_time": <std::string::String as Clone>::clone(&*session_time.clone()),
-                                "word_count": word_count_value,
-                                "char_count": count,
-                                "char_count_with_no_spaces": *char_count_no_spaces.clone(),
-                                "wpm": calculated_wpm
-                            }).to_string();
+                                let json = json!({
+                                    "session_time": (*session_time).clone(),
+                                    "word_count": word_count_value,
+                                    "char_count": count,
+                                    "char_count_with_no_spaces": *char_count_no_spaces.clone(),
+                                    "wpm": calculated_wpm
+                                })
+                                .to_string();
 
-                            let path_jsvalue = invoke("get_data_dir", JsValue::null()).await;
+                                let path_jsvalue = invoke("get_data_dir", JsValue::null()).await;
 
-                            let mut path_string = path_jsvalue.as_string().expect("Geming").clone();
+                                let mut path_string = path_jsvalue.as_string().expect("Geming").clone();
 
-                            path_string.push_str("/PaperSmith/");
+                                path_string.push_str("/PaperSmith/");
 
-                            let json_write = FileWriteData {
-                                path: path_string,
-                                content: json,
-                            };
+                                let json_write = FileWriteData {
+                                    path: path_string,
+                                    content: json,
+                                };
 
-                            invoke(
-                                "write_to_json",
-                                serde_wasm_bindgen::to_value(&json_write).unwrap(),
-                            )
-                            .await;
+                                invoke(
+                                    "write_to_json",
+                                    serde_wasm_bindgen::to_value(&json_write).unwrap(),
+                                )
+                                .await;
+                            }
                         }
                     });
                 }
@@ -112,6 +113,8 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
     }
 
     html! {
-        <div>{format!("{}, {} Words; Characters: {}, {} without spaces, {:.2} wpm", *session_time, *word_count, *char_count,*char_count_no_spaces, calculated_wpm)}</div>
+        <div>
+            { format!("{}, {} Words; Characters: {}, {} without spaces, {:.2} wpm", *session_time, *word_count, *char_count,*char_count_no_spaces, calculated_wpm) }
+        </div>
     }
 }

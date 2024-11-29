@@ -1,29 +1,40 @@
+use gloo::utils::document;
 use serde::Serialize;
 use serde_wasm_bindgen::to_value;
+use sidebar::buttons::Button;
 use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
+use web_sys::HtmlDocument;
 use web_sys::HtmlElement;
-use yew::events::InputEvent;
 use yew::events::MouseEvent;
 use yew::prelude::*;
-use yew_icons::{Icon, IconId};
+use yew_icons::IconId;
 
-#[path = "font_size_handlers.rs"]
-mod font_size_handlers;
-use font_size_handlers::FontSizeControls;
+#[path = "notepad/notepad.rs"]
+mod notepad;
+use notepad::Notepads;
 
-#[path = "zoom_level_handlers.rs"]
-mod zoom_level_handlers;
-use zoom_level_handlers::ZoomControls;
+#[path = "toolbar/toolbar.rs"]
+mod toolbar;
+use toolbar::Toolbar;
+
+#[path = "theme-switcher/switcher.rs"]
+mod switcher;
+use switcher::ThemeSwitcher;
+
+//#[path = "text_alignment_handlers.rs"]
+//mod text_alignment_handlers;
+//use text_alignment_handlers::TextAlignmentControls;
+
+#[path = "menubar/text/text_styling_handlers.rs"]
+mod text_styling_handlers;
+use text_styling_handlers::TextStylingControls;
 
 #[path = "statistics/statistic.rs"]
 mod statistic;
 use statistic::Statistics;
-
-#[path = "text_alignment_handlers.rs"]
-mod text_alignment_handlers;
-use text_alignment_handlers::TextAlignmentControls;
 
 #[path = "sidebar/sidebar.rs"]
 mod sidebar;
@@ -56,19 +67,17 @@ struct SaveFileArgs {
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let pages_ref: NodeRef = use_node_ref();
-    let text_input_ref = use_node_ref();
-    let lines = use_state(Vec::new);
-    let font_size = use_state(|| 16.0);
-    let zoom_level = use_state(|| 100.0);
     let project: UseStateHandle<Option<Project>> = use_state(|| None);
-    let text_alignment = use_state(|| "left".to_string());
     let sidebar = use_state(|| {
-        html! { <>{ "No Project Loaded" }</> }
+        html! {
+            <>
+                <div class="text-lg">{ "No Project Loaded" }</div>
+            </>
+        }
     });
     let modal = use_state(|| html!());
-
-    let on_text_input = text_input_handler(text_input_ref.clone(), lines);
+    let text_input_ref = use_node_ref();
+    let pages_ref = use_node_ref();
 
     let save = {
         let text_input_ref = text_input_ref.clone();
@@ -114,7 +123,7 @@ pub fn app() -> Html {
         })
     };
 
-    let open_settings = {
+    let open_settings:Callback<MouseEvent> = {
         let modal = modal.clone();
         Callback::from(move |_| {
             modal.set(html! {
@@ -135,13 +144,16 @@ pub fn app() -> Html {
     {
         let sidebar = sidebar.clone();
         let project = project.clone();
+        let text_input_ref = text_input_ref.clone();
         use_effect_with(project.clone(), move |_| {
             if (*project).is_none() {
-                sidebar.set(
-                    html! { <div class="cursor-default select-none">{ "No Project Loaded" }</div> },
-                );
+                sidebar.set(html! {
+                    <div class="cursor-default select-none text-lg">{ "No Project Loaded" }</div>
+                });
             } else {
-                sidebar.set(html! { <SideBar project={project.clone()} /> });
+                sidebar.set(
+                    html! { <SideBar project={project.clone()} input_ref={text_input_ref} /> },
+                );
             }
         });
     };
@@ -161,6 +173,16 @@ pub fn app() -> Html {
         })
     };
 
+    let on_undo = Callback::from(move |_: MouseEvent| {
+        let html_doc: HtmlDocument = document().dyn_into().unwrap();
+        html_doc.exec_command("undo").unwrap();
+    });
+
+    let on_redo = Callback::from(move |_: MouseEvent| {
+        let html_doc: HtmlDocument = document().dyn_into().unwrap();
+        html_doc.exec_command("redo").unwrap();
+    });
+
     //let print_project = {
     //    Callback::from(move |_| {
     //        let project = project.clone();
@@ -169,128 +191,37 @@ pub fn app() -> Html {
     //};
 
     html! {
-        <div>
+        <div class="h-screen w-screen flex flex-col">
+            <div class="light lightdark medium dark verydark" />
             <div class="modal-wrapper">{ (*modal).clone() }</div>
             <style id="dynamic-style" />
-            <div class="menubar">
-                <Icon
-                    icon_id={IconId::LucideSettings}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                    onclick={open_settings}
-                />
-
-                <Icon
-                    icon_id={IconId::LucideFilePlus}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                    onclick={open_modal}
-                />
-                <Icon
-                    icon_id={IconId::LucideFileDown}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                    onclick={on_load}
-                />
-                <Icon
-                    icon_id={IconId::LucideSave}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                    onclick={save}
-                />
-                <div class="separator" />
-                <Icon
-                    icon_id={IconId::LucideUndo}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <Icon
-                    icon_id={IconId::LucideRedo}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <div class="separator" />
-                <FontSizeControls font_size={font_size.clone()} />
-                //<Icon icon_id={IconId::}/>
-                <div class="separator" />
-                <Icon
-                    icon_id={IconId::LucideBold}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <Icon
-                    icon_id={IconId::LucideItalic}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <Icon
-                    icon_id={IconId::LucideUnderline}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <Icon
-                    icon_id={IconId::LucideBaseline}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <Icon
-                    icon_id={IconId::LucideHighlighter}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <div class="separator" />
-                <TextAlignmentControls text_alignment={text_alignment.clone()} />
-                <Icon
-                    icon_id={IconId::LucideList}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                <Icon
-                    icon_id={IconId::LucideListChecks}
-                    width={"2em".to_owned()}
-                    height={"2em".to_owned()}
-                    class="menubar-icon"
-                />
-                //<Icon icon_id={IconId::LucideSpellCheck}/>
+            <Toolbar />
+            <div class="h-12 flex justify-left items-center p-2 bg-crust">
+                <Button callback={open_modal} icon={IconId::LucideFilePlus} title="Create Project" size=1.5 />
+                <Button callback={on_load} icon={IconId::LucideFolderOpen} title="Load Project" size=1.5 />
+                <Button callback={save} icon={IconId::LucideSave} title="Save" size=1.5 />
+                <div class="w-[1px] h-[20px] bg-subtext my-0 mx-1 " />
+                <Button callback={on_undo} icon={IconId::LucideUndo} title="Undo" size=1.5 />
+                <Button callback={on_redo} icon={IconId::LucideRedo} title="Redo" size=1.5 />
+                <div class="w-[1px] h-[20px] bg-subtext my-0 mx-1 " />
+                <TextStylingControls />
             </div>
-            <div class="sidebar">{ (*sidebar).clone() }</div>
-            <div class="notepad-outer-container" ref={pages_ref.clone()}>
-                <div
-                    class="notepad-container"
-                    style={format!("transform: scale({});", *zoom_level / 100.0)}
-                >
-                    <a class="anchor" />
-                    <div class="notepad-wrapper">
-                        <div
-                            class="notepad-textarea"
-                            id="notepad-textarea"
-                            ref={text_input_ref}
-                            style={format!("text-align: {};", *text_alignment)}
-                            contenteditable="true"
-                            oninput={on_text_input}
-                        />
+            <div id="main_content" class="flex flex-grow m-3">
+                <div class="flex flex-col min-w-[18rem] overflow-y-auto bg-crust">
+                    <div class="flex-grow">{ (*sidebar).clone() }</div>
+                    <div class="bottom-5 left-2 right-2">
+                        <ThemeSwitcher />
                     </div>
                 </div>
+                <Notepads pages_ref={pages_ref.clone()} text_input_ref={text_input_ref} />
             </div>
-            <div class="bottombar">
+            <div
+                class="h-3 justify-between items-center flex p-2 bg-crust border-solid border-t-[2px] border-x-0 border-b-0 border-text"
+            >
                 <div class="bottombar-left">
                     <Statistics pages_ref={pages_ref.clone()} />
                 </div>
-                <div class="bottombar-right">
-                    <ZoomControls zoom_level={zoom_level.clone()} />
-                </div>
+                <div class="bottombar-right" />
             </div>
         </div>
     }
@@ -319,16 +250,3 @@ let save = {
         });
     })
 };*/
-
-fn text_input_handler(
-    text_input_ref: NodeRef,
-    lines: UseStateHandle<Vec<String>>,
-) -> Callback<InputEvent> {
-    Callback::from(move |_| {
-        if let Some(input) = text_input_ref.cast::<HtmlElement>() {
-            let inner_text = input.inner_text();
-            let new_lines: Vec<String> = inner_text.lines().map(String::from).collect();
-            lines.set(new_lines);
-        }
-    })
-}
