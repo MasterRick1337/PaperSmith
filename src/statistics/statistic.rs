@@ -59,23 +59,21 @@ pub fn Statistics(CharCountProps { closing_callback: on_close, pages_ref }: &Cha
                     let pages_ref = pages_ref.clone();
                     spawn_local(async move {
                         if let Some(pages_element) = pages_ref.cast::<HtmlElement>() {
-                            if let Some(notepad_element) = pages_element
-                                .query_selector(".notepad-textarea-edit")
-                                .unwrap_or(None)
-                            {
+                            // Locate the `notepad-textarea-edit` using query_selector
+                            if let Ok(Some(notepad_element)) = pages_element.query_selector("#notepad-textarea-edit") {
                                 let text = notepad_element.text_content().unwrap_or_default();
-
+        
                                 // Update character counts
                                 let count = text.len();
                                 let count_no_spaces =
                                     text.chars().filter(|c| !c.is_whitespace()).count();
                                 char_count.set(count);
                                 char_count_no_spaces.set(count_no_spaces);
-
+        
                                 // Update word count
                                 let word_count_value = text.split_whitespace().count();
                                 word_count.set(word_count_value);
-
+        
                                 // Update session time
                                 let current_time = Local::now();
                                 let session_duration = current_time - *start_time;
@@ -84,7 +82,7 @@ pub fn Statistics(CharCountProps { closing_callback: on_close, pages_ref }: &Cha
                                 let minutes = (total_seconds % 3600) / 60;
                                 let seconds = total_seconds % 60;
                                 session_time.set(format!("{hours:02}:{minutes:02}:{seconds:02}"));
-
+        
                                 let json = json!({
                                     "session_time": (*session_time).clone(),
                                     "word_count": word_count_value,
@@ -93,18 +91,18 @@ pub fn Statistics(CharCountProps { closing_callback: on_close, pages_ref }: &Cha
                                     "wpm": calculated_wpm
                                 })
                                 .to_string();
-
+        
                                 let path_jsvalue = invoke("get_data_dir", JsValue::null()).await;
-
+        
                                 let mut path_string = path_jsvalue.as_string().expect("Geming").clone();
-
+        
                                 path_string.push_str("/PaperSmith/");
-
+        
                                 let json_write = FileWriteData {
                                     path: path_string,
                                     content: json,
                                 };
-
+        
                                 invoke(
                                     "write_to_json",
                                     serde_wasm_bindgen::to_value(&json_write).unwrap(),

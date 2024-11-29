@@ -94,9 +94,6 @@ pub fn app() -> Html {
         }
     });
     let modal = use_state(|| html!());
-    let render_ref = use_node_ref();
-
-    let on_text_input = text_input_handler(text_input_ref.clone(), render_ref.clone());
 
     let project_path = project.as_ref().map(|proj| proj.path.clone());
     let text_input_ref = use_node_ref();
