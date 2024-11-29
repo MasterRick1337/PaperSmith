@@ -2,6 +2,12 @@
 
 _A free and open-source writing application for authors_
 
+### Main Contributors
+- Toll25
+- MasterRick1337
+- Alllpacka
+- DotDo1
+
 ### Table of contents
 
 - [Status](#status)
