@@ -1,6 +1,5 @@
 use web_sys::{HtmlButtonElement, HtmlInputElement};
 use yew::prelude::*;
-use scan_fonts::scan_fonts;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -16,9 +15,7 @@ pub fn settings_menu(
     let font_size = use_state(String::new);
     let confirm_button_ref = use_node_ref();
     let input_font_size_ref = use_node_ref();
-    let on_font_size_input = number_input_handler(font_size.clone());
-
-    let _ = load_fonts();
+    let on_font_size_input = field_input_handler(font_size.clone());
 
     let on_confirm = {
         let on_close = on_close.clone();
@@ -34,21 +31,24 @@ pub fn settings_menu(
         <>
             <div class="text-xl font-bold">{ "Settings" }</div>
             <br />
-            <div id="font_size_change" class="flex w-full pt-8 justify-between">
-                <div class="font-semibold self-center">{ "Font Size" }</div>
+            // <div id="font_size_change" class="flex w-full pt-8 justify-between">
+            //     <div class="font-semibold self-center">{ "Font Size" }</div>
+            //     <div class="rounded-lg border-transparent hover:border-mauve">
+            //         <input
+            //             oninput={on_font_size_input}
+            //             class="outline-none bg-crust p-2 rounded-lg border-2 border-transparent"
+            //             ref={input_font_size_ref}
+            //         />
+            //     </div>
+            // </div>   
+            <div id="theme_change" class="flex w-full pt-8 justify-between">
+                <div class="font-semibold self-center">{"Theme"}</div>
                 <div class="rounded-lg border-transparent hover:border-mauve">
-                    <input
-                        oninput={on_font_size_input}
-                        class="outline-none bg-crust p-2 rounded-lg border-2 border-transparent"
-                        ref={input_font_size_ref}
-                    />
-                </div>
-            </div>
-            <div id="font_change" class="flex w-full pt-8 justify-between">
-                <div class="font-semibold self-center">{"Font"}</div>
-                <div class="rounded-lg border-transparent hover:border-mauve">
-                    <select id="fonts">
-                        <option value="Arial">{ "Arial" }</option>
+                    <select id="themes">
+                        <option value="light">{ "Light" }</option>
+                        <option value="light-dark">{ "Light Dark" }</option>
+                        <option value="medium-dark">{ "Medium Dark" }</option>
+                        <option value="very-dark">{ "Very Dark" }</option>
                     </select>
                 </div>
             </div>
@@ -66,7 +66,7 @@ pub fn settings_menu(
 }
 
 
-fn number_input_handler(value: UseStateHandle<String>) -> Callback<InputEvent> {
+fn field_input_handler(value: UseStateHandle<String>) -> Callback<InputEvent> {
     Callback::from(move |ev: InputEvent| {
         if let Some(input) = ev.target_dyn_into::<HtmlInputElement>() {
             let text = input.value();
@@ -85,9 +85,4 @@ fn number_input_handler(value: UseStateHandle<String>) -> Callback<InputEvent> {
             }
         }
     })
-}
-
-fn load_fonts() -> Html {
-    let Some(fonts) = scan_fonts(".");
-    println!(fonts);
 }

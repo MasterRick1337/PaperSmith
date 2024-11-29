@@ -59,7 +59,6 @@ gloo-console = "0.3.0"
 chrono = "0.4.38"
 text_io = "0.1.12"
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
-scan-fonts = "1.0.0"
 
 
 [workspace]
