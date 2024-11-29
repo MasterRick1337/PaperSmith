@@ -20,9 +20,9 @@ use notepad::Notepads;
 mod toolbar;
 use toolbar::Toolbar;
 
-#[path = "theme-switcher/switcher.rs"]
-mod switcher;
-use switcher::ThemeSwitcher;
+// #[path = "theme-switcher/switcher.rs"]
+// mod switcher;
+// use switcher::ThemeSwitcher;
 
 //#[path = "text_alignment_handlers.rs"]
 //mod text_alignment_handlers;
@@ -200,18 +200,20 @@ pub fn app() -> Html {
                 <Button callback={open_modal} icon={IconId::LucideFilePlus} title="Create Project" size=1.5 />
                 <Button callback={on_load} icon={IconId::LucideFolderOpen} title="Load Project" size=1.5 />
                 <Button callback={save} icon={IconId::LucideSave} title="Save" size=1.5 />
+                <Button callback={open_settings} icon={IconId::LucideSettings} title={"Open Settings"} size=1.5 />
                 <div class="w-[1px] h-[20px] bg-subtext my-0 mx-1 " />
                 <Button callback={on_undo} icon={IconId::LucideUndo} title="Undo" size=1.5 />
                 <Button callback={on_redo} icon={IconId::LucideRedo} title="Redo" size=1.5 />
                 <div class="w-[1px] h-[20px] bg-subtext my-0 mx-1 " />
                 <TextStylingControls />
             </div>
+
             <div id="main_content" class="flex flex-grow m-3">
                 <div class="flex flex-col min-w-[18rem] overflow-y-auto bg-crust">
                     <div class="flex-grow">{ (*sidebar).clone() }</div>
-                    <div class="bottom-5 left-2 right-2">
-                        <ThemeSwitcher />
-                    </div>
+                    // <div class="bottom-5 left-2 right-2">
+                    //     <ThemeSwitcher />
+                    // </div>
                 </div>
                 <Notepads pages_ref={pages_ref.clone()} text_input_ref={text_input_ref} />
             </div>

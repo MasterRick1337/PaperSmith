@@ -1,6 +1,11 @@
 use web_sys::{HtmlButtonElement, HtmlInputElement};
 use yew::prelude::*;
 
+#[path = "switcher.rs"]
+mod switcher;
+use switcher::ThemeSwitcher;
+
+
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub closing_callback: Callback<MouseEvent>,
@@ -43,14 +48,15 @@ pub fn settings_menu(
             // </div>   
             <div id="theme_change" class="flex w-full pt-8 justify-between">
                 <div class="font-semibold self-center">{"Theme"}</div>
-                <div class="rounded-lg border-transparent hover:border-mauve">
-                    <select id="themes">
-                        <option value="light">{ "Light" }</option>
-                        <option value="light-dark">{ "Light Dark" }</option>
-                        <option value="medium-dark">{ "Medium Dark" }</option>
-                        <option value="very-dark">{ "Very Dark" }</option>
-                    </select>
-                </div>
+                // <div class="rounded-lg border-transparent hover:border-mauve">
+                //     <select id="themes">
+                //         <option value="light">{ "Light" }</option>
+                //         <option value="light-dark">{ "Light Dark" }</option>
+                //         <option value="medium-dark">{ "Medium Dark" }</option>
+                //         <option value="very-dark">{ "Very Dark" }</option>
+                //     </select>
+                // </div>
+                <ThemeSwitcher />
             </div>
             <div class="flex justify-end w-full pt-8">
                 <button
