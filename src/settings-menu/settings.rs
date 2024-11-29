@@ -5,7 +5,6 @@ use yew::prelude::*;
 mod switcher;
 use switcher::ThemeSwitcher;
 
-
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub closing_callback: Callback<MouseEvent>,
@@ -19,8 +18,6 @@ pub fn settings_menu(
 ) -> Html {
     let font_size = use_state(String::new);
     let confirm_button_ref = use_node_ref();
-    let input_font_size_ref = use_node_ref();
-    let on_font_size_input = field_input_handler(font_size.clone());
 
     let on_confirm = {
         let on_close = on_close.clone();
@@ -45,32 +42,29 @@ pub fn settings_menu(
             //             ref={input_font_size_ref}
             //         />
             //     </div>
-            // </div>   
+            // </div>
             <div id="theme_change" class="flex w-full pt-8 justify-between">
-                <div class="font-semibold self-center">{"Theme"}</div>
-                // <div class="rounded-lg border-transparent hover:border-mauve">
-                //     <select id="themes">
-                //         <option value="light">{ "Light" }</option>
-                //         <option value="light-dark">{ "Light Dark" }</option>
-                //         <option value="medium-dark">{ "Medium Dark" }</option>
-                //         <option value="very-dark">{ "Very Dark" }</option>
-                //     </select>
-                // </div>
+                <div class="font-bold self-center">{"Theme"}</div>
                 <ThemeSwitcher />
             </div>
             <div class="flex justify-end w-full pt-8">
                 <button
                 ref={confirm_button_ref}
                 onclick={on_confirm}
-                class="rounded-lg text-lg px-2 py-1 ml-4 bg-mauve text-crust hover:scale-105"
+                class="rounded-lg text-lg px-2 py-1 ml-4 bg-primary text-crust hover:scale-105 border-0"
                 >
                     { "Confirm" }
                 </button>
+                <button
+                onclick={on_close}
+                class="rounded-lg text-lg px-2 py-1 ml-4 bg-secondary text-crust hover:scale-105 border-0"
+                >
+                { "Close" }
+            </button>
             </div>
         </>
     )
 }
-
 
 fn field_input_handler(value: UseStateHandle<String>) -> Callback<InputEvent> {
     Callback::from(move |ev: InputEvent| {
@@ -84,7 +78,10 @@ fn field_input_handler(value: UseStateHandle<String>) -> Callback<InputEvent> {
                     value.set(text)
                 }
                 Err(err) => {
-                    gloo_console::log!(format!("could not convert '{}' to number: {:?}", text, err));
+                    gloo_console::log!(format!(
+                        "could not convert '{}' to number: {:?}",
+                        text, err
+                    ));
 
                     let _ = input.style().set_property("border-color", "red");
                 }

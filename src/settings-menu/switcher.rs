@@ -9,6 +9,8 @@ pub fn switcher() -> Html {
     let dropdown_content = use_state(|| html!());
     let is_open = use_state(|| false);
 
+    let switch_ref = use_node_ref();
+
     let themes = [
         "Light".to_string(),
         "Light Dark".to_string(),
@@ -17,10 +19,19 @@ pub fn switcher() -> Html {
         "Very Dark".to_string(),
     ];
 
-    let switch_theme_callback = Callback::from(move |ev: Event| {
-        // TODO: get value out of select elemnet 
-        gloo_console::log!(ev);
-    });
+    let onchange = {
+        let select_ref = switch_ref.clone();
+
+        Callback::from(move |_| {
+            let select = select_ref.cast::<HtmlSelectElement>();
+
+            if let Some(select) = select {
+                let theme = select.value();
+                switch_theme(theme.to_string().to_lowercase().replace(' ', ""));
+            }
+        })
+    };
+
 
     let themes_vec = themes_to_html(Vec::from(themes.clone()));
 
@@ -75,8 +86,11 @@ pub fn switcher() -> Html {
         // </div>
 
         <div>
-            <div class="rounded-lg border-transparent hover:border-mauve">
-                <select id="themes" onchange={switch_theme_callback}>
+            <div>
+                <select ref={switch_ref}
+                        onchange={onchange}
+                        class="bg-base rounded-lg text-text focus:ring-secondary border-1 border-primary"
+                >
                     { themes_vec }
                 </select>
             </div>
@@ -95,7 +109,10 @@ fn themes_to_html(themes: Vec<String>) -> Html {
         .iter()
         .map(|theme| {
             html! {
-                <option value="{theme}">{theme}</option>
+                <option value={theme.clone()}
+                >
+                { theme }
+                </option>
             }
         })
         .collect()
