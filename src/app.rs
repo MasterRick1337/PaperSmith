@@ -3,6 +3,7 @@ use pulldown_cmark::{html, Options, Parser};
 use serde::{Serialize, Deserialize};
 use serde_wasm_bindgen::to_value;
 use sidebar::buttons::Button;
+use statistic::StatisticWindow;
 use statistic::_CharCountProps::closing_callback;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsCast;
@@ -177,6 +178,26 @@ pub fn app() -> Html {
         })
     };
 
+    let open_statistics = {
+        let modal = modal.clone();
+        let pages_ref = pages_ref.clone();
+        Callback::from(move |_| {
+            modal.set(html! {
+                <Modal
+                    content={html! {
+                        <StatisticWindow
+                            closing_callback={
+                                let modal = modal.clone();
+                                Callback::from(move |_| modal.set(html!()))
+                            }
+                            pages_ref={pages_ref.clone()}
+                        />
+                    }}
+                />
+            });
+        })
+    };
+
     {
         let sidebar = sidebar.clone();
         let project = project.clone();
@@ -255,6 +276,7 @@ pub fn app() -> Html {
                         }
                         pages_ref={pages_ref.clone()}
                     />
+                    <Button callback={open_statistics} icon={IconId::LucideFilePlus} title="Statistics" size=1.5 />
                 </div>
                 <div class="bottombar-right" />
             </div>

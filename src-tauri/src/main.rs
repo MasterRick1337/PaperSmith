@@ -46,6 +46,7 @@ fn main() {
             open_explorer,
             create_empty_file,
             get_file_content,
+            list_files_in_directory,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -84,6 +85,27 @@ fn open_explorer(path: String) {
 fn show_save_dialog(content: String) {
     //REMAKE TO SAVE FILE IN CONTENT.MD !!!!!!!!!!!!!!!!!!!!
     
+}
+
+#[tauri::command]
+fn list_files_in_directory(directory_path: String) -> Result<Vec<String>, String> {
+    let path = PathBuf::from(directory_path);
+
+    // Check if the directory exists
+    if !path.is_dir() {
+        return Err("Provided path is not a valid directory.".to_string());
+    }
+
+    // Read the directory and collect the file names
+    match fs::read_dir(path) {
+        Ok(entries) => {
+            let files = entries.filter_map(|entry| {
+                entry.ok().and_then(|e| e.file_name().to_str().map(|s| s.to_string()))
+            }).collect::<Vec<String>>();
+            Ok(files)
+        }
+        Err(_) => Err("Failed to read the directory.".to_string()),
+    }
 }
 
 #[tauri::command]

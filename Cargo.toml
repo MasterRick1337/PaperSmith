@@ -15,6 +15,7 @@ web-sys = { version = "0.3.69", features = [
   "HtmlButtonElement",
   "CssStyleDeclaration",
   "HtmlDocument",
+  "HtmlSelectElement",
   "console",
   "Document",
   "Node",

@@ -1,10 +1,15 @@
+use std::borrow::Borrow;
+
 use chrono::prelude::*;
 use serde_json::json;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlElement;
+use web_sys::HtmlSelectElement;
 use yew::prelude::*;
 use yew_hooks::prelude::*;
+use js_sys::Array;
+use wasm_bindgen::JsCast;
 
 use serde::{Deserialize, Serialize};
 
@@ -126,7 +131,7 @@ pub fn Statistics(CharCountProps { closing_callback: on_close, pages_ref }: &Cha
 
 #[function_component]
 pub fn StatisticWindow(CharCountProps { closing_callback: on_close , pages_ref }: &CharCountProps) -> Html {
-    let char_count = use_state(|| 0);
+/*    let char_count = use_state(|| 0);
     let char_count_no_spaces = use_state(|| 0);
     let word_count = use_state(|| 0);
     let session_time = use_state(|| String::from("00:00:00"));
@@ -134,8 +139,45 @@ pub fn StatisticWindow(CharCountProps { closing_callback: on_close , pages_ref }
     let calculated_wpm = calculate_wpm(*word_count, Some(*start_time));
 
     let closeing_button = use_node_ref();
+*/
 
-    html! { 
+        let files = use_state(|| vec![]);
+    let selected_file = use_state(|| String::new());
+
+    // Function to fetch files from the directory
+    let fetch_files = {
+        gloo_console::log!("called fetch_files");
+        let files = files.clone();
+        move || {
+            spawn_local(async move {
+                // Get the path
+                let path_jsvalue = invoke("get_data_dir", JsValue::null()).await;
+                let mut path_string = path_jsvalue.as_string().expect("Geming").clone();
+                path_string.push_str("/PaperSmith/");
+
+                // Fetch files from the directory (this is the crucial part, you would need a JS function to list files/folders)
+                let file_list_jsvalue = invoke("list_files_in_directory", JsValue::from_str(&path_string)).await;
+
+                // Convert the JS result to a Rust vector (assuming the JS function returns an array of file/folder names)
+                if let Ok(file_list_array) = file_list_jsvalue.dyn_into::<Array>() {
+                    let file_names: Vec<String> = file_list_array.iter()
+                        .filter_map(|js_value| js_value.as_string())
+                        .collect();
+                    files.set(file_names);
+                }
+            });
+        }
+    };
+
+     // Use `use_effect_once` to call `fetch_files` only once after the component is mounted
+     use_effect_with((),move |_| {
+        fetch_files(); // Call the function that performs the side effect
+        // The closure implicitly returns `()`, which matches the expected type
+    });
+
+    let files_clone = (*files).clone();
+    
+    html! {
         <>
         <div id="footer" class="flex justify-end w-full pt-8">
             <button
@@ -144,6 +186,24 @@ pub fn StatisticWindow(CharCountProps { closing_callback: on_close , pages_ref }
             >
                 { "Close" }
             </button>
+        </div>
+        
+        <div class="file-dropdown">
+            <label for="file-select">{"Select a file or folder"}</label>
+            <select id="file-select" onchange={Callback::from(move |e: Event| {
+                let target = e.target_dyn_into::<web_sys::HtmlSelectElement>().unwrap();
+                selected_file.set(target.value());
+            })}>
+                <option value="">{"-- Select --"}</option>
+                { 
+                     files_clone.iter().map(|file| {
+                        let file_clone = file.clone();
+                        html! {
+                            <option value={file_clone.clone()}>{file_clone.clone()}</option>
+                        }
+                    }).collect::<Html>()
+                }
+            </select>
         </div>
         </>
     }
