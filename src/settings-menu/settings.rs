@@ -1,9 +1,9 @@
 use gloo::utils::document;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::spawn_local;
-use web_sys::{HtmlDocument, HtmlInputElement};
+use web_sys::HtmlDocument;
 use yew::prelude::*;
 
 use crate::app::invoke;
@@ -26,11 +26,9 @@ pub struct FileWriteData {
 
 #[function_component(Settings)]
 pub fn settings_menu(
-    SettingsProps
- {
+    SettingsProps {
         closing_callback: on_close,
-    }: &SettingsProps
-,
+    }: &SettingsProps,
 ) -> Html {
     let confirm_button_ref = use_node_ref();
 
@@ -91,41 +89,41 @@ pub fn settings_menu(
     )
 }
 
-fn field_input_handler(value: UseStateHandle<String>) -> Callback<InputEvent> {
-    Callback::from(move |ev: InputEvent| {
-        if let Some(input) = ev.target_dyn_into::<HtmlInputElement>() {
-            let text = input.value();
+// fn field_input_handler(value: UseStateHandle<String>) -> Callback<InputEvent> {
+//     Callback::from(move |ev: InputEvent| {
+//         if let Some(input) = ev.target_dyn_into::<HtmlInputElement>() {
+//             let text = input.value();
 
-            match text.clone().parse::<u32>() {
-                Ok(n) => {
-                    gloo_console::log!(format!("text is {:?}", n));
-                    let _ = input.style().set_property("border-color", "transparent");
-                    value.set(text)
-                }
-                Err(err) => {
-                    gloo_console::log!(format!(
-                        "could not convert '{}' to number: {:?}",
-                        text, err
-                    ));
+//             match text.clone().parse::<u32>() {
+//                 Ok(n) => {
+//                     gloo_console::log!(format!("text is {:?}", n));
+//                     let _ = input.style().set_property("border-color", "transparent");
+//                     value.set(text)
+//                 }
+//                 Err(err) => {
+//                     gloo_console::log!(format!(
+//                         "could not convert '{}' to number: {:?}",
+//                         text, err
+//                     ));
 
-                    let _ = input.style().set_property("border-color", "red");
-                }
-            }
-        }
-    })
-}
+//                     let _ = input.style().set_property("border-color", "red");
+//                 }
+//             }
+//         }
+//     })
+// }
 
 async fn write_changes(theme: UseStateHandle<String>) {
     let content = json!({
         "theme": *theme,
-    }).to_string();
+    })
+    .to_string();
 
     let name = String::from("settings");
 
     let path_jsvalue = invoke("get_data_dir", JsValue::null()).await;
 
-    let mut path =
-      path_jsvalue.as_string().expect("Cast failed").clone();
+    let mut path = path_jsvalue.as_string().expect("Cast failed").clone();
 
     path.push_str("/PaperSmith/");
 
@@ -136,8 +134,6 @@ async fn write_changes(theme: UseStateHandle<String>) {
         name,
         content,
     };
-
-    println!("{}", settings.content);
 
     invoke(
         "write_to_json",

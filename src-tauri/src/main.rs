@@ -1,8 +1,6 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use chrono::{DateTime, Utc};
-use lazy_static::lazy_static;
 use rfd::FileDialog;
 use saving::create_empty_file;
 use std::fs;
@@ -10,7 +8,6 @@ use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
-use std::sync::Mutex;
 
 mod loader;
 use loader::parse_project;
