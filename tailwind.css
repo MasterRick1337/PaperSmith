@@ -136,3 +136,11 @@ p {
   content: "";
   margin-bottom: 1em;
 }
+
+/* Images ------------------------------------------------------------------ */
+
+img {
+  width: 50%;
+  border-radius: 8px;
+  padding: 5px;
+}
