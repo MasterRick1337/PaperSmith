@@ -1,29 +1,54 @@
-use web_sys::{HtmlButtonElement, HtmlInputElement};
+use gloo::utils::document;
+use serde::{Serialize, Deserialize};
+use serde_json::json;
+use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen_futures::spawn_local;
+use web_sys::{HtmlDocument, HtmlInputElement};
 use yew::prelude::*;
+
+use crate::app::invoke;
 
 #[path = "switcher.rs"]
 mod switcher;
 use switcher::ThemeSwitcher;
 
 #[derive(Properties, PartialEq)]
-pub struct Props {
+pub struct SettingsProps {
     pub closing_callback: Callback<MouseEvent>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct FileWriteData {
+    pub path: String,
+    pub name: String,
+    pub content: String,
 }
 
 #[function_component(Settings)]
 pub fn settings_menu(
-    Props {
+    SettingsProps
+ {
         closing_callback: on_close,
-    }: &Props,
+    }: &SettingsProps
+,
 ) -> Html {
-    let font_size = use_state(String::new);
     let confirm_button_ref = use_node_ref();
+
+    let theme = use_state_eq(|| String::from("Light"));
 
     let on_confirm = {
         let on_close = on_close.clone();
+        let theme = theme.clone();
 
         Callback::from(move |_| {
+            let theme = theme.clone();
             gloo_console::log!("button pressed");
+
+            switch_theme(theme.clone());
+
+            spawn_local(async move {
+                write_changes(theme).await;
+            });
 
             on_close.emit(MouseEvent::new("Dummy").unwrap())
         })
@@ -45,7 +70,7 @@ pub fn settings_menu(
             // </div>
             <div id="theme_change" class="flex w-full pt-8 justify-between">
                 <div class="font-bold self-center">{"Theme"}</div>
-                <ThemeSwitcher />
+                <ThemeSwitcher theme={theme}/>
             </div>
             <div class="flex justify-end w-full pt-8">
                 <button
@@ -88,4 +113,44 @@ fn field_input_handler(value: UseStateHandle<String>) -> Callback<InputEvent> {
             }
         }
     })
+}
+
+async fn write_changes(theme: UseStateHandle<String>) {
+    let content = json!({
+        "theme": *theme,
+    }).to_string();
+
+    let name = String::from("settings");
+
+    let path_jsvalue = invoke("get_data_dir", JsValue::null()).await;
+
+    let mut path =
+      path_jsvalue.as_string().expect("Cast failed").clone();
+
+    path.push_str("/PaperSmith/");
+
+    gloo_console::log!(path.clone());
+
+    let settings = FileWriteData {
+        path,
+        name,
+        content,
+    };
+
+    println!("{}", settings.content);
+
+    invoke(
+        "write_to_json",
+        serde_wasm_bindgen::to_value(&settings).unwrap(),
+    )
+    .await;
+}
+
+fn switch_theme(theme: UseStateHandle<String>) {
+    let html_doc: HtmlDocument = document().dyn_into().unwrap();
+    let body = html_doc.body().unwrap();
+    let theme = String::from(theme.clone().as_str());
+    gloo_console::log!(theme.clone());
+    let theme2 = theme.to_string().to_lowercase().replace(' ', "");
+    body.set_class_name(format!("{theme2} bg-crust text-text").as_str());
 }

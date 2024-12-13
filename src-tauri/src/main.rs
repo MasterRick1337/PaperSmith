@@ -119,15 +119,15 @@ async fn show_save_dialog() {
 }*/
 
 // Definiere eine globale Variable für die Startzeit
-lazy_static! {
-    static ref START_TIME: Mutex<DateTime<Utc>> = Mutex::new(Utc::now());
-}
+// lazy_static! {
+//     static ref START_TIME: Mutex<DateTime<Utc>> = Mutex::new(Utc::now());
+// }
 
 #[tauri::command]
-fn write_to_json(path: &str, content: &str) {
-    let start_time = *START_TIME.lock().unwrap();
-    let formatted_time = start_time.format("%Y-%m-%dT%H-%M-%S").to_string();
-    let file_name = format!("{formatted_time}.json");
+fn write_to_json(path: &str, name: &str, content: &str) {
+    // let start_time = *START_TIME.lock().unwrap();
+    // let formatted_time = start_time.format("%Y-%m-%dT%H-%M-%S").to_string();
+    let file_name = format!("{name}.json");
     let file_path = format!("{path}/{file_name}");
 
     let mut file = match File::create(&file_path) {
@@ -137,6 +137,7 @@ fn write_to_json(path: &str, content: &str) {
             return;
         }
     };
+
     let _result = write!(file, "{content}");
     // match result {
     //     Ok(_) => println!("Wrote in file: {:?}", file_path),

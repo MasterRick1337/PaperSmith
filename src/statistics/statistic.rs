@@ -1,4 +1,7 @@
+use std::sync::Mutex;
+
 use chrono::prelude::*;
+use lazy_static::lazy_static;
 use serde_json::json;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
@@ -22,7 +25,12 @@ pub struct CharCountProps {
 #[derive(Serialize, Deserialize)]
 pub struct FileWriteData {
     pub path: String,
+    pub name: String,
     pub content: String,
+}
+
+lazy_static! {
+    static ref START_TIME: Mutex<DateTime<Utc>> = Mutex::new(Utc::now());
 }
 
 #[function_component]
@@ -89,12 +97,18 @@ pub fn Statistics(CharCountProps { pages_ref }: &CharCountProps) -> Html {
 
                                 let path_jsvalue = invoke("get_data_dir", JsValue::null()).await;
 
-                                let mut path_string = path_jsvalue.as_string().expect("Geming").clone();
+                                let mut path_string =
+                                    path_jsvalue.as_string().expect("Geming").clone();
 
-                                path_string.push_str("/PaperSmith/");
+                                let start_time = *START_TIME.lock().unwrap();
+
+                                let file_name = start_time.format("%Y-%m-%dT%H-%M-%S").to_string();
+
+                                path_string.push_str("/PaperSmith/Statistics/");
 
                                 let json_write = FileWriteData {
                                     path: path_string,
+                                    name: file_name,
                                     content: json,
                                 };
 
